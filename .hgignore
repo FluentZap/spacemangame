@@ -1,2 +1,16 @@
 syntax: glob
 Tech Tree.dia
+SpaceManGame/obj/x86/Debug/SpaceManGame.xml
+SpaceManGame/obj/x86/Debug/SpaceManGame.vbproj.GenerateResource.Cache
+SpaceManGame/obj/x86/Debug/SpaceManGame.vbproj.FileListAbsolute.txt
+SpaceManGame/obj/x86/Debug/SpaceManGame.pdb
+SpaceManGame/obj/x86/Debug/SpaceManGame.exe
+SpaceManGame/obj/x86/Debug/SpaceManGame.Resources.resources
+SpaceManGame/obj/x86/Debug/SpaceManGame.MainForm.resources
+SpaceManGame/obj/x86/Debug/ResolveAssemblyReference.cache
+SpaceManGame/bin/x86/Debug/config.txt
+SpaceManGame/bin/x86/Debug/SpaceManGame.xml
+SpaceManGame/bin/x86/Debug/SpaceManGame.vshost.exe.manifest
+SpaceManGame/bin/x86/Debug/SpaceManGame.vshost.exe
+SpaceManGame/bin/x86/Debug/SpaceManGame.pdb
+SpaceManGame/bin/x86/Debug/SpaceManGame.exe
