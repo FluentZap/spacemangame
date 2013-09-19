@@ -96,7 +96,7 @@
         Public fontcolor As Color
         Public Adj_font_color As Color
 
-        Sub New(ByVal tile_Set As button_texture_enum, ByRef bounds As Rectangle, ByVal Style As button_style, ByVal color As Color, ByVal text As String, ByVal fontcolor As Color, ByVal font As d3d_font_enum, Optional ByVal Enabled As Boolean = True, Optional ByVal Align As Integer = CType(DrawTextFormat.VerticalCenter + DrawTextFormat.Center, DrawTextFormat))
+        Sub New(ByVal tile_Set As button_texture_enum, ByRef bounds As Rectangle, ByVal Style As button_style, ByVal color As Color, ByVal text As String, ByVal fontcolor As Color, ByVal font As d3d_font_enum, Optional ByVal Enabled As Boolean = True, Optional ByVal Align As Integer = CType(DrawTextFormat.VerticalCenter + DrawTextFormat.Center + DrawTextFormat.WordBreak, DrawTextFormat))
             Me.color = color
             Me.Adj_color = color
             Me.style = Style
@@ -264,6 +264,8 @@
 
     Public external_planet_texture(15) As Texture
 
+    Public Loaded_Officer_Textures As Dictionary(Of Integer, Texture) = New Dictionary(Of Integer, Texture)
+
 
     'External View
     Public External_Menu_Open As Boolean    
@@ -278,6 +280,13 @@
     Public Weapon_Control__Selected_Group As Integer = -1
 
 
+    'Personal Level up
+    Public PLV__Selected_Officer As Integer
+    Public PLV__Officer_Scroll As Integer
+    Public PLV__Class_Scroll As Integer
+
+
+
 
     'Dim region(100, 100) As Region_Type
     'Dim ship_view_Region As Point
@@ -287,6 +296,16 @@
         Dim new_game As Boolean
     End Structure
 
+
+    Public Player_Data As New Player_Data_Type
+
+
+
+
+    Class Player_Data_Type
+        Public Officer_List As HashSet(Of Integer) = New HashSet(Of Integer)
+
+    End Class
 
 #End Region
 
@@ -300,6 +319,9 @@
 
         Near_planet = -1
         Loaded_planet = -1
+
+        Player_Data.Officer_List.Add(0)
+
         Load_tech_list()
         set_device_map()
         Set_Weapon_Tech()
@@ -395,16 +417,6 @@
         'fontcollection.AddFontFile("data/fonts/vanberger_stencil.ttf")
         'Dim myfont As New Drawing.Font(fontcollection.Families(0), 18, FontStyle.Bold)
         Dim myfont As New Drawing.Font("Ariel", 18, FontStyle.Regular)
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -517,6 +529,7 @@
     End Sub
 
     Sub Load_Menu_Items()
+        Dim pos As PointI
         'External Menu
         External_Menu_Items.Add(External_menu_items_Enum.Menu, New Menu_button(button_texture_enum.ship_build__menu_button, New Rectangle(0, screen_size.y - 32, 32, 32), button_style.Both))
         External_Menu_Items.Add(External_menu_items_Enum.Menu_alert_setup, New Menu_button(button_texture_enum.ship_build__room_button, New Rectangle(0, screen_size.y - 64, 80, 32), button_style.Both, Color.White, "Alert Setup", Color.Black, d3d_font_enum.SB_small, False))
@@ -537,7 +550,24 @@
 
 
         'Personal Level
-        'Menu_Items_Personal_Level.Add (Personal_level_enums.Officer_Backgroun , New 
+        pos.y = 120 - 23
+        pos.x = 440
+        Menu_Items_Personal_Level.Add(Personal_level_enums.Officer_ScrollUp, New Menu_button(button_texture_enum.PLV__Officer_ScrollUp, New Rectangle(pos.x, pos.y, 72, 16), button_style.Both, Color.White)) : pos.y += 23
+        Menu_Items_Personal_Level.Add(Personal_level_enums.Officer_1, New Menu_button(button_texture_enum.Blank, New Rectangle(pos.x, pos.y, 72, 108), button_style.DisplayOnly, Color.White)) : pos.y += 115
+        Menu_Items_Personal_Level.Add(Personal_level_enums.Officer_2, New Menu_button(button_texture_enum.Blank, New Rectangle(pos.x, pos.y, 72, 108), button_style.DisplayOnly, Color.White)) : pos.y += 115
+        Menu_Items_Personal_Level.Add(Personal_level_enums.Officer_3, New Menu_button(button_texture_enum.Blank, New Rectangle(pos.x, pos.y, 72, 108), button_style.DisplayOnly, Color.White)) : pos.y += 115
+        Menu_Items_Personal_Level.Add(Personal_level_enums.Officer_4, New Menu_button(button_texture_enum.Blank, New Rectangle(pos.x, pos.y, 72, 108), button_style.DisplayOnly, Color.White)) : pos.y += 115
+        Menu_Items_Personal_Level.Add(Personal_level_enums.Officer_5, New Menu_button(button_texture_enum.Blank, New Rectangle(pos.x, pos.y, 72, 108), button_style.DisplayOnly, Color.White)) : pos.y += 115
+        Menu_Items_Personal_Level.Add(Personal_level_enums.Officer_ScrollDown, New Menu_button(button_texture_enum.PLV__Officer_ScrollDown, New Rectangle(pos.x, pos.y, 72, 16), button_style.Both, Color.White))
+
+
+        pos.y = 120 - 23
+        pos.x = 440
+        'Menu_Items_Personal_Level.Add(Personal_level_enums.Class_1, New Menu_button(button_texture_enum.Blank, New Rectangle(pos.x, pos.y, 72, 108), button_style.Both, Color.White))
+        'Menu_Items_Personal_Level.Add(Personal_level_enums.Class_Scroll_Left, New Menu_button(button_texture_enum.PLV__Officer_ScrollUp, New Rectangle(pos.x, pos.y, 72, 16), button_style.Both, Color.White)) : pos.y += 23
+
+
+        'Menu_Items_Personal_Level.Add(Personal_level_enums.Class_Scroll_Right, New Menu_button(button_texture_enum.PLV__Officer_ScrollDown, New Rectangle(pos.x, pos.y, 72, 16), button_style.Both, Color.White))
 
 
     End Sub
@@ -560,6 +590,26 @@
 
         current_view = view
     End Sub
+
+
+
+
+
+    Sub Load_View(ByVal View As current_view_enum)
+        '        If View = current_view_enum.personal_level_screen Then
+        If PLV__Officer_Scroll = 0 Then
+
+
+
+
+        End If
+
+
+
+
+
+    End Sub
+
 
     Sub check_near_planet(ByVal ship As Integer)
         Dim pos, planetpos As PointI
@@ -591,17 +641,31 @@
     End Sub
 
 
+    Function Get_Officer_Texture(ByVal OfficerID As Integer) As Texture
+        Dim Officer_Texture As Texture
+        If Loaded_Officer_Textures.ContainsKey(OfficerID) Then
+            Officer_Texture = Loaded_Officer_Textures(OfficerID)
+        Else
+            Officer_Texture = New Texture(d3d_device, 32, 32, 1, Usage.RenderTarget, Format.A8R8G8B8, Pool.Default)
+            Render_Officer_Texture(OfficerID, Officer_Texture)
+            Loaded_Officer_Textures.Add(OfficerID, Officer_Texture)
+        End If
+        Return Officer_Texture
+    End Function
+
+
     Sub main_loop()
         Dim ship1 As Ship = load_ship_schematic()
         Dim pos = New PointD(ship1.center_point.x * 32, ship1.center_point.y * 32)
         ship1.location = New PointD(0, 0)
 
         ship1.Refresh()
+        ship1.Faction = 0
         Ship_List.Add(0, ship1)
 
 
         Dim ship2 As Ship = load_ship_schematic()
-        ship2.location = New PointD(0, -2000)        
+        ship2.location = New PointD(0, -2000)
         ship2.Refresh()
         Ship_List.Add(1, ship2)
 
@@ -612,8 +676,42 @@
         planet1.landed_ships.Add(0, New PointI(0, 0))
         Planet_List.Add(0, planet1)
 
-        Add_Officer(0, New Officer(0, "Captian", Officer_location_enum.Ship, 0, pos, 1, New Officer.sprite_list(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)))
-        'Add_Officer(1, New Officer("Captian", Officer_location_enum.Ship, 0, New PointD(480, 512), 2, New Officer.sprite_list(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)))
+        Add_Officer(0, New Officer(0, "Captian", Officer_location_enum.Ship, 0, pos, 1, New Officer.sprite_list(character_sprite_set_enum.Human_Renagade_2, character_sprite_enum.Head)))
+        Officer_List(0).Officer_Classes.Add(New Officer_Class(Class_List_Enum.Captian, 50, 0))
+        Officer_List(0).Officer_Classes.Add(New Officer_Class(Class_List_Enum.Engineer, 75, 0))
+        Officer_List(0).Officer_Classes.Add(New Officer_Class(Class_List_Enum.Mage, 0, 0))
+        Officer_List(0).Current_Class = Class_List_Enum.Captian
+
+        Add_Officer(1, New Officer(0, "Skippy", Officer_location_enum.Ship, 0, pos, 1, New Officer.sprite_list(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)))
+        Officer_List(1).Current_Class = Class_List_Enum.Engineer
+        Add_Officer(2, New Officer(0, "Perpa", Officer_location_enum.Ship, 0, pos, 1, New Officer.sprite_list(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)))
+        Officer_List(2).Current_Class = Class_List_Enum.Mage
+        Add_Officer(3, New Officer(0, "Surpa", Officer_location_enum.Ship, 0, pos, 1, New Officer.sprite_list(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)))
+        Officer_List(3).Current_Class = Class_List_Enum.Pilot
+        Add_Officer(4, New Officer(0, "Kerpa", Officer_location_enum.Ship, 0, pos, 1, New Officer.sprite_list(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)))
+        Officer_List(4).Current_Class = Class_List_Enum.Scientist
+        Add_Officer(5, New Officer(0, "Kilki", Officer_location_enum.Ship, 0, pos, 1, New Officer.sprite_list(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)))
+        Officer_List(5).Current_Class = Class_List_Enum.Security
+        Add_Officer(6, New Officer(0, "Stan", Officer_location_enum.Ship, 0, pos, 1, New Officer.sprite_list(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)))
+        Officer_List(6).Current_Class = Class_List_Enum.Mage
+        Add_Officer(7, New Officer(0, "Vextorz", Officer_location_enum.Ship, 0, pos, 1, New Officer.sprite_list(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)))
+        Officer_List(7).Current_Class = Class_List_Enum.Pilot
+        Player_Data.Officer_List.Add(1)
+        Player_Data.Officer_List.Add(2)
+        Player_Data.Officer_List.Add(3)
+        Player_Data.Officer_List.Add(4)
+        Player_Data.Officer_List.Add(5)
+        Player_Data.Officer_List.Add(6)
+        Player_Data.Officer_List.Add(7)
+
+
+        Officer_List(0).sprite.Head_SpriteSet = character_sprite_set_enum.Human_Renagade_2
+        Officer_List(0).sprite.Torso_SpriteSet = character_sprite_set_enum.Human_Renagade_3
+        Officer_List(0).sprite.Left_Arm_SpriteSet = character_sprite_set_enum.Human_Renagade_3
+        Officer_List(0).sprite.Right_Arm_SpriteSet = character_sprite_set_enum.Human_Renagade_3
+        Officer_List(0).sprite.Left_Leg_SpriteSet = character_sprite_set_enum.Human_Renagade_2
+        Officer_List(0).sprite.Right_Leg_SpriteSet = character_sprite_set_enum.Human_Renagade_2
+
 
         current_player = 0
         'Officer_List.Add (0,
@@ -625,6 +723,9 @@
         'current_selected_planet_view = 1
 
         'Dim render_start, render_end, time_current, cps, rate As Long
+
+
+        'Reload_Officer_Textures()
 
         Dim FPS_start, loops As Long
         Logic_Time = Current_Time()
@@ -653,7 +754,7 @@
                         For Each ship In Ship_List.Values
                             ship.DoEvents()
                         Next
-                        External_UI()                        
+                        External_UI()
                         update_Planet_Movements()
                         Handle_Projectiles()
                         'check_near_planet(current_selected_ship_view)
@@ -767,7 +868,7 @@
 
             For Each ship In Ship_List
                 If ship.Key > 0 Then
-                    Dim BoxSize As Integer                    
+                    Dim BoxSize As Integer
                     BoxSize = CInt(Math.Sqrt(ship.Value.GetShipSize.x ^ 2 + ship.Value.GetShipSize.y ^ 2))
 
                     Dim Ship_Rect As New Rectangle(ship.Value.location.PointI.ToPoint, New Size(BoxSize * 32, BoxSize * 32))
@@ -782,7 +883,7 @@
                         Dim center_point As PointD = ship.Value.Get_Relative_Pos
                         Dim Cos As Double = Math.Cos(-ship.Value.rotation)
                         Dim Sin As Double = Math.Sin(-ship.Value.rotation)
-                        
+
                         contact_point.x = CInt(Cos * (item.Location.x - ship.Value.Get_Relative_Pos.x) - Sin * (item.Location.y - ship.Value.Get_Relative_Pos.y) + ship.Value.Get_Center_Point.x) \ 32
                         contact_point.y = CInt(Sin * (item.Location.x - ship.Value.Get_Relative_Pos.x) + Cos * (item.Location.y - ship.Value.Get_Relative_Pos.y) + ship.Value.Get_Center_Point.y) \ 32
 
@@ -834,7 +935,7 @@
             For id = 0 To 500
                 If Not Ship_List(0).Crew_list.ContainsKey(id) Then Exit For
             Next
-            Ship_List(0).Crew_list.Add(id, New Crew(1, pos, 1, 100, character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head, New crew_resource_type(10, 10)))
+            Ship_List(0).Crew_list.Add(id, New Crew(0, pos, 1, 100, character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head, New crew_resource_type(10, 10)))
             'ship1.Crew_list.Add(0, New Crew(pos, 1, 100, character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head, New crew_resource_type(10, 10)))
             pressedkeys.Remove(Keys.Space)
         End If
@@ -1311,7 +1412,7 @@
             For Each item In ship.device_list
                 If item.Value.type = device_type_enum.weapon Then
                     External_Menu_Items_Weapon_Control.Add(count, New Menu_button(button_texture_enum.ship_build__room_button, New Rectangle(screen_size.x - 80, y, 80, 32), button_style.Both, Color.White, item.Value.tech_ID.ToString, Color.Black, d3d_font_enum.SB_small))
-                    y += 32                    
+                    y += 32
                 End If
                 count += 1
             Next
@@ -1342,7 +1443,37 @@
 
     Sub Personal_Level_UI()
 
+
+
+        Dim mouse_info As New MainForm.mouse_info_type
+        Dim mouse_click As Boolean
+        Dim left_down_point As PointI = Nothing
+        Dim left_release_point As PointI = Nothing
+        MainForm.getUI(pressedkeys, mouse_info)
+        Dim choice As Integer = -1
+
+        If mouse_info.get_left_click(left_down_point, left_release_point) Then
+            mouse_click = True
+            For Each Button In Menu_Items_Personal_Level
+                If Button.Value.enabled = True Then
+                    If Button.Value.bounds.Contains(left_down_point.x, left_down_point.y) And Button.Value.bounds.Contains(left_release_point.x, left_release_point.y) Then
+                        choice = Button.Key
+                    End If
+                End If
+            Next
+        End If
+
         Button_Selection(Menu_Items_Personal_Level, mouse_info)
+
+        Select Case choice
+            Case Is = Personal_level_enums.Officer_ScrollUp
+                If PLV__Officer_Scroll > 0 Then PLV__Officer_Scroll -= 1
+            Case Is = Personal_level_enums.Officer_ScrollDown
+                If PLV__Officer_Scroll < Player_Data.Officer_List.Count - 5 Then PLV__Officer_Scroll += 1
+
+        End Select
+
+                
 
 
 

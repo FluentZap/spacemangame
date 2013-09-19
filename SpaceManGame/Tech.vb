@@ -465,5 +465,68 @@
 
 
 
+    Enum Buff_List_Enum As Byte
+        Buffs
+
+
+    End Enum
+
+
+    Enum Ability_List_Enum As Byte
+        Mage__Fireball
+
+
+    End Enum
+
+    Enum Class_List_Enum As Byte        
+        'Base Classes
+        Captian
+        Engineer
+        Security
+        Scientist
+        Pilot
+
+        'Extended Classes
+        Mage
+
+
+    End Enum
+
+    Class Officer_Class        
+        Public ClassID As Class_List_Enum
+        Public Buff_List As HashSet(Of Buff_List_Enum)
+        Public Ability_List As HashSet(Of Ability_List_Enum)
+        Public Experance As Integer
+        Public Level As Byte
+        Public LevelCap As Byte
+
+
+        Sub Load_Lists(ByVal ClassID As Class_List_Enum)
+            Dim B As New HashSet(Of Buff_List_Enum)
+            Dim A As New HashSet(Of Ability_List_Enum)
+
+
+            Select Case ClassID
+                Case Is = Class_List_Enum.Captian
+                    LevelCap = 20
+                    A.Add(Ability_List_Enum.Mage__Fireball)
+                    B.Add(Buff_List_Enum.Buffs)
+            End Select
+
+
+
+        End Sub
+
+
+
+        Sub New(ByVal ClassID As Class_List_Enum, ByVal Experance As Integer, ByVal Level As Byte)
+            Me.ClassID = ClassID
+            Me.Experance = Experance
+            Me.Level = Level
+            Me.LevelCap = LevelCap
+            Load_Lists(ClassID)
+        End Sub
+    End Class
+
 
 End Module
