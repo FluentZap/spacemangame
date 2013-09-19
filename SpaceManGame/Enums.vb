@@ -130,6 +130,8 @@
     End Enum
     Enum character_sprite_set_enum As Byte
         Human_Renagade_1
+        Human_Renagade_2
+        Human_Renagade_3
         Human_Civilian_1
         Human_Pilot_1
     End Enum
@@ -318,6 +320,7 @@
         OpenDoor
     End Enum
     Enum button_texture_enum As Integer
+        Blank = 0
         main_menu__button
 
         ship_build__contex_menu_item
@@ -356,6 +359,11 @@
 
         ship_external__Pipeline_Display
 
+
+        PLV__Officer_Background
+        PLV__Officer_ScrollUp
+        PLV__Officer_ScrollDown
+        PLV__Experience
     End Enum
     
     Enum panel_texture_enum
@@ -541,15 +549,20 @@
 
     Enum Personal_level_enums
         Officer_Background
-        Officer_Scroll_Left
-        Officer_Scroll_Right
+        Officer_ScrollUp
+        Officer_ScrollDown
         Officer_1
         Officer_2
         Officer_3
         Officer_4
         Officer_5
-        Officer_6
         Class_Background
+        Class_1
+        Class_2
+        Class_3
+        Class_4
+        Class_5
+        Class_6
         Class_Level
         Base_Class
         Class_Scroll_Left

@@ -55,6 +55,14 @@
         d3d_sprite.Draw(character_texture(TileSet), New Rectangle(Tile * 32, 0, 32, 32), New Vector3(0, 0, 0), New Vector3(Position.sngX, Position.sngY, 0), Color)
     End Sub
 
+
+    Sub Draw_Officer(ByVal Texture As Texture, ByVal Tile As character_sprite_enum, ByVal Position As PointD, ByVal Color As Color)
+        d3d_sprite.Draw(Texture, New Rectangle(0, 0, 32, 32), New Vector3(0, 0, 0), New Vector3(Position.sngX, Position.sngY, 0), Color)
+    End Sub
+
+
+
+
     Sub Draw_Button(ByVal TileSet As button_texture_enum, ByVal Tile As Integer, ByVal Position As Rectangle, ByVal Color As Color)
         'd3d_sprite.Draw2D(button_texture(TileSet), New Rectangle(Tile * 32, 0, 32, 32), New SizeF(atSize(), atSize()), New PointF(0, 0), 0, New PointF(Position.X, Position.Y), Color)
         d3d_sprite.Draw(button_texture(TileSet), New Rectangle(Tile * 32, 0, 32, 32), New Vector3(0, 0, 0), New Vector3(Position.X, Position.Y, 0), Color)
@@ -102,12 +110,13 @@
             For Each officer In ship.Officer_List
                 pos.x = officer.Value.GetLocation.x - view_location_personal.x
                 pos.y = officer.Value.GetLocation.y - view_location_personal.y
-                Draw_Crew(character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head, pos, Color.White)
+                'Draw_Crew(character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head, pos, Color.White)
+                Draw_Officer(Get_Officer_Texture(officer.Key), character_sprite_enum.Head, pos, Color.White)
             Next
 
             For Each crew In ship.Crew_list
                 pos.x = crew.Value.location.x - view_location_personal.x
-                pos.y = crew.Value.location.y - view_location_personal.y
+                pos.y = crew.Value.location.y - view_location_personal.y                
                 Draw_Crew(character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head, pos, Color.White)
             Next
         End If
@@ -122,7 +131,7 @@
             For Each officer In planet.officer_list
                 pos.x = officer.Value.GetLocationD.x - view_location_personal.x
                 pos.y = officer.Value.GetLocationD.y - view_location_personal.y
-                Draw_Crew(character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head, pos, Color.White)
+                Draw_Officer(Get_Officer_Texture(officer.Key), character_sprite_enum.Head, pos, Color.White)
             Next
 
             For Each crew In planet.crew_list
@@ -287,8 +296,75 @@
         d3d_device.SetSamplerState(0, SamplerStageStates.MagFilter, TextureFilter.None)
         d3d_sprite.Transform = Matrix.Identity
 
+        pos.x = 440
+        pos.y = 120
+        Dim advance As Integer = 0
+
+        For Each item In Player_Data.Officer_List
+            If advance >= PLV__Officer_Scroll Then
+                draw_text(Officer_List(item).name, New Rectangle(pos.intX + 72, pos.intY, 100, 100), DrawTextFormat.Left, Color.White, d3d_font(d3d_font_enum.SB_small))
+                draw_text("Lvl " + Officer_List(item).GetCurrentClass.Level.ToString, New Rectangle(pos.intX + 72, pos.intY + 12, 100, 100), DrawTextFormat.Left, Color.SkyBlue, d3d_font(d3d_font_enum.SB_small))
+                draw_text("Exp " + Officer_List(item).GetCurrentClass.Experance.ToString + "/100", New Rectangle(pos.intX + 72, pos.intY + 24, 100, 100), DrawTextFormat.Left, Color.Green, d3d_font(d3d_font_enum.SB_small))
+                draw_text(Officer_List(item).Current_Class.ToString, New Rectangle(pos.intX + 72, pos.intY + 36, 100, 100), DrawTextFormat.Left, Color.Orange, d3d_font(d3d_font_enum.SB_small))
+
+                d3d_sprite.Transform = Matrix.Transformation2D(New Vector2(0, 0), 0, New Vector2(3, 3), New Vector2(0, 0), 0, New Vector2(0, 0))
+                d3d_sprite.Draw(button_texture(button_texture_enum.PLV__Officer_Background), Vector3.Empty, New Vector3(CSng(pos.x / 3), CSng(pos.y / 3), 0), Color.White.ToArgb)
+
+                'Draw_Crew(character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head, New PointD(pos.x / 3 - 4, pos.y / 3 + 1), Color.White)
+
+                Draw_Officer(Get_Officer_Texture(item), character_sprite_enum.Head, New PointD(pos.x / 3 - 4, pos.y / 3 + 1), Color.White)
+
+                d3d_sprite.Transform = Matrix.Identity
+
+                'Draw_Officer(Get_Officer_Texture(item), character_sprite_enum.Head, New PointD(0, 0), Color.White)
+
+                pos.y += 115
+                If advance - PLV__Officer_Scroll >= 4 Then Exit For
+            End If
+            advance += 1
+        Next
+
+
+        pos.x = 640
+        pos.y = 604
+
+        advance = 0
+        For Each item In Officer_List(PLV__Selected_Officer).Officer_Classes
+            If advance >= PLV__Class_Scroll Then
+
+                draw_text(item.ClassID.ToString, New Rectangle(pos.intX, pos.intY - 18, 72, 100), DrawTextFormat.Left, Color.Orange, d3d_font(d3d_font_enum.SB_small))
+                draw_text("Lvl " + item.Level.ToString, New Rectangle(pos.intX, pos.intY + 108, 100, 100), DrawTextFormat.Left, Color.SkyBlue, d3d_font(d3d_font_enum.SB_small))
+
+                d3d_sprite.Draw(button_texture(button_texture_enum.PLV__Experience), Vector3.Empty, New Vector3(pos.sngX, pos.sngY + 124, 0), Color.White.ToArgb)
+
+                Dim scale As Integer = CInt(72 * item.Experance \ 100)
+                d3d_sprite.Draw(button_texture(button_texture_enum.PLV__Experience), New Rectangle(0, 0, scale, 8), New Vector3(0, 0, 0), New Vector3(pos.sngX, pos.sngY + 124, 0), Color.Cyan.ToArgb)
+
+
+
+
+                d3d_sprite.Transform = Matrix.Transformation2D(New Vector2(0, 0), 0, New Vector2(3, 3), New Vector2(0, 0), 0, New Vector2(0, 0))
+                d3d_sprite.Draw(button_texture(button_texture_enum.PLV__Officer_Background), Vector3.Empty, New Vector3(CSng(pos.x / 3), CSng(pos.y / 3), 0), Color.White.ToArgb)
+
+                'Draw_Crew(character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head, New PointD(pos.x / 3 - 4, pos.y / 3 + 1), Color.White)
+
+                'Draw_Officer(Get_Officer_Texture(item), character_sprite_enum.Head, New PointD(pos.x / 3 - 4, pos.y / 3 + 1), Color.White)
+
+                d3d_sprite.Transform = Matrix.Identity
+
+                'Draw_Officer(Get_Officer_Texture(item), character_sprite_enum.Head, New PointD(0, 0), Color.White)
+
+                pos.x += 115
+                If advance - PLV__Class_Scroll >= 4 Then Exit For
+            End If
+            advance += 1
+        Next
+
+
+
+
         For Each item In Menu_Items_Personal_Level
-            If item.Value.enabled = True Then
+            If item.Value.enabled = True AndAlso Not item.Value.tile_Set = button_texture_enum.Blank Then
                 d3d_sprite.Draw(button_texture(item.Value.tile_Set), Vector3.Empty, New Vector3(item.Value.bounds.X, item.Value.bounds.Y, 0), item.Value.get_color.ToArgb)
                 If Not item.Value.text = "" Then draw_text(item.Value.text, item.Value.bounds, item.Value.align, item.Value.fontcolor, d3d_font(item.Value.font))
             End If
@@ -720,6 +796,36 @@
 
     End Sub
 
+    Sub Render_Officer_Texture(ByVal OfficerID As Integer, ByVal Off_tex As Texture)
+        d3d_sprite.End()
+        Dim O As Officer = Officer_List(OfficerID)
+        Dim BB As Surface
+        Dim MatStore As Matrix
+        BB = d3d_device.GetRenderTarget(0)
+
+        d3d_device.SetRenderTarget(0, Off_tex.GetSurfaceLevel(0))
+        d3d_sprite.Begin(SpriteFlags.AlphaBlend)
+
+        MatStore = d3d_sprite.Transform
+        d3d_sprite.Transform = Matrix.Identity
+
+        d3d_device.Clear(ClearFlags.Target, Color.Transparent, 1, 0)        
+        d3d_device.SetSamplerState(0, SamplerStageStates.MinFilter, TextureFilter.None)
+        d3d_device.SetSamplerState(0, SamplerStageStates.MagFilter, TextureFilter.None)
+        d3d_sprite.Transform = Matrix.Identity
+        d3d_sprite.Draw(character_texture(O.sprite.Head_SpriteSet), New Rectangle(O.sprite.Head_Sprite * 32, 0, 32, 32), New Vector3(0, 0, 0), New Vector3(0, 0, 0), Color.White)
+        d3d_sprite.Draw(character_texture(O.sprite.Torso_SpriteSet), New Rectangle(O.sprite.Torso_Sprite * 32, 32, 32, 32), New Vector3(0, 0, 0), New Vector3(0, 0, 0), Color.White)
+        d3d_sprite.Draw(character_texture(O.sprite.Left_Arm_SpriteSet), New Rectangle(O.sprite.Left_Arm_Sprite * 32, 64, 32, 32), New Vector3(0, 0, 0), New Vector3(0, 0, 0), Color.White)
+        d3d_sprite.Draw(character_texture(O.sprite.Right_Arm_SpriteSet), New Rectangle(O.sprite.Right_Arm_Sprite * 32, 96, 32, 32), New Vector3(0, 0, 0), New Vector3(0, 0, 0), Color.White)
+        d3d_sprite.Draw(character_texture(O.sprite.Left_Leg_SpriteSet), New Rectangle(O.sprite.Left_Leg_Sprite * 32, 128, 32, 32), New Vector3(0, 0, 0), New Vector3(0, 0, 0), Color.White)
+        d3d_sprite.Draw(character_texture(O.sprite.Right_Leg_SpriteSet), New Rectangle(O.sprite.Right_Leg_Sprite * 32, 160, 32, 32), New Vector3(0, 0, 0), New Vector3(0, 0, 0), Color.White)
+        d3d_sprite.End()
+
+        d3d_sprite.Transform = MatStore
+        d3d_device.SetRenderTarget(0, BB)
+        d3d_sprite.Begin(SpriteFlags.AlphaBlend)
+    End Sub
+
 
 #Region "Ship_External"
 
@@ -746,7 +852,8 @@
         For Each officer In Ship.Officer_List
             pos.x = officer.Value.GetLocation.x
             pos.y = officer.Value.GetLocation.y
-            Draw_Crew(character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head, pos, Color.White)
+            'Draw_Crew(character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head, pos, Color.White)
+            Draw_Officer(Get_Officer_Texture(officer.Key), character_sprite_enum.Head, pos, Color.White)
         Next
 
         For Each crew In Ship.Crew_list

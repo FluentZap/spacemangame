@@ -479,9 +479,9 @@ Public Class Ship
 
         For Each Crew In Crew_list
             If Crew.Value.working = False Then
-                If Not Crew.Value.Faction = Me.Faction Then idle_list.Add(Crew.Key)
+                If Crew.Value.Faction = Me.Faction Then idle_list.Add(Crew.Key)
             Else
-                If Not Crew.Value.Faction = Me.Faction Then working_list.Add(Crew.Key, room_list(tile_map(Crew.Value.find_tile.x, Crew.Value.find_tile.y).roomID).Priority)
+                If Crew.Value.Faction = Me.Faction Then working_list.Add(Crew.Key, room_list(tile_map(Crew.Value.find_tile.x, Crew.Value.find_tile.y).roomID).Priority)
             End If
         Next
 

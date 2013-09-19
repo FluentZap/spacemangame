@@ -66,11 +66,18 @@
         button_texture(button_texture_enum.ship_build__Pipeline_Dialog_Panel) = Direct3D.TextureLoader.FromFile(d3d_device, Application.StartupPath + "\Data\Textures\menu\Pipeline_dialog_panel.png", 600, 300, 0, Direct3D.Usage.None, Texture_Format, Direct3D.Pool.Managed, Filter, MipFilter, 0)
         button_texture(button_texture_enum.ship_build__description_panel) = Direct3D.TextureLoader.FromFile(d3d_device, Application.StartupPath + "\Data\Textures\menu\Description_panel.png", 300, 500, 0, Direct3D.Usage.None, Texture_Format, Direct3D.Pool.Managed, Filter, MipFilter, 0)
 
-
         'Ship External
         button_texture(button_texture_enum.ship_external__Pipeline_Display) = Direct3D.TextureLoader.FromFile(d3d_device, Application.StartupPath + "\Data\Textures\menu\Pipeline_Display.png", 160, 16, 0, Direct3D.Usage.None, Texture_Format, Direct3D.Pool.Managed, Filter, MipFilter, 0)
 
 
+
+        'Player Level Up
+        button_texture(button_texture_enum.PLV__Officer_Background) = Direct3D.TextureLoader.FromFile(d3d_device, Application.StartupPath + "\Data\Textures\menu\PLV_Character.png", 24, 36, 0, Direct3D.Usage.None, Texture_Format, Direct3D.Pool.Managed, Filter, MipFilter, 0)
+
+        button_texture(button_texture_enum.PLV__Officer_ScrollUp) = Direct3D.TextureLoader.FromFile(d3d_device, Application.StartupPath + "\Data\Textures\menu\PLV_ScrollUP.png", 72, 16, 0, Direct3D.Usage.None, Texture_Format, Direct3D.Pool.Managed, Filter, MipFilter, 0)
+        button_texture(button_texture_enum.PLV__Officer_ScrollDown) = Direct3D.TextureLoader.FromFile(d3d_device, Application.StartupPath + "\Data\Textures\menu\PLV_ScrollDown.png", 72, 16, 0, Direct3D.Usage.None, Texture_Format, Direct3D.Pool.Managed, Filter, MipFilter, 0)
+
+        button_texture(button_texture_enum.PLV__Experience) = Direct3D.TextureLoader.FromFile(d3d_device, Application.StartupPath + "\Data\Textures\menu\PLV_Experance.png", 72, 8, 0, Direct3D.Usage.None, Texture_Format, Direct3D.Pool.Managed, Filter, MipFilter, 0)
 
 
         'Room sprites
@@ -132,6 +139,12 @@
 
 
         character_texture(character_sprite_set_enum.Human_Renagade_1) = Direct3D.TextureLoader.FromFile(d3d_device, Application.StartupPath + "\Data\Textures\Characters\Renagade1.png", 32, 32, 0, Direct3D.Usage.None, Texture_Format, Direct3D.Pool.Managed, Filter, MipFilter, Color.FromArgb(255, 0, 255, 0).ToArgb)
+
+        character_texture(character_sprite_set_enum.Human_Renagade_2) = Direct3D.TextureLoader.FromFile(d3d_device, Application.StartupPath + "\Data\Textures\Characters\Renagade2.png", 256, 192, 0, Direct3D.Usage.None, Texture_Format, Direct3D.Pool.Managed, Filter, MipFilter, Color.FromArgb(255, 0, 255, 0).ToArgb)
+
+        character_texture(character_sprite_set_enum.Human_Renagade_3) = Direct3D.TextureLoader.FromFile(d3d_device, Application.StartupPath + "\Data\Textures\Characters\Renagade3.png", 256, 192, 0, Direct3D.Usage.None, Texture_Format, Direct3D.Pool.Managed, Filter, MipFilter, Color.FromArgb(255, 0, 255, 0).ToArgb)
+
+
         panel_texture(panel_texture_enum.sbm1) = Direct3D.TextureLoader.FromFile(d3d_device, Application.StartupPath + "\Data\textures\panels\800 x 180.png", 800, 180, 0, Direct3D.Usage.None, Texture_Format, Direct3D.Pool.Managed, Filter, MipFilter, 0)
         panel_texture(panel_texture_enum.minimap) = Direct3D.TextureLoader.FromFile(d3d_device, Application.StartupPath + "\Data\textures\panels\minimap.png", 200, 210, 0, Direct3D.Usage.None, Texture_Format, Direct3D.Pool.Managed, Filter, MipFilter, Color.FromArgb(255, 0, 255, 0).ToArgb)
         panel_texture(panel_texture_enum.white_square) = Direct3D.TextureLoader.FromFile(d3d_device, Application.StartupPath + "\Data\textures\panels\select_tile.png", 32, 32, 0, Direct3D.Usage.None, Texture_Format, Direct3D.Pool.Managed, Filter, MipFilter, 0)
