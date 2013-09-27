@@ -72,12 +72,31 @@
 
 
         'Player Level Up
-        button_texture(button_texture_enum.PLV__Officer_Background) = Direct3D.TextureLoader.FromFile(d3d_device, Application.StartupPath + "\Data\Textures\menu\PLV_Character.png", 24, 36, 0, Direct3D.Usage.None, Texture_Format, Direct3D.Pool.Managed, Filter, MipFilter, 0)
+        button_texture(button_texture_enum.PLV__Officer_Background) = Direct3D.TextureLoader.FromFile(d3d_device, Application.StartupPath + "\Data\Textures\menu\PLV_Character.png", 24, 36, 0, Direct3D.Usage.None, Texture_Format, Direct3D.Pool.Managed, Filter, MipFilter, 0)        
 
         button_texture(button_texture_enum.PLV__Officer_ScrollUp) = Direct3D.TextureLoader.FromFile(d3d_device, Application.StartupPath + "\Data\Textures\menu\PLV_ScrollUP.png", 72, 16, 0, Direct3D.Usage.None, Texture_Format, Direct3D.Pool.Managed, Filter, MipFilter, 0)
         button_texture(button_texture_enum.PLV__Officer_ScrollDown) = Direct3D.TextureLoader.FromFile(d3d_device, Application.StartupPath + "\Data\Textures\menu\PLV_ScrollDown.png", 72, 16, 0, Direct3D.Usage.None, Texture_Format, Direct3D.Pool.Managed, Filter, MipFilter, 0)
 
+        button_texture(button_texture_enum.PLV__Officer_ScrollLeft) = Direct3D.TextureLoader.FromFile(d3d_device, Application.StartupPath + "\Data\Textures\menu\PLV_ScrollLeft.png", 16, 108, 0, Direct3D.Usage.None, Texture_Format, Direct3D.Pool.Managed, Filter, MipFilter, 0)
+        button_texture(button_texture_enum.PLV__Officer_ScrollRight) = Direct3D.TextureLoader.FromFile(d3d_device, Application.StartupPath + "\Data\Textures\menu\PLV_ScrollRight.png", 16, 108, 0, Direct3D.Usage.None, Texture_Format, Direct3D.Pool.Managed, Filter, MipFilter, 0)
+
+
         button_texture(button_texture_enum.PLV__Experience) = Direct3D.TextureLoader.FromFile(d3d_device, Application.StartupPath + "\Data\Textures\menu\PLV_Experance.png", 72, 8, 0, Direct3D.Usage.None, Texture_Format, Direct3D.Pool.Managed, Filter, MipFilter, 0)
+
+        button_texture(button_texture_enum.PLV__Class_List) = Direct3D.TextureLoader.FromFile(d3d_device, Application.StartupPath + "\Data\Textures\characters\Class_List.png", 256, 32, 0, Direct3D.Usage.None, Texture_Format, Direct3D.Pool.Managed, Filter, MipFilter, Color.FromArgb(255, 0, 255, 0).ToArgb)
+
+        button_texture(button_texture_enum.PLV__Base_Class) = Direct3D.TextureLoader.FromFile(d3d_device, Application.StartupPath + "\Data\Textures\menu\PLV_Base_Class.png", 96, 16, 0, Direct3D.Usage.None, Texture_Format, Direct3D.Pool.Managed, Filter, MipFilter, Color.FromArgb(255, 0, 255, 0).ToArgb)
+        button_texture(button_texture_enum.PLV__Base_Class_Frame) = Direct3D.TextureLoader.FromFile(d3d_device, Application.StartupPath + "\Data\Textures\menu\PLV_Base_Class_Frame.png", 100, 20, 0, Direct3D.Usage.None, Texture_Format, Direct3D.Pool.Managed, Filter, MipFilter, Color.FromArgb(255, 0, 255, 0).ToArgb)
+
+        button_texture(button_texture_enum.PLV__Class_List_Frame) = Direct3D.TextureLoader.FromFile(d3d_device, Application.StartupPath + "\Data\Textures\menu\PLV_Class_Frame.png", 92, 167, 0, Direct3D.Usage.None, Texture_Format, Direct3D.Pool.Managed, Filter, MipFilter, 0)
+
+        button_texture(button_texture_enum.PLV__Class_List_HalfFrame1) = Direct3D.TextureLoader.FromFile(d3d_device, Application.StartupPath + "\Data\Textures\menu\PLV_Class_HalfFrame1.png", 92, 167, 0, Direct3D.Usage.None, Texture_Format, Direct3D.Pool.Managed, Filter, MipFilter, Color.FromArgb(255, 0, 255, 0).ToArgb)
+        button_texture(button_texture_enum.PLV__Class_List_HalfFrame2) = Direct3D.TextureLoader.FromFile(d3d_device, Application.StartupPath + "\Data\Textures\menu\PLV_Class_HalfFrame2.png", 92, 167, 0, Direct3D.Usage.None, Texture_Format, Direct3D.Pool.Managed, Filter, MipFilter, Color.FromArgb(255, 0, 255, 0).ToArgb)
+
+        button_texture(button_texture_enum.PLV__Skill_Point) = Direct3D.TextureLoader.FromFile(d3d_device, Application.StartupPath + "\Data\Textures\menu\PLV_Skill.png", 64, 64, 0, Direct3D.Usage.None, Texture_Format, Direct3D.Pool.Managed, Filter, MipFilter, Color.FromArgb(255, 0, 255, 0).ToArgb)
+
+        button_texture(button_texture_enum.PLV__Level_Up) = Direct3D.TextureLoader.FromFile(d3d_device, Application.StartupPath + "\Data\Textures\menu\PLV_Level.png", 24, 16, 0, Direct3D.Usage.None, Texture_Format, Direct3D.Pool.Managed, Filter, MipFilter, Color.FromArgb(255, 0, 255, 0).ToArgb)
+
 
 
         'Room sprites

@@ -1,6 +1,7 @@
 ﻿<Serializable()> Public Class Officer
     Public Officer_Classes As HashSet(Of Officer_Class) = New HashSet(Of Officer_Class)
     Public Current_Class As Class_List_Enum
+
     Dim faction As Integer
     Public name As String
     Dim location As PointD
@@ -83,10 +84,15 @@
         Me.location = location
         Me.speed = speed
         Me.sprite = Sprite
+        Me.Officer_Classes.Add(New Officer_Class(Class_List_Enum.Engineer, random(0, 99), CByte(random(0, 40))))        
+        Me.Officer_Classes.Add(New Officer_Class(Class_List_Enum.Security, random(0, 99), CByte(random(0, 40))))
+        Me.Officer_Classes.Add(New Officer_Class(Class_List_Enum.Scientist, random(0, 99), CByte(random(0, 40))))
+        Me.Officer_Classes.Add(New Officer_Class(Class_List_Enum.Aviator, random(0, 99), CByte(random(0, 40))))
+        Me.Officer_Classes(Class_List_Enum.Engineer).Skill_Points = 5
+        Me.Officer_Classes(Class_List_Enum.Security).Skill_Points = 5
+        Me.Officer_Classes(Class_List_Enum.Scientist).Skill_Points = 5
+        Me.Officer_Classes(Class_List_Enum.Aviator).Skill_Points = 5
     End Sub
-
-
-
 
     Sub Move(ByVal Vector As PointD)
         Me.location.x += Vector.x
@@ -134,6 +140,17 @@
         Next
         Return Nothing
     End Function
+
+
+    Function GetClassByNumber(ByVal Number As Integer) As Officer_Class
+        Dim a As Integer = 0
+        For Each item In Officer_Classes
+            If a = Number + 4 Then Return item
+            a += 1
+        Next
+            Return Nothing
+    End Function
+
 
     Function GetCurrentClass() As Officer_Class
         For Each item In Officer_Classes

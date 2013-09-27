@@ -478,25 +478,32 @@
 
     End Enum
 
-    Enum Class_List_Enum As Byte        
+    Enum Class_List_Enum As Integer
+        Empty = -1
         'Base Classes
-        Captian
         Engineer
         Security
         Scientist
-        Pilot
+        Aviator
 
         'Extended Classes
         Mage
-
-
+        Spellsword
+        Thief
+        Inventor
+        Shadow
+        PlaceHolder
+        Eye_Of_The_Placeholder
     End Enum
 
     Class Officer_Class        
         Public ClassID As Class_List_Enum
         Public Buff_List As HashSet(Of Buff_List_Enum)
         Public Ability_List As HashSet(Of Ability_List_Enum)
+        Public Base_Class As Class_List_Enum = Class_List_Enum.Empty
+        Public Base_Class_2 As Class_List_Enum = Class_List_Enum.Empty
         Public Experance As Integer
+        Public Skill_Points As Byte
         Public Level As Byte
         Public LevelCap As Byte
 
@@ -507,12 +514,25 @@
 
 
             Select Case ClassID
-                Case Is = Class_List_Enum.Captian
+                Case Is = Class_List_Enum.Mage
                     LevelCap = 20
+                    Base_Class = Class_List_Enum.Scientist
+                    Base_Class_2 = Class_List_Enum.Engineer
                     A.Add(Ability_List_Enum.Mage__Fireball)
                     B.Add(Buff_List_Enum.Buffs)
-            End Select
 
+
+                Case Is = Class_List_Enum.Spellsword
+                    LevelCap = 20
+                    Base_Class = Class_List_Enum.Scientist
+                    Base_Class_2 = Class_List_Enum.Security
+
+
+                Case Is = Class_List_Enum.Shadow
+                    LevelCap = 20
+                    Base_Class = Class_List_Enum.Security
+
+            End Select
 
 
         End Sub
@@ -527,6 +547,87 @@
             Load_Lists(ClassID)
         End Sub
     End Class
+
+
+
+    Enum Skill_List As Integer
+        None = -1
+        Engineer__A
+        Engineer__B
+        Engineer__C
+
+        Security__A
+        Security__B
+        Security__C
+
+    End Enum
+
+    'Enum 
+
+
+    Class Skill_Item
+        Public Buff_List As HashSet(Of Buff_List_Enum) = New HashSet(Of Buff_List_Enum)
+        Public Ability_List As HashSet(Of Ability_List_Enum) = New HashSet(Of Ability_List_Enum)
+        Public Position As PointI
+        Public Parent As Skill_List
+
+        Sub New(ByVal Buff_List As HashSet(Of Buff_List_Enum), ByVal Ability_List As HashSet(Of Ability_List_Enum), ByVal Position As PointI, ByVal Parent As Skill_List)
+            Me.Buff_List = Buff_List
+            Me.Ability_List = Ability_List
+            Me.Position = Position
+            Me.Parent = Parent
+        End Sub
+
+    End Class
+
+
+
+
+    Class Class_Tech_Tree        
+        Public Skills As Dictionary(Of Skill_List, Skill_Item) = New Dictionary(Of Skill_List, Skill_Item)
+
+
+        Sub New(ByVal ClassID As Class_List_Enum)
+            Load_Lists(ClassID)
+        End Sub
+
+
+        Sub Load_Lists(ByVal ClassId As Class_List_Enum)
+
+            Dim B As New HashSet(Of Buff_List_Enum)
+            Dim A As New HashSet(Of Ability_List_Enum)
+            Dim P As PointI
+
+            Select Case ClassId
+                'Set class tech tree
+                Case Is = Class_List_Enum.Engineer
+                    B.Add(Buff_List_Enum.Buffs)
+                    A.Add(Ability_List_Enum.Mage__Fireball)
+                    P = New PointI(0, 0)
+                    Skills.Add(Skill_List.Engineer__A, New Skill_Item(B, A, P, Skill_List.None))
+                    A.Clear() : B.Clear()
+
+                    B.Add(Buff_List_Enum.Buffs)
+                    A.Add(Ability_List_Enum.Mage__Fireball)
+                    P = New PointI(0, 1)
+                    Skills.Add(Skill_List.Engineer__B, New Skill_Item(B, A, P, Skill_List.Engineer__A))
+                    A.Clear() : B.Clear()
+
+                    B.Add(Buff_List_Enum.Buffs)
+                    A.Add(Ability_List_Enum.Mage__Fireball)
+                    P = New PointI(0, 2)
+                    Skills.Add(Skill_List.Engineer__C, New Skill_Item(B, A, P, Skill_List.Engineer__B))
+                    A.Clear() : B.Clear()
+
+
+
+
+            End Select
+        End Sub
+
+
+    End Class
+
 
 
 End Module

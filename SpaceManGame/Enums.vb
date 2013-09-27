@@ -363,7 +363,18 @@
         PLV__Officer_Background
         PLV__Officer_ScrollUp
         PLV__Officer_ScrollDown
+        PLV__Officer_ScrollLeft
+        PLV__Officer_ScrollRight
         PLV__Experience
+        PLV__Class_List
+        PLV__Class_List_Frame
+
+        PLV__Class_List_HalfFrame1
+        PLV__Class_List_HalfFrame2
+        PLV__Skill_Point
+        PLV__Level_Up
+        PLV__Base_Class
+        PLV__Base_Class_Frame
     End Enum
     
     Enum panel_texture_enum
@@ -557,6 +568,10 @@
         Officer_4
         Officer_5
         Class_Background
+        Class_Engineer
+        Class_Security
+        Class_Scientist
+        Class_Aviator
         Class_1
         Class_2
         Class_3
