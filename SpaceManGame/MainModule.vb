@@ -282,9 +282,12 @@
 
     'Personal Level up
     Public PLV__Selected_Officer As Integer
+    Public PLV__Selected_Officer_Old As Integer
+    Public PLV__Selected_Class As Class_List_Enum
+    Public PLV__Selected_Class_Old As Class_List_Enum
     Public PLV__Officer_Scroll As Integer
     Public PLV__Class_Scroll As Integer
-
+    Public PLV__Tech_Tree As Class_Tech_Tree
 
 
 
@@ -561,14 +564,25 @@
         Menu_Items_Personal_Level.Add(Personal_level_enums.Officer_ScrollDown, New Menu_button(button_texture_enum.PLV__Officer_ScrollDown, New Rectangle(pos.x, pos.y, 72, 16), button_style.Both, Color.White))
 
 
-        pos.y = 120 - 23
-        pos.x = 440
-        'Menu_Items_Personal_Level.Add(Personal_level_enums.Class_1, New Menu_button(button_texture_enum.Blank, New Rectangle(pos.x, pos.y, 72, 108), button_style.Both, Color.White))
-        'Menu_Items_Personal_Level.Add(Personal_level_enums.Class_Scroll_Left, New Menu_button(button_texture_enum.PLV__Officer_ScrollUp, New Rectangle(pos.x, pos.y, 72, 16), button_style.Both, Color.White)) : pos.y += 23
+        pos.x = 640
+        pos.y = 604
+        Menu_Items_Personal_Level.Add(Personal_level_enums.Class_Engineer, New Menu_button(button_texture_enum.Blank, New Rectangle(pos.x, pos.y, 96, 16), button_style.DisplayOnly, Color.White)) : pos.y += 32
+        Menu_Items_Personal_Level.Add(Personal_level_enums.Class_Security, New Menu_button(button_texture_enum.Blank, New Rectangle(pos.x, pos.y, 96, 16), button_style.DisplayOnly, Color.White)) : pos.y += 32
+        Menu_Items_Personal_Level.Add(Personal_level_enums.Class_Scientist, New Menu_button(button_texture_enum.Blank, New Rectangle(pos.x, pos.y, 96, 16), button_style.DisplayOnly, Color.White)) : pos.y += 32
+        Menu_Items_Personal_Level.Add(Personal_level_enums.Class_Aviator, New Menu_button(button_texture_enum.Blank, New Rectangle(pos.x, pos.y, 96, 16), button_style.DisplayOnly, Color.White)) : pos.y += 32
 
 
-        'Menu_Items_Personal_Level.Add(Personal_level_enums.Class_Scroll_Right, New Menu_button(button_texture_enum.PLV__Officer_ScrollDown, New Rectangle(pos.x, pos.y, 72, 16), button_style.Both, Color.White))
 
+
+        pos.y = 604
+        pos.x = 780
+        Menu_Items_Personal_Level.Add(Personal_level_enums.Class_Scroll_Left, New Menu_button(button_texture_enum.PLV__Officer_ScrollLeft, New Rectangle(pos.x - 30, pos.y, 16, 108), button_style.Both, Color.White))
+        Menu_Items_Personal_Level.Add(Personal_level_enums.Class_1, New Menu_button(button_texture_enum.Blank, New Rectangle(pos.x, pos.y, 72, 108), button_style.DisplayOnly, Color.White)) : pos.x += 92
+        Menu_Items_Personal_Level.Add(Personal_level_enums.Class_2, New Menu_button(button_texture_enum.Blank, New Rectangle(pos.x, pos.y, 72, 108), button_style.DisplayOnly, Color.White)) : pos.x += 92
+        Menu_Items_Personal_Level.Add(Personal_level_enums.Class_3, New Menu_button(button_texture_enum.Blank, New Rectangle(pos.x, pos.y, 72, 108), button_style.DisplayOnly, Color.White)) : pos.x += 92
+        Menu_Items_Personal_Level.Add(Personal_level_enums.Class_4, New Menu_button(button_texture_enum.Blank, New Rectangle(pos.x, pos.y, 72, 108), button_style.DisplayOnly, Color.White)) : pos.x += 92
+        Menu_Items_Personal_Level.Add(Personal_level_enums.Class_5, New Menu_button(button_texture_enum.Blank, New Rectangle(pos.x, pos.y, 72, 108), button_style.DisplayOnly, Color.White)) : pos.x += 92
+        Menu_Items_Personal_Level.Add(Personal_level_enums.Class_Scroll_Right, New Menu_button(button_texture_enum.PLV__Officer_ScrollRight, New Rectangle(pos.x, pos.y, 16, 108), button_style.Both, Color.White))
 
     End Sub
 
@@ -649,6 +663,7 @@
             Officer_Texture = New Texture(d3d_device, 32, 32, 1, Usage.RenderTarget, Format.A8R8G8B8, Pool.Default)
             Render_Officer_Texture(OfficerID, Officer_Texture)
             Loaded_Officer_Textures.Add(OfficerID, Officer_Texture)
+            Officer_Texture = Loaded_Officer_Textures(OfficerID)
         End If
         Return Officer_Texture
     End Function
@@ -677,17 +692,25 @@
         Planet_List.Add(0, planet1)
 
         Add_Officer(0, New Officer(0, "Captian", Officer_location_enum.Ship, 0, pos, 1, New Officer.sprite_list(character_sprite_set_enum.Human_Renagade_2, character_sprite_enum.Head)))
-        Officer_List(0).Officer_Classes.Add(New Officer_Class(Class_List_Enum.Captian, 50, 0))
-        Officer_List(0).Officer_Classes.Add(New Officer_Class(Class_List_Enum.Engineer, 75, 0))
-        Officer_List(0).Officer_Classes.Add(New Officer_Class(Class_List_Enum.Mage, 0, 0))
-        Officer_List(0).Current_Class = Class_List_Enum.Captian
+
+        Officer_List(0).Officer_Classes.Add(New Officer_Class(Class_List_Enum.Mage, 0, 1))
+        Officer_List(0).Officer_Classes.Add(New Officer_Class(Class_List_Enum.SpellSword, 0, 1))
+        Officer_List(0).Officer_Classes.Add(New Officer_Class(Class_List_Enum.Shadow, 0, 1))
+        Officer_List(0).Officer_Classes.Add(New Officer_Class(Class_List_Enum.Thief, 0, 1))
+        Officer_List(0).Officer_Classes.Add(New Officer_Class(Class_List_Enum.Inventor, 0, 1))
+        Officer_List(0).Officer_Classes.Add(New Officer_Class(Class_List_Enum.PlaceHolder, 20, 10))
+        Officer_List(0).Officer_Classes.Add(New Officer_Class(Class_List_Enum.Eye_Of_The_Placeholder, 56, 1))
+
+
+
+        Officer_List(0).Current_Class = Class_List_Enum.Mage
 
         Add_Officer(1, New Officer(0, "Skippy", Officer_location_enum.Ship, 0, pos, 1, New Officer.sprite_list(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)))
         Officer_List(1).Current_Class = Class_List_Enum.Engineer
         Add_Officer(2, New Officer(0, "Perpa", Officer_location_enum.Ship, 0, pos, 1, New Officer.sprite_list(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)))
         Officer_List(2).Current_Class = Class_List_Enum.Mage
         Add_Officer(3, New Officer(0, "Surpa", Officer_location_enum.Ship, 0, pos, 1, New Officer.sprite_list(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)))
-        Officer_List(3).Current_Class = Class_List_Enum.Pilot
+        Officer_List(3).Current_Class = Class_List_Enum.Aviator
         Add_Officer(4, New Officer(0, "Kerpa", Officer_location_enum.Ship, 0, pos, 1, New Officer.sprite_list(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)))
         Officer_List(4).Current_Class = Class_List_Enum.Scientist
         Add_Officer(5, New Officer(0, "Kilki", Officer_location_enum.Ship, 0, pos, 1, New Officer.sprite_list(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)))
@@ -695,7 +718,7 @@
         Add_Officer(6, New Officer(0, "Stan", Officer_location_enum.Ship, 0, pos, 1, New Officer.sprite_list(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)))
         Officer_List(6).Current_Class = Class_List_Enum.Mage
         Add_Officer(7, New Officer(0, "Vextorz", Officer_location_enum.Ship, 0, pos, 1, New Officer.sprite_list(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)))
-        Officer_List(7).Current_Class = Class_List_Enum.Pilot
+        Officer_List(7).Current_Class = Class_List_Enum.Aviator
         Player_Data.Officer_List.Add(1)
         Player_Data.Officer_List.Add(2)
         Player_Data.Officer_List.Add(3)
@@ -1443,8 +1466,6 @@
 
     Sub Personal_Level_UI()
 
-
-
         Dim mouse_info As New MainForm.mouse_info_type
         Dim mouse_click As Boolean
         Dim left_down_point As PointI = Nothing
@@ -1470,10 +1491,52 @@
                 If PLV__Officer_Scroll > 0 Then PLV__Officer_Scroll -= 1
             Case Is = Personal_level_enums.Officer_ScrollDown
                 If PLV__Officer_Scroll < Player_Data.Officer_List.Count - 5 Then PLV__Officer_Scroll += 1
+            Case Is = Personal_level_enums.Officer_1
+                PLV__Selected_Officer = PLV__Officer_Scroll
+                PLV__Selected_Class = Officer_List(PLV__Selected_Officer).Current_Class                
+            Case Is = Personal_level_enums.Officer_2
+                PLV__Selected_Officer = PLV__Officer_Scroll + 1
+                PLV__Selected_Class = Officer_List(PLV__Selected_Officer).Current_Class
+            Case Is = Personal_level_enums.Officer_3
+                PLV__Selected_Officer = PLV__Officer_Scroll + 2
+                PLV__Selected_Class = Officer_List(PLV__Selected_Officer).Current_Class
+            Case Is = Personal_level_enums.Officer_4
+                PLV__Selected_Officer = PLV__Officer_Scroll + 3
+                PLV__Selected_Class = Officer_List(PLV__Selected_Officer).Current_Class
+            Case Is = Personal_level_enums.Officer_5
+                PLV__Selected_Officer = PLV__Officer_Scroll + 4
+                PLV__Selected_Class = Officer_List(PLV__Selected_Officer).Current_Class                
+
+
+            Case Is = Personal_level_enums.Class_Scroll_Left
+                If PLV__Class_Scroll > 0 Then PLV__Class_Scroll -= 1
+            Case Is = Personal_level_enums.Class_Scroll_Right
+                If PLV__Class_Scroll < (Officer_List(PLV__Selected_Officer).Officer_Classes.Count - 4) - 5 Then PLV__Class_Scroll += 1
+
+            Case Is = Personal_level_enums.Class_1
+                If Officer_List(PLV__Selected_Officer).Officer_Classes.Count - 4 > 0 + PLV__Class_Scroll Then PLV__Selected_Class = Officer_List(PLV__Selected_Officer).GetClassByNumber(0 + PLV__Class_Scroll).ClassID
+            Case Is = Personal_level_enums.Class_2
+                If Officer_List(PLV__Selected_Officer).Officer_Classes.Count - 4 > 1 + PLV__Class_Scroll Then PLV__Selected_Class = Officer_List(PLV__Selected_Officer).GetClassByNumber(1 + PLV__Class_Scroll).ClassID                
+            Case Is = Personal_level_enums.Class_3
+                If Officer_List(PLV__Selected_Officer).Officer_Classes.Count - 4 > 2 + PLV__Class_Scroll Then PLV__Selected_Class = Officer_List(PLV__Selected_Officer).GetClassByNumber(2 + PLV__Class_Scroll).ClassID            
+            Case Is = Personal_level_enums.Class_4
+                If Officer_List(PLV__Selected_Officer).Officer_Classes.Count - 4 > 3 + PLV__Class_Scroll Then PLV__Selected_Class = Officer_List(PLV__Selected_Officer).GetClassByNumber(3 + PLV__Class_Scroll).ClassID            
+            Case Is = Personal_level_enums.Class_5
+                If Officer_List(PLV__Selected_Officer).Officer_Classes.Count - 4 > 4 + PLV__Class_Scroll Then PLV__Selected_Class = Officer_List(PLV__Selected_Officer).GetClassByNumber(4 + PLV__Class_Scroll).ClassID                
+
+
+            Case Is = Personal_level_enums.Class_Engineer
+                PLV__Selected_Class = Class_List_Enum.Engineer                
+            Case Is = Personal_level_enums.Class_Security
+                PLV__Selected_Class = Class_List_Enum.Security                
+            Case Is = Personal_level_enums.Class_Scientist
+                PLV__Selected_Class = Class_List_Enum.Scientist                
+            Case Is = Personal_level_enums.Class_Aviator
+                PLV__Selected_Class = Class_List_Enum.Aviator
 
         End Select
 
-                
+        PLV_Load_Tech_Tree(PLV__Selected_Class)
 
 
 
@@ -1541,6 +1604,30 @@
 
 
     End Sub
+
+
+
+
+    Sub PLV_Load_Tech_Tree(ByVal Officer_Class As Class_List_Enum)
+        If PLV__Selected_Class <> PLV__Selected_Class_Old OrElse PLV__Selected_Officer <> PLV__Selected_Officer_Old Then
+            PLV__Tech_Tree = New Class_Tech_Tree(PLV__Selected_Class)
+
+            Dim remove_list As New HashSet(Of Integer)
+            For Each item In Menu_Items_Personal_Level
+                If item.Key >= 1000 Then remove_list.Add(item.Key)
+            Next
+            For Each item In remove_list
+                Menu_Items_Personal_Level.Remove(item)
+            Next
+            For Each item In PLV__Tech_Tree.Skills
+                Menu_Items_Personal_Level.Add(1000 + item.Key, New Menu_button(button_texture_enum.PLV__Skill_Point, New Rectangle(740 + item.Value.Position.x * 100, 50 + item.Value.Position.y * 100, 64, 64), button_style.Both))
+            Next
+
+            PLV__Selected_Class_Old = PLV__Selected_Class
+            PLV__Selected_Officer_Old = PLV__Selected_Officer
+        End If
+    End Sub
+
 
 #End Region
 

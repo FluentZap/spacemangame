@@ -289,9 +289,10 @@
     Sub render_personal_level()
 
         Dim pos As PointD
-        d3d_device.BeginScene()
-        d3d_device.Clear(ClearFlags.Target, Color.Black, 1, 0)
-        d3d_sprite.Begin(SpriteFlags.AlphaBlend)
+        Dim scale As Integer        
+        d3d_device.BeginScene()        
+        d3d_device.Clear(ClearFlags.Target, Color.Black, 1, 0)        
+        d3d_sprite.Begin(SpriteFlags.AlphaBlend)        
         d3d_device.SetSamplerState(0, SamplerStageStates.MinFilter, TextureFilter.None)
         d3d_device.SetSamplerState(0, SamplerStageStates.MagFilter, TextureFilter.None)
         d3d_sprite.Transform = Matrix.Identity
@@ -299,7 +300,7 @@
         pos.x = 440
         pos.y = 120
         Dim advance As Integer = 0
-
+        Dim backcolor As Color = Color.White
         For Each item In Player_Data.Officer_List
             If advance >= PLV__Officer_Scroll Then
                 draw_text(Officer_List(item).name, New Rectangle(pos.intX + 72, pos.intY, 100, 100), DrawTextFormat.Left, Color.White, d3d_font(d3d_font_enum.SB_small))
@@ -307,9 +308,9 @@
                 draw_text("Exp " + Officer_List(item).GetCurrentClass.Experance.ToString + "/100", New Rectangle(pos.intX + 72, pos.intY + 24, 100, 100), DrawTextFormat.Left, Color.Green, d3d_font(d3d_font_enum.SB_small))
                 draw_text(Officer_List(item).Current_Class.ToString, New Rectangle(pos.intX + 72, pos.intY + 36, 100, 100), DrawTextFormat.Left, Color.Orange, d3d_font(d3d_font_enum.SB_small))
 
+                If PLV__Selected_Officer = item Then backcolor = Color.LightGreen Else backcolor = Color.White
                 d3d_sprite.Transform = Matrix.Transformation2D(New Vector2(0, 0), 0, New Vector2(3, 3), New Vector2(0, 0), 0, New Vector2(0, 0))
-                d3d_sprite.Draw(button_texture(button_texture_enum.PLV__Officer_Background), Vector3.Empty, New Vector3(CSng(pos.x / 3), CSng(pos.y / 3), 0), Color.White.ToArgb)
-
+                d3d_sprite.Draw(button_texture(button_texture_enum.PLV__Officer_Background), Vector3.Empty, New Vector3(CSng(pos.x / 3), CSng(pos.y / 3), 0), backcolor.ToArgb)
                 'Draw_Crew(character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head, New PointD(pos.x / 3 - 4, pos.y / 3 + 1), Color.White)
 
                 Draw_Officer(Get_Officer_Texture(item), character_sprite_enum.Head, New PointD(pos.x / 3 - 4, pos.y / 3 + 1), Color.White)
@@ -325,41 +326,105 @@
         Next
 
 
-        pos.x = 640
+        pos.x = 780
         pos.y = 604
 
         advance = 0
+        backcolor = Color.White
+        Dim Class_Color As Color
+        Dim Class_Color_2 As Color
         For Each item In Officer_List(PLV__Selected_Officer).Officer_Classes
-            If advance >= PLV__Class_Scroll Then
+            If Not item.ClassID = Class_List_Enum.Engineer AndAlso Not item.ClassID = Class_List_Enum.Security AndAlso Not item.ClassID = Class_List_Enum.Scientist AndAlso Not item.ClassID = Class_List_Enum.Aviator Then
+                If advance >= PLV__Class_Scroll Then
 
-                draw_text(item.ClassID.ToString, New Rectangle(pos.intX, pos.intY - 18, 72, 100), DrawTextFormat.Left, Color.Orange, d3d_font(d3d_font_enum.SB_small))
-                draw_text("Lvl " + item.Level.ToString, New Rectangle(pos.intX, pos.intY + 108, 100, 100), DrawTextFormat.Left, Color.SkyBlue, d3d_font(d3d_font_enum.SB_small))
+                    If item.Base_Class > Class_List_Enum.Empty Then
+                        If item.Base_Class = Class_List_Enum.Engineer Then Class_Color = Color.Orange
+                        If item.Base_Class = Class_List_Enum.Security Then Class_Color = Color.Red
+                        If item.Base_Class = Class_List_Enum.Scientist Then Class_Color = Color.LightBlue
+                        If item.Base_Class = Class_List_Enum.Aviator Then Class_Color = Color.Green
 
-                d3d_sprite.Draw(button_texture(button_texture_enum.PLV__Experience), Vector3.Empty, New Vector3(pos.sngX, pos.sngY + 124, 0), Color.White.ToArgb)
+                        If item.Base_Class_2 > Class_List_Enum.Empty Then
 
-                Dim scale As Integer = CInt(72 * item.Experance \ 100)
-                d3d_sprite.Draw(button_texture(button_texture_enum.PLV__Experience), New Rectangle(0, 0, scale, 8), New Vector3(0, 0, 0), New Vector3(pos.sngX, pos.sngY + 124, 0), Color.Cyan.ToArgb)
+                            If item.Base_Class_2 = Class_List_Enum.Engineer Then Class_Color_2 = Color.Orange
+                            If item.Base_Class_2 = Class_List_Enum.Security Then Class_Color_2 = Color.Red
+                            If item.Base_Class_2 = Class_List_Enum.Scientist Then Class_Color_2 = Color.LightBlue
+                            If item.Base_Class_2 = Class_List_Enum.Aviator Then Class_Color_2 = Color.Green
+
+                            d3d_sprite.Draw(button_texture(button_texture_enum.PLV__Class_List_HalfFrame1), Vector3.Empty, New Vector3(pos.sngX - 9, pos.sngY - 24, 0), Class_Color.ToArgb)
+                            d3d_sprite.Draw(button_texture(button_texture_enum.PLV__Class_List_HalfFrame2), Vector3.Empty, New Vector3(pos.sngX - 9, pos.sngY - 24, 0), Class_Color_2.ToArgb)
+                        Else
+                            d3d_sprite.Draw(button_texture(button_texture_enum.PLV__Class_List_Frame), Vector3.Empty, New Vector3(pos.sngX - 9, pos.sngY - 24, 0), Class_Color.ToArgb)
+                        End If
+                    Else
+                        d3d_sprite.Draw(button_texture(button_texture_enum.PLV__Class_List_Frame), Vector3.Empty, New Vector3(pos.sngX - 9, pos.sngY - 24, 0), Color.Gray.ToArgb)
+                    End If
 
 
 
 
-                d3d_sprite.Transform = Matrix.Transformation2D(New Vector2(0, 0), 0, New Vector2(3, 3), New Vector2(0, 0), 0, New Vector2(0, 0))
-                d3d_sprite.Draw(button_texture(button_texture_enum.PLV__Officer_Background), Vector3.Empty, New Vector3(CSng(pos.x / 3), CSng(pos.y / 3), 0), Color.White.ToArgb)
+                    draw_text(item.ClassID.ToString, New Rectangle(pos.intX, pos.intY - 18, 72, 100), DrawTextFormat.Left, Color.Black, d3d_font(d3d_font_enum.SB_small))
+                    draw_text("Lvl " + item.Level.ToString, New Rectangle(pos.intX, pos.intY + 108, 100, 100), DrawTextFormat.Left, Color.Black, d3d_font(d3d_font_enum.SB_small))
+                    If item.Skill_Points > 0 Then d3d_sprite.Draw(button_texture(button_texture_enum.PLV__Level_Up), Vector3.Empty, New Vector3(pos.sngX + 50, pos.sngY + 109, 0), Color.White.ToArgb)
+                    d3d_sprite.Draw(button_texture(button_texture_enum.PLV__Experience), Vector3.Empty, New Vector3(pos.sngX, pos.sngY + 124, 0), Color.White.ToArgb)
 
-                'Draw_Crew(character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head, New PointD(pos.x / 3 - 4, pos.y / 3 + 1), Color.White)
 
-                'Draw_Officer(Get_Officer_Texture(item), character_sprite_enum.Head, New PointD(pos.x / 3 - 4, pos.y / 3 + 1), Color.White)
+                    scale = CInt(72 * item.Experance \ 100)
+                    d3d_sprite.Draw(button_texture(button_texture_enum.PLV__Experience), New Rectangle(0, 0, scale, 8), New Vector3(0, 0, 0), New Vector3(pos.sngX, pos.sngY + 124, 0), Color.Cyan.ToArgb)
 
-                d3d_sprite.Transform = Matrix.Identity
+                    If PLV__Selected_Class = item.ClassID Then backcolor = Color.LightGreen Else backcolor = Color.White
+                    d3d_sprite.Transform = Matrix.Transformation2D(New Vector2(0, 0), 0, New Vector2(3, 3), New Vector2(0, 0), 0, New Vector2(0, 0))
+                    d3d_sprite.Draw(button_texture(button_texture_enum.PLV__Officer_Background), Vector3.Empty, New Vector3(CSng(pos.x / 3), CSng(pos.y / 3), 0), backcolor.ToArgb)
 
-                'Draw_Officer(Get_Officer_Texture(item), character_sprite_enum.Head, New PointD(0, 0), Color.White)
+                    d3d_sprite.Draw(button_texture(button_texture_enum.PLV__Class_List), New Rectangle(item.ClassID * 32, 0, 32, 32), New Vector3(0, 0, 0), New Vector3(CSng(pos.x / 3 - 4), CSng(pos.y / 3 + 1), 0), Color.White.ToArgb)
 
-                pos.x += 115
-                If advance - PLV__Class_Scroll >= 4 Then Exit For
+                    d3d_sprite.Transform = Matrix.Identity
+
+                    'Draw_Officer(Get_Officer_Texture(item), character_sprite_enum.Head, New PointD(0, 0), Color.White)
+
+                    pos.x += 92
+                    If advance - PLV__Class_Scroll >= 4 Then Exit For
+                End If
+                advance += 1
             End If
-            advance += 1
         Next
 
+        pos.x = 640
+        pos.y = 604
+        'Draw Base Classes
+        If PLV__Selected_Class = Class_List_Enum.Engineer Then d3d_sprite.Draw(button_texture(button_texture_enum.PLV__Base_Class_Frame), Vector3.Empty, New Vector3(pos.sngX - 2, pos.sngY - 2, 0), Color.White.ToArgb)
+        d3d_sprite.Draw(button_texture(button_texture_enum.PLV__Base_Class), Vector3.Empty, New Vector3(pos.sngX, pos.sngY, 0), Color.Gray.ToArgb)
+        scale = CInt(96 * Officer_List(PLV__Selected_Officer).GetClass(Class_List_Enum.Engineer).Experance \ 100)
+        d3d_sprite.Draw(button_texture(button_texture_enum.PLV__Base_Class), New Rectangle(0, 0, scale, 16), New Vector3(0, 0, 0), New Vector3(pos.sngX, pos.sngY, 0), Color.Orange.ToArgb)
+        If Officer_List(PLV__Selected_Officer).GetClass(Class_List_Enum.Engineer).Skill_Points > 0 Then d3d_sprite.Draw(button_texture(button_texture_enum.PLV__Level_Up), Vector3.Empty, New Vector3(pos.sngX - 54, pos.sngY, 0), Color.White.ToArgb)
+        draw_text("Lv " + Officer_List(PLV__Selected_Officer).GetClass(Class_List_Enum.Engineer).Level.ToString, New Rectangle(pos.intX - 32, pos.intY, 96, 16), DrawTextFormat.Left, Color.White, d3d_font(d3d_font_enum.SB_small))
+        draw_text("Engineer", New Rectangle(pos.intX, pos.intY, 96, 16), DrawTextFormat.Center, Color.Black, d3d_font(d3d_font_enum.SB_small))
+        pos.y += 32
+
+        If PLV__Selected_Class = Class_List_Enum.Security Then d3d_sprite.Draw(button_texture(button_texture_enum.PLV__Base_Class_Frame), Vector3.Empty, New Vector3(pos.sngX - 2, pos.sngY - 2, 0), Color.White.ToArgb)
+        d3d_sprite.Draw(button_texture(button_texture_enum.PLV__Base_Class), Vector3.Empty, New Vector3(pos.sngX, pos.sngY, 0), Color.Gray.ToArgb)
+        scale = CInt(96 * Officer_List(PLV__Selected_Officer).GetClass(Class_List_Enum.Security).Experance \ 100)
+        d3d_sprite.Draw(button_texture(button_texture_enum.PLV__Base_Class), New Rectangle(0, 0, scale, 16), New Vector3(0, 0, 0), New Vector3(pos.sngX, pos.sngY, 0), Color.Red.ToArgb)
+        If Officer_List(PLV__Selected_Officer).GetClass(Class_List_Enum.Security).Skill_Points > 0 Then d3d_sprite.Draw(button_texture(button_texture_enum.PLV__Level_Up), Vector3.Empty, New Vector3(pos.sngX - 54, pos.sngY, 0), Color.White.ToArgb)
+        draw_text("Lv " + Officer_List(PLV__Selected_Officer).GetClass(Class_List_Enum.Security).Level.ToString, New Rectangle(pos.intX - 32, pos.intY, 96, 16), DrawTextFormat.Left, Color.White, d3d_font(d3d_font_enum.SB_small))
+        draw_text("Security", New Rectangle(pos.intX, pos.intY, 96, 16), DrawTextFormat.Center, Color.Black, d3d_font(d3d_font_enum.SB_small))
+        pos.y += 32
+
+        If PLV__Selected_Class = Class_List_Enum.Scientist Then d3d_sprite.Draw(button_texture(button_texture_enum.PLV__Base_Class_Frame), Vector3.Empty, New Vector3(pos.sngX - 2, pos.sngY - 2, 0), Color.White.ToArgb)
+        d3d_sprite.Draw(button_texture(button_texture_enum.PLV__Base_Class), Vector3.Empty, New Vector3(pos.sngX, pos.sngY, 0), Color.Gray.ToArgb)
+        scale = CInt(96 * Officer_List(PLV__Selected_Officer).GetClass(Class_List_Enum.Scientist).Experance \ 100)
+        d3d_sprite.Draw(button_texture(button_texture_enum.PLV__Base_Class), New Rectangle(0, 0, scale, 16), New Vector3(0, 0, 0), New Vector3(pos.sngX, pos.sngY, 0), Color.LightBlue.ToArgb)
+        If Officer_List(PLV__Selected_Officer).GetClass(Class_List_Enum.Scientist).Skill_Points > 0 Then d3d_sprite.Draw(button_texture(button_texture_enum.PLV__Level_Up), Vector3.Empty, New Vector3(pos.sngX - 54, pos.sngY, 0), Color.White.ToArgb)
+        draw_text("Lv " + Officer_List(PLV__Selected_Officer).GetClass(Class_List_Enum.Scientist).Level.ToString, New Rectangle(pos.intX - 32, pos.intY, 96, 16), DrawTextFormat.Left, Color.White, d3d_font(d3d_font_enum.SB_small))
+        draw_text("Scientist", New Rectangle(pos.intX, pos.intY, 96, 16), DrawTextFormat.Center, Color.Black, d3d_font(d3d_font_enum.SB_small))
+        pos.y += 32
+
+        If PLV__Selected_Class = Class_List_Enum.Aviator Then d3d_sprite.Draw(button_texture(button_texture_enum.PLV__Base_Class_Frame), Vector3.Empty, New Vector3(pos.sngX - 2, pos.sngY - 2, 0), Color.White.ToArgb)
+        d3d_sprite.Draw(button_texture(button_texture_enum.PLV__Base_Class), Vector3.Empty, New Vector3(pos.sngX, pos.sngY, 0), Color.Gray.ToArgb)
+        scale = CInt(96 * Officer_List(PLV__Selected_Officer).GetClass(Class_List_Enum.Aviator).Experance \ 100)
+        d3d_sprite.Draw(button_texture(button_texture_enum.PLV__Base_Class), New Rectangle(0, 0, scale, 16), New Vector3(0, 0, 0), New Vector3(pos.sngX, pos.sngY, 0), Color.Cyan.ToArgb)
+        If Officer_List(PLV__Selected_Officer).GetClass(Class_List_Enum.Aviator).Skill_Points > 0 Then d3d_sprite.Draw(button_texture(button_texture_enum.PLV__Level_Up), Vector3.Empty, New Vector3(pos.sngX - 54, pos.sngY, 0), Color.White.ToArgb)
+        draw_text("Lv " + Officer_List(PLV__Selected_Officer).GetClass(Class_List_Enum.Aviator).Level.ToString, New Rectangle(pos.intX - 32, pos.intY, 96, 16), DrawTextFormat.Left, Color.White, d3d_font(d3d_font_enum.SB_small))
+        draw_text("Aviator", New Rectangle(pos.intX, pos.intY, 96, 16), DrawTextFormat.Center, Color.Black, d3d_font(d3d_font_enum.SB_small))
 
 
 
@@ -803,15 +868,13 @@
         Dim MatStore As Matrix
         BB = d3d_device.GetRenderTarget(0)
 
-        d3d_device.SetRenderTarget(0, Off_tex.GetSurfaceLevel(0))
+        d3d_device.SetRenderTarget(0, Off_tex.GetSurfaceLevel(0))        
         d3d_sprite.Begin(SpriteFlags.AlphaBlend)
-
-        MatStore = d3d_sprite.Transform
-        d3d_sprite.Transform = Matrix.Identity
-
-        d3d_device.Clear(ClearFlags.Target, Color.Transparent, 1, 0)        
         d3d_device.SetSamplerState(0, SamplerStageStates.MinFilter, TextureFilter.None)
         d3d_device.SetSamplerState(0, SamplerStageStates.MagFilter, TextureFilter.None)
+        MatStore = d3d_sprite.Transform
+        d3d_sprite.Transform = Matrix.Identity
+        d3d_device.Clear(ClearFlags.Target, Color.Transparent, 1, 0)
         d3d_sprite.Transform = Matrix.Identity
         d3d_sprite.Draw(character_texture(O.sprite.Head_SpriteSet), New Rectangle(O.sprite.Head_Sprite * 32, 0, 32, 32), New Vector3(0, 0, 0), New Vector3(0, 0, 0), Color.White)
         d3d_sprite.Draw(character_texture(O.sprite.Torso_SpriteSet), New Rectangle(O.sprite.Torso_Sprite * 32, 32, 32, 32), New Vector3(0, 0, 0), New Vector3(0, 0, 0), Color.White)
