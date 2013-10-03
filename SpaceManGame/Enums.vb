@@ -371,6 +371,7 @@
 
         PLV__Class_List_HalfFrame1
         PLV__Class_List_HalfFrame2
+        PLV__Skill_Bar
         PLV__Skill_Point
         PLV__Level_Up
         PLV__Base_Class

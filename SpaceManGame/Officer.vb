@@ -2,6 +2,11 @@
     Public Officer_Classes As HashSet(Of Officer_Class) = New HashSet(Of Officer_Class)
     Public Current_Class As Class_List_Enum
 
+    Public Buff_List As HashSet(Of Buff_List_Enum) = New HashSet(Of Buff_List_Enum)
+    Public Ability_List As HashSet(Of Ability_List_Enum) = New HashSet(Of Ability_List_Enum)
+
+    Public Skill_List As HashSet(Of Skill_List_Enum) = New HashSet(Of Skill_List_Enum)
+
     Dim faction As Integer
     Public name As String
     Dim location As PointD
@@ -88,10 +93,10 @@
         Me.Officer_Classes.Add(New Officer_Class(Class_List_Enum.Security, random(0, 99), CByte(random(0, 40))))
         Me.Officer_Classes.Add(New Officer_Class(Class_List_Enum.Scientist, random(0, 99), CByte(random(0, 40))))
         Me.Officer_Classes.Add(New Officer_Class(Class_List_Enum.Aviator, random(0, 99), CByte(random(0, 40))))
-        Me.Officer_Classes(Class_List_Enum.Engineer).Skill_Points = 5
+        Me.Officer_Classes(Class_List_Enum.Engineer).Skill_Points = 2
         Me.Officer_Classes(Class_List_Enum.Security).Skill_Points = 5
-        Me.Officer_Classes(Class_List_Enum.Scientist).Skill_Points = 5
-        Me.Officer_Classes(Class_List_Enum.Aviator).Skill_Points = 5
+        'Me.Officer_Classes(Class_List_Enum.Scientist).Skill_Points = 5
+        'Me.Officer_Classes(Class_List_Enum.Aviator).Skill_Points = 5
     End Sub
 
     Sub Move(ByVal Vector As PointD)
@@ -158,6 +163,42 @@
         Next
         Return New Officer_Class(0, 0, 0)
     End Function
+
+
+
+
+
+
+    Sub Recalculate_Abilities_Buffs()
+
+        'Me.Officer_Classes(Current_Class).Ability_List.Add(Ability_List_Enum.Mage__Fireball)
+        'Me.Officer_Classes(Current_Class).Buff_List.Add(Buff_List_Enum.Buffs)
+        Dim Tree As New Class_Tech_Tree(Current_Class)
+        For Each item In Tree.Skills
+
+            If (item.Value.Inherited = True AndAlso Officer_Classes(Current_Class).Level >= item.Value.Req_Level) OrElse Skill_List.Contains(item.Key) Then
+                If Not Skill_List.Contains(item.Key) Then Skill_List.Add(item.Key)
+                For Each a In item.Value.Ability_List
+                    If Not Ability_List.Contains(a) Then Ability_List.Add(a)
+                Next
+
+                For Each b In item.Value.Buff_List
+                    If Not Buff_List.Contains(b) Then Buff_List.Add(b)
+                Next
+
+            End If
+
+        Next
+
+
+
+    End Sub
+
+
+
+
+
+
 
 
 End Class
