@@ -286,8 +286,7 @@
     Public PLV__Selected_Class As Class_List_Enum
     Public PLV__Selected_Class_Old As Class_List_Enum
     Public PLV__Officer_Scroll As Integer
-    Public PLV__Class_Scroll As Integer
-    Public PLV__Tech_Tree As Class_Tech_Tree
+    Public PLV__Class_Scroll As Integer    
 
 
 
@@ -1493,19 +1492,24 @@
                 If PLV__Officer_Scroll < Player_Data.Officer_List.Count - 5 Then PLV__Officer_Scroll += 1
             Case Is = Personal_level_enums.Officer_1
                 PLV__Selected_Officer = PLV__Officer_Scroll
-                PLV__Selected_Class = Officer_List(PLV__Selected_Officer).Current_Class                
+                PLV__Selected_Class = Officer_List(PLV__Selected_Officer).Current_Class
+                Officer_List(PLV__Selected_Officer).Recalculate_Abilities_Buffs()
             Case Is = Personal_level_enums.Officer_2
                 PLV__Selected_Officer = PLV__Officer_Scroll + 1
                 PLV__Selected_Class = Officer_List(PLV__Selected_Officer).Current_Class
+                Officer_List(PLV__Selected_Officer).Recalculate_Abilities_Buffs()
             Case Is = Personal_level_enums.Officer_3
                 PLV__Selected_Officer = PLV__Officer_Scroll + 2
                 PLV__Selected_Class = Officer_List(PLV__Selected_Officer).Current_Class
+                Officer_List(PLV__Selected_Officer).Recalculate_Abilities_Buffs()
             Case Is = Personal_level_enums.Officer_4
                 PLV__Selected_Officer = PLV__Officer_Scroll + 3
                 PLV__Selected_Class = Officer_List(PLV__Selected_Officer).Current_Class
+                Officer_List(PLV__Selected_Officer).Recalculate_Abilities_Buffs()
             Case Is = Personal_level_enums.Officer_5
                 PLV__Selected_Officer = PLV__Officer_Scroll + 4
-                PLV__Selected_Class = Officer_List(PLV__Selected_Officer).Current_Class                
+                PLV__Selected_Class = Officer_List(PLV__Selected_Officer).Current_Class
+                Officer_List(PLV__Selected_Officer).Recalculate_Abilities_Buffs()
 
 
             Case Is = Personal_level_enums.Class_Scroll_Left
@@ -1534,9 +1538,19 @@
             Case Is = Personal_level_enums.Class_Aviator
                 PLV__Selected_Class = Class_List_Enum.Aviator
 
+            Case 999 To 1999
+                Dim skill As Skill_Item = New Class_Tech_Tree(PLV__Selected_Class).Skills(CType(choice - 1000, Skill_List_Enum))
+                If Officer_List(PLV__Selected_Officer).Officer_Classes(PLV__Selected_Class).Skill_Points >= skill.Cost Then
+                    If skill.Parent = Skill_List_Enum.None OrElse Officer_List(PLV__Selected_Officer).Skill_List.Contains(skill.Parent) Then
+                        Officer_List(PLV__Selected_Officer).Skill_List.Add(CType(choice - 1000, Skill_List_Enum))
+                        Officer_List(PLV__Selected_Officer).Officer_Classes(PLV__Selected_Class).Skill_Points -= skill.Cost
+                    End If
+                End If
+
         End Select
 
         PLV_Load_Tech_Tree(PLV__Selected_Class)
+        PLV_Set_Skills()
 
 
 
@@ -1607,10 +1621,9 @@
 
 
 
-
     Sub PLV_Load_Tech_Tree(ByVal Officer_Class As Class_List_Enum)
         If PLV__Selected_Class <> PLV__Selected_Class_Old OrElse PLV__Selected_Officer <> PLV__Selected_Officer_Old Then
-            PLV__Tech_Tree = New Class_Tech_Tree(PLV__Selected_Class)
+            Dim PLV__Tech_Tree As Class_Tech_Tree = New Class_Tech_Tree(PLV__Selected_Class)
 
             Dim remove_list As New HashSet(Of Integer)
             For Each item In Menu_Items_Personal_Level
@@ -1620,12 +1633,40 @@
                 Menu_Items_Personal_Level.Remove(item)
             Next
             For Each item In PLV__Tech_Tree.Skills
-                Menu_Items_Personal_Level.Add(1000 + item.Key, New Menu_button(button_texture_enum.PLV__Skill_Point, New Rectangle(740 + item.Value.Position.x * 100, 50 + item.Value.Position.y * 100, 64, 64), button_style.Both))
+                Menu_Items_Personal_Level.Add(1000 + item.Key, New Menu_button(button_texture_enum.PLV__Skill_Point, New Rectangle(740 + item.Value.Position.x * 100, 50 + item.Value.Position.y * 96, 32, 32), button_style.Both))
+                If item.Value.Parent > Skill_List_Enum.None Then
+                    Menu_Items_Personal_Level.Add(2000 + item.Value.Parent, New Menu_button(button_texture_enum.PLV__Skill_Bar, New Rectangle(740 + item.Value.Position.x * 100 + 12, 50 + item.Value.Position.y * 96 - 64, 8, 64), button_style.DisplayOnly))
+                End If
+                Menu_Items_Personal_Level(1000 + item.Key).tile = item.Value.Sprite
+                If Officer_List(PLV__Selected_Officer).Skill_List.Contains(item.Key) Then Menu_Items_Personal_Level(1000 + item.Key).color = Color.FromArgb(255, 100, 100, 255)
             Next
 
             PLV__Selected_Class_Old = PLV__Selected_Class
             PLV__Selected_Officer_Old = PLV__Selected_Officer
         End If
+    End Sub
+
+
+    Sub PLV_Set_Skills()
+
+        'Dim Tree As Class_Tech_Tree = New Class_Tech_Tree(PLV__Selected_Class)
+
+        For Each item In Officer_List(PLV__Selected_Officer).Skill_List
+            If item > -1 AndAlso Menu_Items_Personal_Level.ContainsKey(1000 + item) Then
+                Menu_Items_Personal_Level(1000 + item).Adj_color = Color.FromArgb(255, 100, 100, 255)
+
+                If Menu_Items_Personal_Level.ContainsKey(2000 + item) Then Menu_Items_Personal_Level(2000 + item).Adj_color = Color.FromArgb(255, 100, 100, 255)
+            End If
+        Next
+
+
+        
+        'If Officer_List(PLV__Selected_Officer).Skill_List.Contains(skill.Parent) Then
+        'End If
+        'If Menu_Items_Personal_Level.ContainsKey(2000 + item) Then Menu_Items_Personal_Level(2000 + item).Adj_color = Color.FromArgb(255, 100, 100, 255)
+
+
+
     End Sub
 
 

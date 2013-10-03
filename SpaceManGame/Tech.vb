@@ -496,10 +496,9 @@
         Eye_Of_The_Placeholder
     End Enum
 
-    Class Officer_Class        
-        Public ClassID As Class_List_Enum
-        Public Buff_List As HashSet(Of Buff_List_Enum)
-        Public Ability_List As HashSet(Of Ability_List_Enum)
+
+    Class Officer_Class
+        Public ClassID As Class_List_Enum        
         Public Base_Class As Class_List_Enum = Class_List_Enum.Empty
         Public Base_Class_2 As Class_List_Enum = Class_List_Enum.Empty
         Public Experance As Integer
@@ -509,35 +508,22 @@
 
 
         Sub Load_Lists(ByVal ClassID As Class_List_Enum)
-            Dim B As New HashSet(Of Buff_List_Enum)
-            Dim A As New HashSet(Of Ability_List_Enum)
-
-
             Select Case ClassID
                 Case Is = Class_List_Enum.Mage
                     LevelCap = 20
                     Base_Class = Class_List_Enum.Scientist
                     Base_Class_2 = Class_List_Enum.Engineer
-                    A.Add(Ability_List_Enum.Mage__Fireball)
-                    B.Add(Buff_List_Enum.Buffs)
-
 
                 Case Is = Class_List_Enum.Spellsword
                     LevelCap = 20
                     Base_Class = Class_List_Enum.Scientist
                     Base_Class_2 = Class_List_Enum.Security
 
-
                 Case Is = Class_List_Enum.Shadow
                     LevelCap = 20
                     Base_Class = Class_List_Enum.Security
-
             End Select
-
-
         End Sub
-
-
 
         Sub New(ByVal ClassID As Class_List_Enum, ByVal Experance As Integer, ByVal Level As Byte)
             Me.ClassID = ClassID
@@ -546,11 +532,12 @@
             Me.LevelCap = LevelCap
             Load_Lists(ClassID)
         End Sub
+
     End Class
 
 
 
-    Enum Skill_List As Integer
+    Enum Skill_List_Enum As Integer
         None = -1
         Engineer__A
         Engineer__B
@@ -560,22 +547,32 @@
         Security__B
         Security__C
 
+        Mage__Base
+
     End Enum
 
-    'Enum 
 
-
+    'Enum
     Class Skill_Item
         Public Buff_List As HashSet(Of Buff_List_Enum) = New HashSet(Of Buff_List_Enum)
         Public Ability_List As HashSet(Of Ability_List_Enum) = New HashSet(Of Ability_List_Enum)
         Public Position As PointI
-        Public Parent As Skill_List
+        Public Parent As Skill_List_Enum
+        Public Inherited As Boolean
+        Public Req_Level As Integer
+        Public Sprite As Integer
+        Public Cost As Byte
 
-        Sub New(ByVal Buff_List As HashSet(Of Buff_List_Enum), ByVal Ability_List As HashSet(Of Ability_List_Enum), ByVal Position As PointI, ByVal Parent As Skill_List)
+
+        Sub New(ByVal Buff_List As HashSet(Of Buff_List_Enum), ByVal Ability_List As HashSet(Of Ability_List_Enum), ByVal Position As PointI, ByVal Sprite As Integer, ByVal Parent As Skill_List_Enum, ByVal Req_Level As Integer, ByVal Cost As Byte, Optional ByVal Inherited As Boolean = False)
             Me.Buff_List = Buff_List
             Me.Ability_List = Ability_List
             Me.Position = Position
+            Me.Sprite = Sprite
             Me.Parent = Parent
+            Me.Req_Level = Req_Level
+            Me.Inherited = Inherited
+            Me.Cost = Cost
         End Sub
 
     End Class
@@ -583,8 +580,8 @@
 
 
 
-    Class Class_Tech_Tree        
-        Public Skills As Dictionary(Of Skill_List, Skill_Item) = New Dictionary(Of Skill_List, Skill_Item)
+    Class Class_Tech_Tree
+        Public Skills As Dictionary(Of Skill_List_Enum, Skill_Item) = New Dictionary(Of Skill_List_Enum, Skill_Item)
 
 
         Sub New(ByVal ClassID As Class_List_Enum)
@@ -604,26 +601,39 @@
                     B.Add(Buff_List_Enum.Buffs)
                     A.Add(Ability_List_Enum.Mage__Fireball)
                     P = New PointI(0, 0)
-                    Skills.Add(Skill_List.Engineer__A, New Skill_Item(B, A, P, Skill_List.None))
-                    A.Clear() : B.Clear()
+                    Skills.Add(Skill_List_Enum.Engineer__A, New Skill_Item(B, A, P, 0, Skill_List_Enum.None, 0, 1))
+                    Reset_List(A, B)
 
                     B.Add(Buff_List_Enum.Buffs)
                     A.Add(Ability_List_Enum.Mage__Fireball)
                     P = New PointI(0, 1)
-                    Skills.Add(Skill_List.Engineer__B, New Skill_Item(B, A, P, Skill_List.Engineer__A))
-                    A.Clear() : B.Clear()
+                    Skills.Add(Skill_List_Enum.Engineer__B, New Skill_Item(B, A, P, 1, Skill_List_Enum.Engineer__A, 5, 1))
+                    Reset_List(A, B)
 
                     B.Add(Buff_List_Enum.Buffs)
                     A.Add(Ability_List_Enum.Mage__Fireball)
                     P = New PointI(0, 2)
-                    Skills.Add(Skill_List.Engineer__C, New Skill_Item(B, A, P, Skill_List.Engineer__B))
-                    A.Clear() : B.Clear()
+                    Skills.Add(Skill_List_Enum.Engineer__C, New Skill_Item(B, A, P, 2, Skill_List_Enum.Engineer__B, 10, 1))
+                    Reset_List(A, B)
 
 
 
+                Case Is = Class_List_Enum.Mage
+                    B.Add(Buff_List_Enum.Buffs)
+                    A.Add(Ability_List_Enum.Mage__Fireball)
+                    P = New PointI(0, 0)
+                    Skills.Add(Skill_List_Enum.Engineer__A, New Skill_Item(B, A, P, 3, Skill_List_Enum.None, 0, 0, True))
+                    Reset_List(A, B)
 
             End Select
         End Sub
+
+
+        Private Sub Reset_List(ByVal A As HashSet(Of Ability_List_Enum), ByVal B As HashSet(Of Buff_List_Enum))
+            A = New HashSet(Of Ability_List_Enum)
+            B = New HashSet(Of Buff_List_Enum)
+        End Sub
+
 
 
     End Class

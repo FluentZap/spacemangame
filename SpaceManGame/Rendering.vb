@@ -297,6 +297,7 @@
         d3d_device.SetSamplerState(0, SamplerStageStates.MagFilter, TextureFilter.None)
         d3d_sprite.Transform = Matrix.Identity
 
+        'Draw officers
         pos.x = 440
         pos.y = 120
         Dim advance As Integer = 0
@@ -325,7 +326,7 @@
             advance += 1
         Next
 
-
+        'Draw Classes
         pos.x = 780
         pos.y = 604
 
@@ -427,10 +428,16 @@
         draw_text("Aviator", New Rectangle(pos.intX, pos.intY, 96, 16), DrawTextFormat.Center, Color.Black, d3d_font(d3d_font_enum.SB_small))
 
 
+        draw_text("Skill Points " + Officer_List(PLV__Selected_Officer).GetClass(PLV__Selected_Class).Skill_Points.ToString, New Rectangle(screen_size.x \ 2, 0, 96, 16), DrawTextFormat.Left, Color.White, d3d_font(d3d_font_enum.SB_small))
+
 
         For Each item In Menu_Items_Personal_Level
             If item.Value.enabled = True AndAlso Not item.Value.tile_Set = button_texture_enum.Blank Then
-                d3d_sprite.Draw(button_texture(item.Value.tile_Set), Vector3.Empty, New Vector3(item.Value.bounds.X, item.Value.bounds.Y, 0), item.Value.get_color.ToArgb)
+                If item.Key < 1000 OrElse item.Key >= 2000 Then
+                    d3d_sprite.Draw(button_texture(item.Value.tile_Set), Vector3.Empty, New Vector3(item.Value.bounds.X, item.Value.bounds.Y, 0), item.Value.get_color.ToArgb)
+                Else
+                    d3d_sprite.Draw(button_texture(item.Value.tile_Set), New Rectangle(item.Value.tile * 32, 0, 32, 32), New Vector3(0, 0, 0), New Vector3(item.Value.bounds.X, item.Value.bounds.Y, 0), item.Value.get_color.ToArgb)
+                End If
                 If Not item.Value.text = "" Then draw_text(item.Value.text, item.Value.bounds, item.Value.align, item.Value.fontcolor, d3d_font(item.Value.font))
             End If
         Next
