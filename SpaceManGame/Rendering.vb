@@ -51,13 +51,13 @@
         d3d_sprite.Draw(character_texture(TileSet), New Rectangle(Tile * 32, 0, 32, 32), New Vector3(0, 0, 0), New Vector3(Position.x, Position.y, 0), Color)
     End Sub
 
-    Sub Draw_Crew(ByVal TileSet As character_sprite_set_enum, ByVal Tile As character_sprite_enum, ByVal Position As PointD, ByVal Color As Color)
+    Sub Draw_Crew(ByVal TileSet As character_sprite_set_enum, ByVal Tile As Integer, ByVal Position As PointD, ByVal Color As Color)
         d3d_sprite.Draw(character_texture(TileSet), New Rectangle(Tile * 32, 0, 32, 32), New Vector3(0, 0, 0), New Vector3(Position.sngX, Position.sngY, 0), Color)
     End Sub
 
 
-    Sub Draw_Officer(ByVal Texture As Texture, ByVal Tile As character_sprite_enum, ByVal Position As PointD, ByVal Color As Color)
-        d3d_sprite.Draw(Texture, New Rectangle(0, 0, 32, 32), New Vector3(0, 0, 0), New Vector3(Position.sngX, Position.sngY, 0), Color)
+    Sub Draw_Officer(ByVal Texture As Texture, ByVal Tile As Integer, ByVal Position As PointD, ByVal Color As Color)
+        d3d_sprite.Draw(Texture, New Rectangle(Tile * 32, 0, 32, 32), New Vector3(0, 0, 0), New Vector3(Position.sngX, Position.sngY, 0), Color)
     End Sub
 
 
@@ -111,13 +111,13 @@
                 pos.x = officer.Value.GetLocation.x - view_location_personal.x
                 pos.y = officer.Value.GetLocation.y - view_location_personal.y
                 'Draw_Crew(character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head, pos, Color.White)
-                Draw_Officer(Get_Officer_Texture(officer.Key), character_sprite_enum.Head, pos, Color.White)
+                Draw_Officer(Get_Officer_Texture(officer.Key), officer.Value.Get_Sprite, pos, Color.White)
             Next
 
             For Each crew In ship.Crew_list
                 pos.x = crew.Value.location.x - view_location_personal.x
-                pos.y = crew.Value.location.y - view_location_personal.y                
-                Draw_Crew(character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head, pos, Color.White)
+                pos.y = crew.Value.location.y - view_location_personal.y
+                Draw_Crew(crew.Value.SpriteSet, crew.Value.Get_Sprite, pos, Color.White)
             Next
         End If
 
@@ -131,13 +131,13 @@
             For Each officer In planet.officer_list
                 pos.x = officer.Value.GetLocationD.x - view_location_personal.x
                 pos.y = officer.Value.GetLocationD.y - view_location_personal.y
-                Draw_Officer(Get_Officer_Texture(officer.Key), character_sprite_enum.Head, pos, Color.White)
+                Draw_Officer(Get_Officer_Texture(officer.Key), officer.Value.Get_Sprite, pos, Color.White)
             Next
 
             For Each crew In planet.crew_list
                 pos.x = crew.Value.location.x - view_location_personal.x
                 pos.y = crew.Value.location.y - view_location_personal.y
-                Draw_Crew(character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head, pos, Color.White)
+                Draw_Crew(crew.Value.SpriteSet, crew.Value.Get_Sprite, pos, Color.White)
             Next
         End If
 
@@ -535,7 +535,7 @@
         Dim TileMap(ship_size.x, ship_size.y) As Ship_tile
         Dim pos As PointD
         Dim sprite_set As character_sprite_set_enum
-        Dim sprite As character_sprite_enum
+        Dim sprite As Integer
 
         'current_player.GetLocation()
 
@@ -870,6 +870,7 @@
 
     Sub Render_Officer_Texture(ByVal OfficerID As Integer, ByVal Off_tex As Texture)
         d3d_sprite.End()
+        Dim Sprite_Width As Integer = 640
         Dim O As Officer = Officer_List(OfficerID)
         Dim BB As Surface
         Dim MatStore As Matrix
@@ -883,12 +884,12 @@
         d3d_sprite.Transform = Matrix.Identity
         d3d_device.Clear(ClearFlags.Target, Color.Transparent, 1, 0)
         d3d_sprite.Transform = Matrix.Identity
-        d3d_sprite.Draw(character_texture(O.sprite.Head_SpriteSet), New Rectangle(O.sprite.Head_Sprite * 32, 0, 32, 32), New Vector3(0, 0, 0), New Vector3(0, 0, 0), Color.White)
-        d3d_sprite.Draw(character_texture(O.sprite.Torso_SpriteSet), New Rectangle(O.sprite.Torso_Sprite * 32, 32, 32, 32), New Vector3(0, 0, 0), New Vector3(0, 0, 0), Color.White)
-        d3d_sprite.Draw(character_texture(O.sprite.Left_Arm_SpriteSet), New Rectangle(O.sprite.Left_Arm_Sprite * 32, 64, 32, 32), New Vector3(0, 0, 0), New Vector3(0, 0, 0), Color.White)
-        d3d_sprite.Draw(character_texture(O.sprite.Right_Arm_SpriteSet), New Rectangle(O.sprite.Right_Arm_Sprite * 32, 96, 32, 32), New Vector3(0, 0, 0), New Vector3(0, 0, 0), Color.White)
-        d3d_sprite.Draw(character_texture(O.sprite.Left_Leg_SpriteSet), New Rectangle(O.sprite.Left_Leg_Sprite * 32, 128, 32, 32), New Vector3(0, 0, 0), New Vector3(0, 0, 0), Color.White)
-        d3d_sprite.Draw(character_texture(O.sprite.Right_Leg_SpriteSet), New Rectangle(O.sprite.Right_Leg_Sprite * 32, 160, 32, 32), New Vector3(0, 0, 0), New Vector3(0, 0, 0), Color.White)
+        d3d_sprite.Draw(character_texture(O.sprite.Head_SpriteSet), New Rectangle(0, 0, Sprite_Width, 32), New Vector3(0, 0, 0), New Vector3(0, 0, 0), Color.White)
+        d3d_sprite.Draw(character_texture(O.sprite.Torso_SpriteSet), New Rectangle(0, 32, Sprite_Width, 32), New Vector3(0, 0, 0), New Vector3(0, 0, 0), Color.White)
+        d3d_sprite.Draw(character_texture(O.sprite.Left_Arm_SpriteSet), New Rectangle(0, 64, Sprite_Width, 32), New Vector3(0, 0, 0), New Vector3(0, 0, 0), Color.White)
+        d3d_sprite.Draw(character_texture(O.sprite.Right_Arm_SpriteSet), New Rectangle(0, 96, Sprite_Width, 32), New Vector3(0, 0, 0), New Vector3(0, 0, 0), Color.White)
+        d3d_sprite.Draw(character_texture(O.sprite.Left_Leg_SpriteSet), New Rectangle(0, 128, Sprite_Width, 32), New Vector3(0, 0, 0), New Vector3(0, 0, 0), Color.White)
+        d3d_sprite.Draw(character_texture(O.sprite.Right_Leg_SpriteSet), New Rectangle(0, 160, Sprite_Width, 32), New Vector3(0, 0, 0), New Vector3(0, 0, 0), Color.White)
         d3d_sprite.End()
 
         d3d_sprite.Transform = MatStore
@@ -922,14 +923,14 @@
         For Each officer In Ship.Officer_List
             pos.x = officer.Value.GetLocation.x
             pos.y = officer.Value.GetLocation.y
-            'Draw_Crew(character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head, pos, Color.White)
-            Draw_Officer(Get_Officer_Texture(officer.Key), character_sprite_enum.Head, pos, Color.White)
+            'Draw_Crew(character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head, pos, Color.White)            
+            Draw_Officer(Get_Officer_Texture(officer.Key), officer.Value.Get_Sprite, pos, Color.White)            
         Next
 
         For Each crew In Ship.Crew_list
             pos.x = crew.Value.location.x
             pos.y = crew.Value.location.y
-            Draw_Crew(character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head, pos, Color.White)
+            Draw_Crew(crew.Value.SpriteSet, crew.Value.Get_Sprite, pos, Color.White)
         Next
 
     End Sub

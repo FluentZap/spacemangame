@@ -659,7 +659,8 @@
         If Loaded_Officer_Textures.ContainsKey(OfficerID) Then
             Officer_Texture = Loaded_Officer_Textures(OfficerID)
         Else
-            Officer_Texture = New Texture(d3d_device, 32, 32, 1, Usage.RenderTarget, Format.A8R8G8B8, Pool.Default)
+            'Tile Size
+            Officer_Texture = New Texture(d3d_device, 640, 32, 1, Usage.RenderTarget, Format.A8R8G8B8, Pool.Default)
             Render_Officer_Texture(OfficerID, Officer_Texture)
             Loaded_Officer_Textures.Add(OfficerID, Officer_Texture)
             Officer_Texture = Loaded_Officer_Textures(OfficerID)
@@ -690,7 +691,7 @@
         planet1.landed_ships.Add(0, New PointI(0, 0))
         Planet_List.Add(0, planet1)
 
-        Add_Officer(0, New Officer(0, "Captian", Officer_location_enum.Ship, 0, pos, 1, New Officer.sprite_list(character_sprite_set_enum.Human_Renagade_2, character_sprite_enum.Head)))
+        Add_Officer(0, New Officer(0, "Captian", Officer_location_enum.Ship, 0, pos, 1, New Officer.sprite_list(character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head)))
 
         Officer_List(0).Officer_Classes.Add(New Officer_Class(Class_List_Enum.Mage, 0, 1))
         Officer_List(0).Officer_Classes.Add(New Officer_Class(Class_List_Enum.SpellSword, 0, 1))
@@ -704,19 +705,19 @@
 
         Officer_List(0).Current_Class = Class_List_Enum.Mage
 
-        Add_Officer(1, New Officer(0, "Skippy", Officer_location_enum.Ship, 0, pos, 1, New Officer.sprite_list(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)))
+        Add_Officer(1, New Officer(0, "Skippy", Officer_location_enum.Ship, 0, pos, 1, New Officer.sprite_list(0, 0)))
         Officer_List(1).Current_Class = Class_List_Enum.Engineer
-        Add_Officer(2, New Officer(0, "Perpa", Officer_location_enum.Ship, 0, pos, 1, New Officer.sprite_list(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)))
+        Add_Officer(2, New Officer(0, "Perpa", Officer_location_enum.Ship, 0, pos, 1, New Officer.sprite_list(0, 0)))
         Officer_List(2).Current_Class = Class_List_Enum.Mage
-        Add_Officer(3, New Officer(0, "Surpa", Officer_location_enum.Ship, 0, pos, 1, New Officer.sprite_list(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)))
+        Add_Officer(3, New Officer(0, "Surpa", Officer_location_enum.Ship, 0, pos, 1, New Officer.sprite_list(0, 0)))
         Officer_List(3).Current_Class = Class_List_Enum.Aviator
-        Add_Officer(4, New Officer(0, "Kerpa", Officer_location_enum.Ship, 0, pos, 1, New Officer.sprite_list(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)))
+        Add_Officer(4, New Officer(0, "Kerpa", Officer_location_enum.Ship, 0, pos, 1, New Officer.sprite_list(0, 0)))
         Officer_List(4).Current_Class = Class_List_Enum.Scientist
-        Add_Officer(5, New Officer(0, "Kilki", Officer_location_enum.Ship, 0, pos, 1, New Officer.sprite_list(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)))
+        Add_Officer(5, New Officer(0, "Kilki", Officer_location_enum.Ship, 0, pos, 1, New Officer.sprite_list(0, 0)))
         Officer_List(5).Current_Class = Class_List_Enum.Security
-        Add_Officer(6, New Officer(0, "Stan", Officer_location_enum.Ship, 0, pos, 1, New Officer.sprite_list(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)))
+        Add_Officer(6, New Officer(0, "Stan", Officer_location_enum.Ship, 0, pos, 1, New Officer.sprite_list(0, 0)))
         Officer_List(6).Current_Class = Class_List_Enum.Mage
-        Add_Officer(7, New Officer(0, "Vextorz", Officer_location_enum.Ship, 0, pos, 1, New Officer.sprite_list(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)))
+        Add_Officer(7, New Officer(0, "Vextorz", Officer_location_enum.Ship, 0, pos, 1, New Officer.sprite_list(0, 0)))
         Officer_List(7).Current_Class = Class_List_Enum.Aviator
         Player_Data.Officer_List.Add(1)
         Player_Data.Officer_List.Add(2)
@@ -727,12 +728,12 @@
         Player_Data.Officer_List.Add(7)
 
 
-        Officer_List(0).sprite.Head_SpriteSet = character_sprite_set_enum.Human_Renagade_2
-        Officer_List(0).sprite.Torso_SpriteSet = character_sprite_set_enum.Human_Renagade_3
-        Officer_List(0).sprite.Left_Arm_SpriteSet = character_sprite_set_enum.Human_Renagade_3
-        Officer_List(0).sprite.Right_Arm_SpriteSet = character_sprite_set_enum.Human_Renagade_3
-        Officer_List(0).sprite.Left_Leg_SpriteSet = character_sprite_set_enum.Human_Renagade_2
-        Officer_List(0).sprite.Right_Leg_SpriteSet = character_sprite_set_enum.Human_Renagade_2
+        Officer_List(0).sprite.Head_SpriteSet = character_sprite_set_enum.Human_Renagade_1
+        Officer_List(0).sprite.Torso_SpriteSet = character_sprite_set_enum.Human_Renagade_1
+        Officer_List(0).sprite.Left_Arm_SpriteSet = character_sprite_set_enum.Human_Renagade_1
+        Officer_List(0).sprite.Right_Arm_SpriteSet = character_sprite_set_enum.Human_Renagade_1
+        Officer_List(0).sprite.Left_Leg_SpriteSet = character_sprite_set_enum.Human_Renagade_1
+        Officer_List(0).sprite.Right_Leg_SpriteSet = character_sprite_set_enum.Human_Renagade_1
 
 
         current_player = 0

@@ -59,7 +59,7 @@
     Public location As PointD
     Public HpMax As Integer
     Public Hp As Integer
-    Public Sprite As character_sprite_enum
+    Public Sprite As Integer
     Public SpriteSet As character_sprite_set_enum
     Public buffs As buffs_enum
     Public speed As Double
@@ -73,6 +73,12 @@
     Public command_queue As New Queue(Of Crew_Command_script)
     'Public command_list As LinkedList(Of 
 
+
+
+    Public Ani_Index As Integer
+    Public Ani_Step As Integer
+    Public Ani_Current As Unit_Animation
+    Public Current_Animation As Animation_Name_Enum = Animation_Name_Enum.None    
 
     Sub New(ByVal Faction As Integer, ByRef location As PointD, ByVal speed As Double, ByVal hp As Integer, ByVal sprite_set As character_sprite_set_enum, ByVal sprite As character_sprite_enum, ByVal points As crew_resource_type)
         Me.Faction = Faction
@@ -106,6 +112,69 @@
     Function Get_points() As crew_resource_type
         Return Points
     End Function
+
+
+
+    Function Get_Sprite() As Integer
+        Return Sprite
+    End Function
+
+
+    Sub Update_Sprite()
+        'Set correct animation
+        Set_Correct_Animation()
+        'Progress Animation
+        If Ani_Index > Ani_Current.Frame.Count - 1 Then
+            If Ani_Current.RepeatFrame > -1 Then
+                Ani_Index = Ani_Current.RepeatFrame : Ani_Step = 0
+            Else
+                Sprite = Ani_Current.Frame(Ani_Current.Hold_Index).Sprite
+                Ani_Current.Finished = True
+            End If
+        End If
+        If Ani_Index <= Ani_Current.Frame.Count - 1 Then
+            Sprite = Ani_Current.Frame(Ani_Index).Sprite
+            Ani_Step += 1
+            If Ani_Step >= Ani_Current.Frame(Ani_Index).Duration Then Ani_Index += 1 : Ani_Step = 0
+        End If
+    End Sub
+
+
+
+
+    Sub Set_Correct_Animation()
+        If Current_Animation = Animation_Name_Enum.None Then set_Animation(Animation_Name_Enum.Basic_Walk_Stand_Up)
+        If command_queue.Count > 0 Then
+
+            If command_queue.Peek.type = crew_script_enum.move_to_tile Then
+                Dim command As Crew.Command_move = DirectCast(command_queue.First, Crew.Command_move)
+                If Math.Abs(location.x - command.dest.x) > Math.Abs(location.y - command.dest.y) Then
+                    If location.x <= command.dest.x Then set_Animation(Animation_Name_Enum.Basic_Walk_Right)
+                    If location.x > command.dest.x Then set_Animation(Animation_Name_Enum.Basic_Walk_Left)
+                Else
+                    If location.y <= command.dest.y Then set_Animation(Animation_Name_Enum.Basic_Walk_Down)
+                    If location.y > command.dest.y Then set_Animation(Animation_Name_Enum.Basic_Walk_Up)
+                End If
+            End If
+
+            If command_queue.Peek.type = crew_script_enum.hold Then
+                set_Animation(Animation_Name_Enum.Basic_Walk_Stand_Down)
+            End If
+        Else
+            set_Animation(Animation_Name_Enum.Basic_Walk_Stand_Down)
+        End If
+
+    End Sub
+
+
+    Sub set_Animation(ByVal Animation As Animation_Name_Enum)
+        If Not Animation = Current_Animation Then
+            Ani_Index = 0
+            Ani_Step = 0
+            Ani_Current = Get_Animation(Animation)
+            Current_Animation = Animation
+        End If
+    End Sub
 
 
 End Class

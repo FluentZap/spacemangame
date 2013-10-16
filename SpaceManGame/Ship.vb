@@ -461,7 +461,14 @@ Public Class Ship
             If remove = True Then device_animations.Remove(item)
         Next
 
+        For Each item In Officer_List
+            item.Value.Update_Sprite()
+        Next
 
+
+        For Each item In Crew_list
+            item.Value.Update_Sprite()
+        Next
 
     End Sub
 

@@ -5,7 +5,12 @@
     Public Buff_List As HashSet(Of Buff_List_Enum) = New HashSet(Of Buff_List_Enum)
     Public Ability_List As HashSet(Of Ability_List_Enum) = New HashSet(Of Ability_List_Enum)
 
-    Public Skill_List As HashSet(Of Skill_List_Enum) = New HashSet(Of Skill_List_Enum)
+    Public Skill_List As HashSet(Of Skill_List_Enum) = New HashSet(Of Skill_List_Enum)    
+
+    Public Ani_Index As Integer
+    Public Ani_Step As Integer
+    Public Ani_Current As Unit_Animation
+    Public Current_Animation As Animation_Name_Enum = Animation_Name_Enum.None
 
     Dim faction As Integer
     Public name As String
@@ -29,13 +34,8 @@
 
 
     <Serializable()> Structure sprite_list
-        Dim Head_Sprite As character_sprite_enum
-        Dim Torso_Sprite As character_sprite_enum
-        Dim Left_Arm_Sprite As character_sprite_enum
-        Dim Right_Arm_Sprite As character_sprite_enum
-        Dim Left_Leg_Sprite As character_sprite_enum
-        Dim Right_Leg_Sprite As character_sprite_enum
-
+        Dim Sprite As Integer
+        
         Dim Head_SpriteSet As character_sprite_set_enum
         Dim Torso_SpriteSet As character_sprite_set_enum
         Dim Left_Arm_SpriteSet As character_sprite_set_enum
@@ -43,13 +43,8 @@
         Dim Left_Leg_SpriteSet As character_sprite_set_enum
         Dim Right_Leg_SpriteSet As character_sprite_set_enum
 
-        Sub New(ByVal Sprite_Set As character_sprite_set_enum, ByVal Sprite As character_sprite_enum)
-            Me.Head_Sprite = Sprite
-            Me.Torso_Sprite = Sprite
-            Me.Left_Arm_Sprite = Sprite
-            Me.Right_Arm_Sprite = Sprite
-            Me.Left_Leg_Sprite = Sprite
-            Me.Right_Leg_Sprite = Sprite
+        Sub New(ByVal Sprite_Set As character_sprite_set_enum, ByVal Sprite As Integer)
+            Me.Sprite = Sprite
 
             Me.Head_SpriteSet = Sprite_Set
             Me.Torso_SpriteSet = Sprite_Set
@@ -60,14 +55,8 @@
 
         End Sub
 
-        Sub New(ByVal Head_Sprite As character_sprite_enum, ByVal Torso_Sprite As character_sprite_enum, ByVal Left_Arm_Sprite As character_sprite_enum, ByVal Right_Arm_Sprite As character_sprite_enum, ByVal Left_Leg_Sprite As character_sprite_enum, ByVal Right_Leg_Sprite As character_sprite_enum, ByVal Head_SpriteSet As character_sprite_set_enum, ByVal Torso_SpriteSet As character_sprite_set_enum, ByVal Left_Arm_SpriteSet As character_sprite_set_enum, ByVal Right_Arm_SpriteSet As character_sprite_set_enum, ByVal Left_Leg_priteSet As character_sprite_set_enum, ByVal Right_Leg_SpriteSet As character_sprite_set_enum)
-            Me.Head_Sprite = Head_Sprite
-            Me.Torso_Sprite = Torso_Sprite
-            Me.Left_Arm_Sprite = Left_Arm_Sprite
-            Me.Right_Arm_Sprite = Right_Arm_Sprite
-            Me.Left_Leg_Sprite = Left_Leg_Sprite
-            Me.Right_Leg_Sprite = Right_Leg_Sprite
-
+        Sub New(ByVal Sprite As Integer, ByVal Head_SpriteSet As character_sprite_set_enum, ByVal Torso_SpriteSet As character_sprite_set_enum, ByVal Left_Arm_SpriteSet As character_sprite_set_enum, ByVal Right_Arm_SpriteSet As character_sprite_set_enum, ByVal Left_Leg_priteSet As character_sprite_set_enum, ByVal Right_Leg_SpriteSet As character_sprite_set_enum)
+            Me.Sprite = Sprite
             Me.Head_SpriteSet = Head_SpriteSet
             Me.Torso_SpriteSet = Torso_SpriteSet
             Me.Left_Arm_SpriteSet = Left_Arm_SpriteSet
@@ -96,7 +85,7 @@
         Me.Officer_Classes(Class_List_Enum.Engineer).Skill_Points = 2
         Me.Officer_Classes(Class_List_Enum.Security).Skill_Points = 5
         'Me.Officer_Classes(Class_List_Enum.Scientist).Skill_Points = 5
-        'Me.Officer_Classes(Class_List_Enum.Aviator).Skill_Points = 5
+        Recalculate_Abilities_Buffs()
     End Sub
 
     Sub Move(ByVal Vector As PointD)
@@ -164,8 +153,35 @@
         Return New Officer_Class(0, 0, 0)
     End Function
 
+    Function Get_Sprite() As Integer
+        Return sprite.Sprite
+    End Function
 
 
+
+
+
+
+
+
+    Sub Update_Sprite()
+        'Set correct animation
+        Set_Correct_Animation()
+        'Progress Animation
+        If Ani_Index > Ani_Current.Frame.Count - 1 Then
+            If Ani_Current.RepeatFrame > -1 Then
+                Ani_Index = Ani_Current.RepeatFrame : Ani_Step = 0
+            Else
+                sprite.Sprite = Ani_Current.Frame(Ani_Current.Hold_Index).Sprite
+                Ani_Current.Finished = True
+            End If
+        End If
+        If Ani_Index <= Ani_Current.Frame.Count - 1 Then
+            sprite.Sprite = Ani_Current.Frame(Ani_Index).Sprite
+            Ani_Step += 1
+            If Ani_Step >= Ani_Current.Frame(Ani_Index).Duration Then Ani_Index += 1 : Ani_Step = 0
+        End If
+    End Sub
 
 
 
@@ -196,9 +212,32 @@
 
 
 
+    Sub Set_Correct_Animation()
+        If Current_Animation = Animation_Name_Enum.None Then set_Animation(Animation_Name_Enum.Basic_Walk_Stand_Up)
+        If input_flages.walking = True Then
+            If input_flages.FaceLeft = Move_Direction.Yes Then set_Animation(Animation_Name_Enum.Basic_Walk_Left)
+            If input_flages.FaceLeft = Move_Direction.No Then set_Animation(Animation_Name_Enum.Basic_Walk_Right)
+            If input_flages.FaceUp = Move_Direction.Yes Then set_Animation(Animation_Name_Enum.Basic_Walk_Up)
+            If input_flages.FaceUp = Move_Direction.No Then set_Animation(Animation_Name_Enum.Basic_Walk_Down)
+        Else
+            If input_flages.FaceLeft = Move_Direction.Empty AndAlso input_flages.FaceUp = Move_Direction.Empty Then
+                If Current_Animation = Animation_Name_Enum.Basic_Walk_Left Then set_Animation(Animation_Name_Enum.Basic_Walk_Stand_Left)
+                If Current_Animation = Animation_Name_Enum.Basic_Walk_Right Then set_Animation(Animation_Name_Enum.Basic_Walk_Stand_Right)
+                If Current_Animation = Animation_Name_Enum.Basic_Walk_Up Then set_Animation(Animation_Name_Enum.Basic_Walk_Stand_Up)
+                If Current_Animation = Animation_Name_Enum.Basic_Walk_Down Then set_Animation(Animation_Name_Enum.Basic_Walk_Stand_Down)
+            End If
+        End If
+
+    End Sub
 
 
-
-
+    Sub set_Animation(ByVal Animation As Animation_Name_Enum)
+        If Not Animation = Current_Animation Then
+            Ani_Index = 0
+            Ani_Step = 0
+            Ani_Current = Get_Animation(Animation)
+            Current_Animation = Animation
+        End If
+    End Sub
 
 End Class
