@@ -189,6 +189,9 @@
     Public render_time As Long
     Public render_duration As Long
 
+
+
+
     'Ship Decals
     Public Ship_Decals As Dictionary(Of Integer, String) = New Dictionary(Of Integer, String)
 
@@ -330,8 +333,11 @@
         Load_Menu_Items()
 
         QueryPerformanceFrequency(cps)
-        logic_rate = CLng(Math.Round(cps / 120))
+        logic_rate = CLng(Math.Round(cps / 60))
         refresh_rate = CLng(Math.Round(cps / (d3d_device.GetSwapChain(0).DisplayMode.RefreshRate)))
+
+
+
     End Sub
 
 
