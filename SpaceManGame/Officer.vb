@@ -19,23 +19,90 @@
     Dim center_point As PointI
 
     Public speed As Double
+    Public StrafeSpeed As Double
     Public view_range As Integer
 
     Public region As Officer_location_enum
     Public Location_ID As Integer
 
-    Public input_flages As officer_input_flages
+    Public input_flages As New officer_input_flages
 
-    <Serializable()> Public Structure officer_input_flages
-        Dim walking As Boolean
-        Dim FaceLeft As Move_Direction
-        Dim FaceUp As Move_Direction
-    End Structure
+    Public Fuel As Integer
+    Public FuelMax As Integer
+    Public Energy As Integer
+    Public EnergyMax As Integer
+    Public Health As New Limb_Health_Class(10)
+
+
+    Class Limb_Health_Class
+        Public Head As Byte
+        Public Torso As Byte
+        Public LeftArm As Byte
+        Public RightArm As Byte
+        Public LeftLeg As Byte
+        Public RightLeg As Byte
+        Public HeadM As Byte
+        Public TorsoM As Byte
+        Public LeftArmM As Byte
+        Public RightArmM As Byte
+        Public LeftLegM As Byte
+        Public RightLegM As Byte
+
+        Sub New(ByVal Health As Byte)
+            Head = Health
+            Torso = Health
+            LeftArm = Health
+            RightArm = Health
+            LeftLeg = Health
+            RightLeg = Health
+            HeadM = Health
+            TorsoM = Health
+            LeftArmM = Health
+            RightArmM = Health
+            LeftLegM = Health
+            RightLegM = Health
+        End Sub
+
+        Sub Damage_All(ByVal A As Byte)
+            If A > Head Then Head = 0 Else Head -= A
+            If A > Torso Then Torso = 0 Else Torso -= A
+            If A > LeftArm Then LeftArm = 0 Else LeftArm -= A
+            If A > RightArm Then RightArm = 0 Else RightArm -= A
+            If A > LeftLeg Then LeftLeg = 0 Else LeftLeg -= A
+            If A > RightLeg Then RightLeg = 0 Else RightLeg -= A
+        End Sub
+
+
+
+
+    End Class
+
+
+    <Serializable()> Public Class officer_input_flages
+        Public walking As Boolean
+        Public MoveX As Move_Direction
+        Public MoveY As Move_Direction
+        Public Facing As Move_Direction
+
+        Sub New()
+            Me.Facing = Move_Direction.Down
+        End Sub
+
+    End Class
+
+
+
+    <Serializable()> Public Class Equipment_Class
+        'Public Chest As 
+
+    End Class
+
+
 
 
     <Serializable()> Structure sprite_list
         Dim Sprite As Integer
-        
+
         Dim Head_SpriteSet As character_sprite_set_enum
         Dim Torso_SpriteSet As character_sprite_set_enum
         Dim Left_Arm_SpriteSet As character_sprite_set_enum
@@ -71,21 +138,22 @@
     Public sprite As sprite_list
     'Attributes
 
-    Sub New(ByVal faction As Integer, ByVal Name As String, ByVal Region As Officer_location_enum, ByVal Location_Id As Integer, ByVal location As PointD, ByVal speed As Double, ByVal Sprite As sprite_list)
+    Sub New(ByVal faction As Integer, ByVal Name As String, ByVal Region As Officer_location_enum, ByVal Location_Id As Integer, ByVal location As PointD, ByVal speed As Double, ByVal StrafeSpeed As Double, ByVal Sprite As sprite_list)
         Me.name = Name
         Me.region = Region
         Me.Location_ID = Location_Id
         Me.location = location
         Me.speed = speed
-        Me.sprite = Sprite
-        Me.Officer_Classes.Add(New Officer_Class(Class_List_Enum.Engineer, random(0, 99), CByte(random(0, 40))))        
+        Me.StrafeSpeed = StrafeSpeed
+        Me.sprite = Sprite        
+        Me.Officer_Classes.Add(New Officer_Class(Class_List_Enum.Engineer, random(0, 99), CByte(random(0, 40))))
         Me.Officer_Classes.Add(New Officer_Class(Class_List_Enum.Security, random(0, 99), CByte(random(0, 40))))
         Me.Officer_Classes.Add(New Officer_Class(Class_List_Enum.Scientist, random(0, 99), CByte(random(0, 40))))
         Me.Officer_Classes.Add(New Officer_Class(Class_List_Enum.Aviator, random(0, 99), CByte(random(0, 40))))
         Me.Officer_Classes(Class_List_Enum.Engineer).Skill_Points = 2
         Me.Officer_Classes(Class_List_Enum.Security).Skill_Points = 5
         'Me.Officer_Classes(Class_List_Enum.Scientist).Skill_Points = 5
-        Recalculate_Abilities_Buffs()
+        Recalculate_Abilities_Buffs()        
     End Sub
 
     Sub Move(ByVal Vector As PointD)
@@ -142,7 +210,7 @@
             If a = Number + 4 Then Return item
             a += 1
         Next
-            Return Nothing
+        Return Nothing
     End Function
 
 
@@ -213,14 +281,16 @@
 
 
     Sub Set_Correct_Animation()
-        If Current_Animation = Animation_Name_Enum.None Then set_Animation(Animation_Name_Enum.Basic_Walk_Stand_Up)
+        If Current_Animation = Animation_Name_Enum.None Then set_Animation(Animation_Name_Enum.Basic_Walk_Stand_Down)
         If input_flages.walking = True Then
-            If input_flages.FaceLeft = Move_Direction.Yes Then set_Animation(Animation_Name_Enum.Basic_Walk_Left)
-            If input_flages.FaceLeft = Move_Direction.No Then set_Animation(Animation_Name_Enum.Basic_Walk_Right)
-            If input_flages.FaceUp = Move_Direction.Yes Then set_Animation(Animation_Name_Enum.Basic_Walk_Up)
-            If input_flages.FaceUp = Move_Direction.No Then set_Animation(Animation_Name_Enum.Basic_Walk_Down)
+
+            If input_flages.Facing = Move_Direction.Up Then set_Animation(Animation_Name_Enum.Basic_Walk_Up)
+            If input_flages.Facing = Move_Direction.Down Then set_Animation(Animation_Name_Enum.Basic_Walk_Down)
+            If input_flages.Facing = Move_Direction.Left Then set_Animation(Animation_Name_Enum.Basic_Walk_Left)
+            If input_flages.Facing = Move_Direction.Right Then set_Animation(Animation_Name_Enum.Basic_Walk_Right)
+
         Else
-            If input_flages.FaceLeft = Move_Direction.Empty AndAlso input_flages.FaceUp = Move_Direction.Empty Then
+            If input_flages.MoveX = Move_Direction.None AndAlso input_flages.MoveY = Move_Direction.None Then
                 If Current_Animation = Animation_Name_Enum.Basic_Walk_Left Then set_Animation(Animation_Name_Enum.Basic_Walk_Stand_Left)
                 If Current_Animation = Animation_Name_Enum.Basic_Walk_Right Then set_Animation(Animation_Name_Enum.Basic_Walk_Stand_Right)
                 If Current_Animation = Animation_Name_Enum.Basic_Walk_Up Then set_Animation(Animation_Name_Enum.Basic_Walk_Stand_Up)

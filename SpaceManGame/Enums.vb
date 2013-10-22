@@ -376,6 +376,17 @@
         PLV__Level_Up
         PLV__Base_Class
         PLV__Base_Class_Frame
+
+
+
+
+
+
+        Personal__HealthOverlay
+
+
+
+
     End Enum
     
     Enum panel_texture_enum
@@ -587,11 +598,13 @@
 
 
     Enum Move_Direction As Byte
-        Empty = 0
-        No = 1
-        Yes = 2
+        None = 0
+        Left = 1
+        Right = 2
+        Up = 3
+        Down = 4
     End Enum
-
+    
 
 
     Enum Internal_menu_items_Enum As Byte
@@ -630,6 +643,21 @@
         Devices
         Rooms
     End Enum
+
+
+
+
+
+
+
+
+
+    Enum Chest_Equipment_Enum
+        Cloth
+
+
+    End Enum
+
 
 
 End Module

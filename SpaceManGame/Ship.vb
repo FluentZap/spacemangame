@@ -121,6 +121,8 @@ Public Class Ship
 
     Public open_doors As HashSet(Of Integer) = New HashSet(Of Integer)
 
+    Public Projectiles As HashSet(Of Projectile) = New HashSet(Of Projectile)
+
     Sub Load_Pathfinding()
         path_find = New A_star
         path_find.set_map(tile_map, shipsize)
@@ -172,6 +174,7 @@ Public Class Ship
         Calculate_Engines()
 
         Update_Locataion()
+        Handle_Projectiles()
     End Sub
 
     Public Sub Refresh()
@@ -355,16 +358,18 @@ Public Class Ship
 #Region "ship scripts"
 
     Function open_door(ByRef point As PointI) As Boolean
-        If Not device_animations.ContainsKey(tile_map(point.x, point.y).device_tile.device_ID) AndAlso Not open_doors.Contains(tile_map(point.x, point.y).device_tile.device_ID) Then
-            Dim Aniset As Animation_set_Enum
-            Select Case device_list(tile_map(point.x, point.y).device_tile.device_ID).tech_ID
-                Case Is = tech_list_enum.Door_MK1
-                    Aniset = Animation_set_Enum.Door_MK1_open
-                Case Is = tech_list_enum.Door_MK2
-                    Aniset = Animation_set_Enum.Door_MK2_open
-            End Select
-            device_animations.Add(tile_map(point.x, point.y).device_tile.device_ID, New Device_Animation_class(Aniset, Special_animation_action_enum.Open_door))
-            Return True
+        If tile_map(point.x, point.y).device_tile IsNot Nothing Then
+            If Not device_animations.ContainsKey(tile_map(point.x, point.y).device_tile.device_ID) AndAlso Not open_doors.Contains(tile_map(point.x, point.y).device_tile.device_ID) Then
+                Dim Aniset As Animation_set_Enum
+                Select Case device_list(tile_map(point.x, point.y).device_tile.device_ID).tech_ID
+                    Case Is = tech_list_enum.Door_MK1
+                        Aniset = Animation_set_Enum.Door_MK1_open
+                    Case Is = tech_list_enum.Door_MK2
+                        Aniset = Animation_set_Enum.Door_MK2_open
+                End Select
+                device_animations.Add(tile_map(point.x, point.y).device_tile.device_ID, New Device_Animation_class(Aniset, Special_animation_action_enum.Open_door))
+                Return True
+            End If
         End If
         Return False
     End Function
@@ -488,7 +493,9 @@ Public Class Ship
             If Crew.Value.working = False Then
                 If Crew.Value.Faction = Me.Faction Then idle_list.Add(Crew.Key)
             Else
-                If Crew.Value.Faction = Me.Faction Then working_list.Add(Crew.Key, room_list(tile_map(Crew.Value.find_tile.x, Crew.Value.find_tile.y).roomID).Priority)
+                If tile_map(Crew.Value.find_tile.x, Crew.Value.find_tile.y).roomID > 1 Then
+                    If Crew.Value.Faction = Me.Faction Then working_list.Add(Crew.Key, room_list(tile_map(Crew.Value.find_tile.x, Crew.Value.find_tile.y).roomID).Priority)
+                End If
             End If
         Next
 
@@ -746,6 +753,69 @@ Public Class Ship
     End Sub
 
 #End Region
+
+
+    Sub Handle_Projectiles()
+        Dim remove_List As List(Of Projectile) = New List(Of Projectile)
+        For Each item In Me.Projectiles
+            item.Location.x += item.vector_velocity.x
+            item.Location.y += item.vector_velocity.y
+            item.Life -= 1
+            If item.Life <= 0 Then
+                If item.Second_Stage_Life <= 0 Then
+                    remove_List.Add(item)
+                Else
+                    item.Life = item.Second_Stage_Life
+                    item.Second_Stage_Life = 0
+                    Dim vec As PointD
+
+                    vec.x = Math.Cos(item.Rotation - 1.57079633)
+                    vec.y = Math.Sin(item.Rotation - 1.57079633)
+
+                    item.vector_velocity.x += vec.x * 20
+                    item.vector_velocity.y += vec.y * 20
+                End If
+            End If
+
+
+            Dim tile As PointI = New PointI(item.Location.intX \ 32, item.Location.intY \ 32)
+            If tile.x >= 0 AndAlso tile.x <= shipsize.x AndAlso tile.y >= 0 AndAlso tile.y <= shipsize.y Then
+                If (Not tile_map(tile.x, tile.y).walkable = walkable_type_enum.Walkable) AndAlso (Not tile_map(tile.x, tile.y).walkable = walkable_type_enum.OpenDoor) Then
+                    Detonate_Local_Projectile(item)
+                    remove_List.Add(item)
+                End If
+            End If
+
+        Next
+
+        For Each item In remove_List
+            Me.Projectiles.Remove(item)
+        Next
+
+    End Sub
+
+
+    Sub Detonate_Local_Projectile(ByVal Pro As Projectile)        
+        Dim contact_Point As PointI = New PointI(Pro.Location.intX \ 32, Pro.Location.intY \ 32)
+        tile_map(contact_Point.x, contact_Point.y).color = Color.Red
+
+        For y = contact_Point.y - 2 To contact_Point.y + 2
+            For x = contact_Point.x - 2 To contact_Point.x + 2
+                If x >= 0 AndAlso x <= shipsize.x AndAlso y >= 0 AndAlso y <= shipsize.y Then
+                    tile_map(x, y).color = Color.Red
+
+                    For Each Crew In Crew_list
+                        If Crew.Value.find_tile = New PointI(x, y) Then
+                            Crew.Value.Health.Damage_All(3)
+                        End If
+
+                    Next
+
+                End If
+            Next
+        Next
+
+    End Sub
 
     Sub Update_Locataion()
         'Nav_Computer()
@@ -1069,11 +1139,30 @@ Public Class Ship
     Sub Update_Officers()
         For Each item In Officer_List
             If item.Value.input_flages.walking = True Then
-                If item.Value.input_flages.FaceLeft = Move_Direction.Yes Then MoveOfficer(item.Key, New PointD(-1, 0))
-                If item.Value.input_flages.FaceLeft = Move_Direction.No Then MoveOfficer(item.Key, New PointD(1, 0))
+                Select Case item.Value.input_flages.Facing
 
-                If item.Value.input_flages.FaceUp = Move_Direction.Yes Then MoveOfficer(item.Key, New PointD(0, -1))
-                If item.Value.input_flages.FaceUp = Move_Direction.No Then MoveOfficer(item.Key, New PointD(0, 1))
+                    Case Is = Move_Direction.Left
+                        If item.Value.input_flages.MoveX = Move_Direction.Left Then MoveOfficer(item.Key, New PointD(-1, 0))
+                        If item.Value.input_flages.MoveX = Move_Direction.Right Then MoveOfficer(item.Key, New PointD(0.2, 0))
+                        If item.Value.input_flages.MoveY = Move_Direction.Up Then MoveOfficer(item.Key, New PointD(0, -DIAGONAL_SPEED_MODIFIER))
+                        If item.Value.input_flages.MoveY = Move_Direction.Down Then MoveOfficer(item.Key, New PointD(0, DIAGONAL_SPEED_MODIFIER))
+                    Case Is = Move_Direction.Right
+                        If item.Value.input_flages.MoveX = Move_Direction.Left Then MoveOfficer(item.Key, New PointD(-0.2, 0))
+                        If item.Value.input_flages.MoveX = Move_Direction.Right Then MoveOfficer(item.Key, New PointD(1, 0))
+                        If item.Value.input_flages.MoveY = Move_Direction.Up Then MoveOfficer(item.Key, New PointD(0, -DIAGONAL_SPEED_MODIFIER))
+                        If item.Value.input_flages.MoveY = Move_Direction.Down Then MoveOfficer(item.Key, New PointD(0, DIAGONAL_SPEED_MODIFIER))
+                    Case Is = Move_Direction.Up
+                        If item.Value.input_flages.MoveX = Move_Direction.Left Then MoveOfficer(item.Key, New PointD(-DIAGONAL_SPEED_MODIFIER, 0))
+                        If item.Value.input_flages.MoveX = Move_Direction.Right Then MoveOfficer(item.Key, New PointD(DIAGONAL_SPEED_MODIFIER, 0))
+                        If item.Value.input_flages.MoveY = Move_Direction.Up Then MoveOfficer(item.Key, New PointD(0, -1))
+                        If item.Value.input_flages.MoveY = Move_Direction.Down Then MoveOfficer(item.Key, New PointD(0, 0.2))
+                    Case Is = Move_Direction.Down
+                        If item.Value.input_flages.MoveX = Move_Direction.Left Then MoveOfficer(item.Key, New PointD(-DIAGONAL_SPEED_MODIFIER, 0))
+                        If item.Value.input_flages.MoveX = Move_Direction.Right Then MoveOfficer(item.Key, New PointD(DIAGONAL_SPEED_MODIFIER, 0))
+                        If item.Value.input_flages.MoveY = Move_Direction.Up Then MoveOfficer(item.Key, New PointD(0, -0.2))
+                        If item.Value.input_flages.MoveY = Move_Direction.Down Then MoveOfficer(item.Key, New PointD(0, 1))
+
+                End Select
             End If
 
 

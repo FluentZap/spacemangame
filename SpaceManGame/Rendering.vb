@@ -5,7 +5,7 @@
     Sub Draw_Ship_Tile(ByVal TileSet As Integer, ByVal Tile As Integer, ByVal Position As PointD, ByVal Color As Color)
         'd3d_sprite.Draw2D(tile_texture(TileSet), New Rectangle(Tile * 32, 0, 32, 32), New SizeF(atSize(), atSize()), New PointF(0, 0), 0, New PointF(Position.x, Position.y), Color)
         If TileSet < tile_type_enum.Device_Base OrElse TileSet = tile_type_enum.Restricted Then
-            d3d_sprite.Draw(tile_texture(TileSet), New Rectangle(Tile * 32, 0, 32, 32), New Vector3(0, 0, 0), New Vector3(Position.intX, Position.intY, 0), Color.ToArgb)
+            d3d_sprite.Draw(tile_texture(TileSet), New Rectangle(Tile * 32, 0, 32, 32), New Vector3(0, 0, 0), New Vector3(Position.sngX, Position.sngY, 0), Color.ToArgb)
         End If
     End Sub
 
@@ -32,7 +32,7 @@
 
             Dim mat As Matrix = Matrix.Identity
             'mat = Matrix.Transformation2D(New Vector2(0, 0), 0, New Vector2(scalex, scaley), New Vector2(16 * scalex, 16 * scaley), Geometry.DegreeToRadian(Rotation), New Vector2(CSng(Position.x * scale), CSng(Position.y * scale)))
-            mat = Matrix.Transformation2D(New Vector2(0, 0), 0, New Vector2(scalex, scaley), New Vector2(16 * scalex, 16 * scaley), Geometry.DegreeToRadian(Rotation), New Vector2(CSng(Position.x), CSng(Position.y)))
+            mat = Matrix.Transformation2D(New Vector2(0, 0), 0, New Vector2(scalex, scaley), New Vector2(16 * scalex, 16 * scaley), Geometry.DegreeToRadian(Rotation), New Vector2(Position.sngX, Position.sngY))
 
 
             'mat.RotateZ(Geometry.DegreeToRadian(Rotation))
@@ -106,7 +106,7 @@
         If Officer_List(player).region = Officer_location_enum.Ship Then
             Dim ship As Ship = Ship_List(Officer_List(player).Location_ID)
             render_personal_ship(player)
-
+            d3d_sprite.Transform = Matrix.Transformation2D(New Vector2(0, 0), 0, New Vector2(scale, scale), New Vector2(0, 0), 0, New Vector2(0, 0))
             For Each officer In ship.Officer_List
                 pos.x = officer.Value.GetLocation.x - view_location_personal.x
                 pos.y = officer.Value.GetLocation.y - view_location_personal.y
@@ -144,6 +144,12 @@
         d3d_sprite.Transform = Matrix.Identity
         draw_text("FPS " + FPS.ToString, New Rectangle(0, 0, 100, 20), CType(DrawTextFormat.Center + DrawTextFormat.VerticalCenter, DrawTextFormat), Color.White, d3d_font(d3d_font_enum.SB_small))
 
+        render_personal_health_overlay(New PointI(256, screen_size.y - 96), Officer_List(current_player).Health)
+
+        If Crew_List.ContainsKey(Mouse_Target) Then
+            render_personal_health_overlay(New PointI(128, screen_size.y - 96), Crew_List(Mouse_Target).Health)
+        End If
+
         d3d_sprite.End()
         d3d_device.EndScene()
         Try
@@ -168,12 +174,23 @@
                 pos.y = (y * 32) - view_location_personal.y
                 If x >= 0 AndAlso x <= ship.shipsize.x AndAlso y >= 0 AndAlso y <= ship.shipsize.y Then
                     If TileMap(x, y).type < tile_type_enum.Restricted Then
-                        Draw_Ship_Tile(TileMap(x, y).type, TileMap(x, y).sprite, pos, Color.FromArgb(255, 255, 255, 255))
+                        Draw_Ship_Tile(TileMap(x, y).type, TileMap(x, y).sprite, pos, TileMap(x, y).adj_color)
                         If TileMap(x, y).device_tile IsNot Nothing Then Draw_Device_Tile(TileMap(x, y).device_tile.type, TileMap(x, y).device_tile.sprite, ship.device_list(TileMap(x, y).device_tile.device_ID).Sprite_Animation_Key, pos, TileMap(x, y).device_tile.rotate, TileMap(x, y).device_tile.flip, scale, Color.White)
                     End If
                 End If
             Next
         Next
+
+
+        Dim x1 As Single
+        Dim y1 As Single
+        For Each pro In ship.Projectiles
+            x1 = CSng(pro.Location.x - view_location_personal.x - 16)
+            y1 = CSng(pro.Location.y - view_location_personal.y - 16)
+            d3d_sprite.Transform = Matrix.Transformation2D(New Vector2(0, 0), 0, New Vector2(scale, scale), New Vector2(16 * scale, 16 * scale), CSng(pro.Rotation), New Vector2(x1 * scale, y1 * scale))
+            d3d_sprite.Draw(projectile_tile_texture(Projectile_Tile_Type_Enum.Energy1), Rectangle.Empty, Vector3.Empty, New Vector3(0, 0, 0), Color.White)
+        Next
+
     End Sub
 
     Sub render_personal_planet(ByVal player As Integer)
@@ -457,6 +474,34 @@
 
     End Sub
 
+
+    Sub render_personal_health_overlay(ByVal Pos As PointI, ByVal H As Officer.Limb_Health_Class)
+        'Dim pos As PointI = New PointI(256, screen_size.y - 96)        
+        Dim F As Integer
+
+        F = ((255 \ H.HeadM) * H.Head)
+        d3d_sprite.Draw(button_texture(button_texture_enum.Personal__HealthOverlay), New Rectangle(0, 0, 128, 96), Vector3.Empty, New Vector3(Pos.x, Pos.y, 0), Color.FromArgb(255, 255 - F, F, 0))
+        F = ((255 \ H.TorsoM) * H.Torso)
+        d3d_sprite.Draw(button_texture(button_texture_enum.Personal__HealthOverlay), New Rectangle(128, 0, 128, 96), Vector3.Empty, New Vector3(Pos.x, Pos.y, 0), Color.FromArgb(255, 255 - F, F, 0))
+        F = ((255 \ H.LeftArmM) * H.LeftArm)
+        d3d_sprite.Draw(button_texture(button_texture_enum.Personal__HealthOverlay), New Rectangle(256, 0, 128, 96), Vector3.Empty, New Vector3(Pos.x, Pos.y, 0), Color.FromArgb(255, 255 - F, F, 0))
+        F = ((255 \ H.RightArmM) * H.RightArm)
+        d3d_sprite.Draw(button_texture(button_texture_enum.Personal__HealthOverlay), New Rectangle(384, 0, 128, 96), Vector3.Empty, New Vector3(Pos.x, Pos.y, 0), Color.FromArgb(255, 255 - F, F, 0))
+        F = ((255 \ H.LeftLegM) * H.LeftLeg)
+        d3d_sprite.Draw(button_texture(button_texture_enum.Personal__HealthOverlay), New Rectangle(512, 0, 128, 96), Vector3.Empty, New Vector3(Pos.x, Pos.y, 0), Color.FromArgb(255, 255 - F, F, 0))
+        F = ((255 \ H.RightLegM) * H.RightLeg)
+        d3d_sprite.Draw(button_texture(button_texture_enum.Personal__HealthOverlay), New Rectangle(640, 0, 128, 96), Vector3.Empty, New Vector3(Pos.x, Pos.y, 0), Color.FromArgb(255, 255 - F, F, 0))
+        d3d_sprite.Draw(button_texture(button_texture_enum.Personal__HealthOverlay), New Rectangle(768, 0, 128, 96), Vector3.Empty, New Vector3(Pos.x, Pos.y, 0), Color.FromArgb(255, 255 - F, F, 0))
+
+        draw_text(H.Head.ToString + "\" + H.HeadM.ToString, New Rectangle(Pos.x, Pos.y, 32, 16), CType(DrawTextFormat.Right + DrawTextFormat.VerticalCenter, DrawTextFormat), Color.Black, d3d_font(d3d_font_enum.SB_small))
+        draw_text(H.Torso.ToString + "\" + H.TorsoM.ToString, New Rectangle(Pos.x, Pos.y + 16, 32, 16), CType(DrawTextFormat.Right + DrawTextFormat.VerticalCenter, DrawTextFormat), Color.Black, d3d_font(d3d_font_enum.SB_small))
+        draw_text(H.LeftArm.ToString + "\" + H.LeftArmM.ToString, New Rectangle(Pos.x, Pos.y + 32, 32, 16), CType(DrawTextFormat.Right + DrawTextFormat.VerticalCenter, DrawTextFormat), Color.Black, d3d_font(d3d_font_enum.SB_small))
+
+        draw_text(H.RightArm.ToString + "\" + H.RightArmM.ToString, New Rectangle(Pos.x, Pos.y + 48, 32, 16), CType(DrawTextFormat.Center + DrawTextFormat.VerticalCenter, DrawTextFormat), Color.Black, d3d_font(d3d_font_enum.SB_small))
+        draw_text(H.LeftLeg.ToString + "\" + H.LeftLegM.ToString, New Rectangle(Pos.x, Pos.y + 64, 32, 16), CType(DrawTextFormat.Center + DrawTextFormat.VerticalCenter, DrawTextFormat), Color.Black, d3d_font(d3d_font_enum.SB_small))
+        draw_text(H.RightLeg.ToString + "\" + H.RightLegM.ToString, New Rectangle(Pos.x, Pos.y + 80, 32, 16), CType(DrawTextFormat.Center + DrawTextFormat.VerticalCenter, DrawTextFormat), Color.Black, d3d_font(d3d_font_enum.SB_small))
+
+    End Sub
 
 
 
