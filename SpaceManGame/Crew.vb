@@ -1,5 +1,7 @@
 ﻿<Serializable()> Public Class Crew
 
+
+
 #Region "Crew Script Classes"
     <Serializable()> Public MustInherit Class Crew_Command_script
         Public status As script_status_enum = script_status_enum.uninvoked
@@ -57,8 +59,6 @@
 
     Public Faction As Integer
     Public location As PointD
-    Public HpMax As Integer
-    Public Hp As Integer
     Public Sprite As Integer
     Public SpriteSet As character_sprite_set_enum
     Public buffs As buffs_enum
@@ -66,28 +66,33 @@
     Public no_ship_duty As Boolean
     Public working As Boolean
 
+    Public region As Officer_location_enum
+    Public Location_ID As Integer
+
     Dim Points As crew_resource_type
 
     'Public command_Queue As New LinkedList(Of crew_command_script)
 
     Public command_queue As New Queue(Of Crew_Command_script)
     'Public command_list As LinkedList(Of 
-
+    Public Health As Officer.Limb_Health_Class
 
 
     Public Ani_Index As Integer
     Public Ani_Step As Integer
     Public Ani_Current As Unit_Animation
-    Public Current_Animation As Animation_Name_Enum = Animation_Name_Enum.None    
+    Public Current_Animation As Animation_Name_Enum = Animation_Name_Enum.None
 
-    Sub New(ByVal Faction As Integer, ByRef location As PointD, ByVal speed As Double, ByVal hp As Integer, ByVal sprite_set As character_sprite_set_enum, ByVal sprite As character_sprite_enum, ByVal points As crew_resource_type)
+    Sub New(ByVal Faction As Integer, ByRef location As PointD, ByVal Location_ID As Integer, ByVal Region As Officer_location_enum, ByVal speed As Double, ByVal sprite_set As character_sprite_set_enum, ByVal sprite As character_sprite_enum, ByVal points As crew_resource_type)
         Me.Faction = Faction
         Me.location = location
+        Me.Location_ID = Location_ID
+        Me.region = Region
         Me.speed = speed
-        Me.Hp = hp
         Me.SpriteSet = sprite_set
         Me.Sprite = sprite
         Me.Points = points
+        Me.Health = New Officer.Limb_Health_Class(10)
     End Sub
 
     Function find_tile() As PointI
@@ -104,7 +109,7 @@
         rect.X = location.intX
         rect.Y = location.intY
         rect.Width = 32
-        rect.Height = 32        
+        rect.Height = 32
         Return rect
     End Function
 
