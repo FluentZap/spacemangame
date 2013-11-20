@@ -111,6 +111,8 @@
         tile_texture(tile_type_enum.Corridor_1) = Direct3D.TextureLoader.FromFile(d3d_device, Application.StartupPath + "\Data\Textures\Tiles\Corridor1.png", 512, 32, 0, Direct3D.Usage.None, Texture_Format, Direct3D.Pool.Managed, Filter, MipFilter, 0)
         tile_texture(tile_type_enum.Engineering_1) = Direct3D.TextureLoader.FromFile(d3d_device, Application.StartupPath + "\Data\Textures\Tiles\Engineering1.png", 512, 32, 0, Direct3D.Usage.None, Texture_Format, Direct3D.Pool.Managed, Filter, MipFilter, 0)
 
+        tile_texture(tile_type_enum.Crew_Quarters_1) = Direct3D.TextureLoader.FromFile(d3d_device, Application.StartupPath + "\Data\Textures\Tiles\CrewQuarters1.png", 512, 32, 0, Direct3D.Usage.None, Texture_Format, Direct3D.Pool.Managed, Filter, MipFilter, 0)
+
         tile_texture(tile_type_enum.Armor_1) = Direct3D.TextureLoader.FromFile(d3d_device, Application.StartupPath + "\Data\Textures\Tiles\Armor2.png", 416, 32, 0, Direct3D.Usage.None, Texture_Format, Direct3D.Pool.Managed, Filter, MipFilter, Color.FromArgb(255, 0, 255, 0).ToArgb)
         'tile_texture(tile_type_enum.Armor_1) = Direct3D.TextureLoader.FromFile(d3d_device, Application.StartupPath + "\Data\Textures\Tiles\Armor2-2.png", 416, 32, 0, Direct3D.Usage.None, Texture_Format, Direct3D.Pool.Managed, Filter, MipFilter, Color.FromArgb(255, 0, 255, 0).ToArgb)
 
@@ -124,7 +126,13 @@
 
 
         'Planet_Textures
-        planet_tile_texture(planet_tile_type_enum.Forest_Planet) = Direct3D.TextureLoader.FromFile(d3d_device, Application.StartupPath + "\Data\Textures\Tiles\planet1.png", 96, 32, 0, Direct3D.Usage.None, Texture_Format, Direct3D.Pool.Managed, Filter, MipFilter, 0)
+        planet_tile_texture(planet_tile_type_enum.Forest_Planet) = Direct3D.TextureLoader.FromFile(d3d_device, Application.StartupPath + "\Data\Textures\Tiles\planet1.png", 640, 32, 0, Direct3D.Usage.None, Texture_Format, Direct3D.Pool.Managed, Filter, MipFilter, 0)
+
+        planet_tile_texture(planet_tile_type_enum.Forest_Planet) = Direct3D.TextureLoader.FromFile(d3d_device, Application.StartupPath + "\Data\Textures\Tiles\planet1.png", 640, 32, 0, Direct3D.Usage.None, Texture_Format, Direct3D.Pool.Managed, Filter, MipFilter, 0)
+
+        planet_tile_texture(planet_tile_type_enum.House) = Direct3D.TextureLoader.FromFile(d3d_device, Application.StartupPath + "\Data\Textures\Tiles\Building_House_Small.png", 576, 32, 0, Direct3D.Usage.None, Texture_Format, Direct3D.Pool.Managed, Filter, MipFilter, 0)
+        planet_tile_texture(planet_tile_type_enum.House_Inside) = Direct3D.TextureLoader.FromFile(d3d_device, Application.StartupPath + "\Data\Textures\Tiles\Building_House_Small_inside.png", 288, 32, 0, Direct3D.Usage.None, Texture_Format, Direct3D.Pool.Managed, Filter, MipFilter, 0)
+
 
         'planet_tile_texture(planet_tile_type_enum.Forest_Planet) = Direct3D.TextureLoader.FromFile(d3d_device, Application.StartupPath + "\Data\Textures\Tiles\planet1.png", 96, 32, 0, Direct3D.Usage.None, Texture_Format, Direct3D.Pool.Managed, Filter, MipFilter, Color.FromArgb(255, 0, 255, 0).ToArgb)
         planet_tile_texture(planet_tile_type_enum.Shipyard) = Direct3D.TextureLoader.FromFile(d3d_device, Application.StartupPath + "\Data\Textures\Tiles\Shipyard1.png", 512, 32, 0, Direct3D.Usage.None, Texture_Format, Direct3D.Pool.Managed, Filter, MipFilter, Color.FromArgb(255, 0, 255, 0).ToArgb)
@@ -136,6 +144,10 @@
         projectile_tile_texture(Projectile_Tile_Type_Enum.Energy1) = Direct3D.TextureLoader.FromFile(d3d_device, Application.StartupPath + "\Data\Textures\Projectiles\Energy1.png", 32, 32, 0, Direct3D.Usage.None, Texture_Format, Direct3D.Pool.Managed, Filter, MipFilter, Color.FromArgb(255, 0, 255, 0).ToArgb)
 
 
+        effect_texture(0) = Direct3D.TextureLoader.FromFile(d3d_device, Application.StartupPath + "\Data\Textures\Tiles\Cloud1.png", 512, 512, 0, Direct3D.Usage.None, Texture_Format, Direct3D.Pool.Managed, Filter, MipFilter, 0)
+        effect_texture(1) = Direct3D.TextureLoader.FromFile(d3d_device, Application.StartupPath + "\Data\Textures\Tiles\Cloud2.png", 512, 512, 0, Direct3D.Usage.None, Texture_Format, Direct3D.Pool.Managed, Filter, MipFilter, 0)
+        effect_texture(2) = Direct3D.TextureLoader.FromFile(d3d_device, Application.StartupPath + "\Data\Textures\Tiles\Cloud3.png", 512, 512, 0, Direct3D.Usage.None, Texture_Format, Direct3D.Pool.Managed, Filter, MipFilter, 0)
+
         'Device sprites
         device_tile_texture(device_tile_type_enum.Generator) = Direct3D.TextureLoader.FromFile(d3d_device, Application.StartupPath + "\Data\Textures\Devices\Generator.png", 128, 64, 0, Direct3D.Usage.None, Texture_Format, Direct3D.Pool.Managed, Filter, MipFilter, Color.FromArgb(255, 0, 255, 0).ToArgb)
         device_tile_texture(device_tile_type_enum.Combustion_engine_MK1) = Direct3D.TextureLoader.FromFile(d3d_device, Application.StartupPath + "\Data\Textures\Devices\Combustion_MK1-1.png", 384, 32, 0, Direct3D.Usage.None, Texture_Format, Direct3D.Pool.Managed, Filter, MipFilter, Color.FromArgb(255, 0, 255, 0).ToArgb)
@@ -143,6 +155,10 @@
         device_tile_texture(device_tile_type_enum.Door_MK1) = Direct3D.TextureLoader.FromFile(d3d_device, Application.StartupPath + "\Data\Textures\Devices\Door_MK1.png", 128, 416, 0, Direct3D.Usage.None, Texture_Format, Direct3D.Pool.Managed, Filter, MipFilter, Color.FromArgb(255, 0, 255, 0).ToArgb)
         device_tile_texture(device_tile_type_enum.Door_MK2) = Direct3D.TextureLoader.FromFile(d3d_device, Application.StartupPath + "\Data\Textures\Devices\Door_MK2.png", 64, 320, 0, Direct3D.Usage.None, Texture_Format, Direct3D.Pool.Managed, Filter, MipFilter, Color.FromArgb(255, 0, 255, 0).ToArgb)
 
+        device_tile_texture(device_tile_type_enum.Airlock_MK1) = Direct3D.TextureLoader.FromFile(d3d_device, Application.StartupPath + "\Data\Textures\Devices\Airlock_MK1.png", 64, 640, 0, Direct3D.Usage.None, Texture_Format, Direct3D.Pool.Managed, Filter, MipFilter, Color.FromArgb(255, 0, 255, 0).ToArgb)
+
+
+        
 
         device_tile_texture(device_tile_type_enum.Bridge_Control_Panel) = Direct3D.TextureLoader.FromFile(d3d_device, Application.StartupPath + "\Data\Textures\Devices\Control_Panel.png", 160, 32, 0, Direct3D.Usage.None, Texture_Format, Direct3D.Pool.Managed, Filter, MipFilter, Color.FromArgb(255, 0, 255, 0).ToArgb)
 

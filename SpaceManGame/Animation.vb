@@ -66,6 +66,10 @@
         Door_MK2_hold
 
 
+        Airlock_MK1_open
+        Airlock_MK1_close
+        Airlock_MK1_hold
+
 
     End Enum
 
@@ -107,6 +111,25 @@
                 ani_set(0) = New ani_frame_type(100, 9)
                 Return ani_set
 
+
+            Case Is = Animation_set_Enum.Airlock_MK1_open
+                Dim ani_set(19) As ani_frame_type
+                For a As Byte = 0 To 19
+                    ani_set(a) = New ani_frame_type(3, CByte(a + 1))
+                Next a
+                Return ani_set
+            Case Is = Animation_set_Enum.Airlock_MK1_close
+                Dim ani_set(19) As ani_frame_type
+                For a As Byte = 0 To 19
+                    ani_set(19 - a) = New ani_frame_type(3, CByte(a))
+                Next a
+                Return ani_set
+            Case Is = Animation_set_Enum.Airlock_MK1_hold
+                Dim ani_set(0) As ani_frame_type
+                ani_set(0) = New ani_frame_type(100, 19)
+                Return ani_set
+
+
         End Select
         Return Nothing
     End Function
@@ -125,9 +148,6 @@ End Module
 Public Module Unit_Animations
 
 
-
-
-
     Class Animation_Frame
         Public Sprite As Integer
         Public Duration As Integer
@@ -137,7 +157,7 @@ Public Module Unit_Animations
         End Sub
     End Class
 
-    Class Unit_Animation
+    Class Basic_Animation
         Public Frame() As Animation_Frame
         Public Finished As Boolean = False
         Public RepeatFrame As Integer = -1
@@ -147,7 +167,7 @@ Public Module Unit_Animations
 
 
 
-    Enum Animation_Name_Enum
+    Enum Unit_Animation_Name_Enum
         None
         Basic_Walk_Stand_Left
         Basic_Walk_Stand_Right
@@ -161,31 +181,31 @@ Public Module Unit_Animations
 
 
 
-    Function Get_Animation(ByVal Animation_Name As Animation_Name_Enum) As Unit_Animation
-        Dim Ani As New Unit_Animation
+    Function Get_Animation(ByVal Animation_Name As Unit_Animation_Name_Enum) As Basic_Animation
+        Dim Ani As New Basic_Animation
         Select Case Animation_Name
             '---------------Basic--------------
-            Case Is = Animation_Name_Enum.Basic_Walk_Stand_Left
+            Case Is = Unit_Animation_Name_Enum.Basic_Walk_Stand_Left
                 Dim frames(0) As Animation_Frame
                 frames(0) = New Animation_Frame(10, 0)
                 Ani.Frame = frames
                 Ani.Hold_Index = 0
-            Case Is = Animation_Name_Enum.Basic_Walk_Stand_Right
+            Case Is = Unit_Animation_Name_Enum.Basic_Walk_Stand_Right
                 Dim frames(0) As Animation_Frame
                 frames(0) = New Animation_Frame(15, 0)
                 Ani.Frame = frames
                 Ani.Hold_Index = 0
-            Case Is = Animation_Name_Enum.Basic_Walk_Stand_Up
+            Case Is = Unit_Animation_Name_Enum.Basic_Walk_Stand_Up
                 Dim frames(0) As Animation_Frame
                 frames(0) = New Animation_Frame(5, 0)
                 Ani.Frame = frames
                 Ani.Hold_Index = 0
-            Case Is = Animation_Name_Enum.Basic_Walk_Stand_Down
+            Case Is = Unit_Animation_Name_Enum.Basic_Walk_Stand_Down
                 Dim frames(0) As Animation_Frame
                 frames(0) = New Animation_Frame(0, 0)
                 Ani.Frame = frames
                 Ani.Hold_Index = 0
-            Case Is = Animation_Name_Enum.Basic_Walk_Left
+            Case Is = Unit_Animation_Name_Enum.Basic_Walk_Left
                 Dim frames(3) As Animation_Frame
                 frames(0) = New Animation_Frame(11, 15)
                 frames(1) = New Animation_Frame(12, 15)
@@ -193,7 +213,7 @@ Public Module Unit_Animations
                 frames(3) = New Animation_Frame(14, 15)
                 Ani.Frame = frames
                 Ani.RepeatFrame = 0
-            Case Is = Animation_Name_Enum.Basic_Walk_Right
+            Case Is = Unit_Animation_Name_Enum.Basic_Walk_Right
                 Dim frames(3) As Animation_Frame
                 frames(0) = New Animation_Frame(16, 15)
                 frames(1) = New Animation_Frame(17, 15)
@@ -201,7 +221,7 @@ Public Module Unit_Animations
                 frames(3) = New Animation_Frame(19, 15)
                 Ani.Frame = frames
                 Ani.RepeatFrame = 0
-            Case Is = Animation_Name_Enum.Basic_Walk_Up
+            Case Is = Unit_Animation_Name_Enum.Basic_Walk_Up
                 Dim frames(3) As Animation_Frame
                 frames(0) = New Animation_Frame(6, 15)
                 frames(1) = New Animation_Frame(7, 15)
@@ -209,7 +229,7 @@ Public Module Unit_Animations
                 frames(3) = New Animation_Frame(9, 14)
                 Ani.Frame = frames
                 Ani.RepeatFrame = 0
-            Case Is = Animation_Name_Enum.Basic_Walk_Down
+            Case Is = Unit_Animation_Name_Enum.Basic_Walk_Down
                 Dim frames(3) As Animation_Frame
                 frames(0) = New Animation_Frame(1, 15)
                 frames(1) = New Animation_Frame(2, 15)
@@ -225,4 +245,20 @@ Public Module Unit_Animations
 
 
     
+End Module
+
+
+
+Module External_Animations
+    Class Ship_Basic_Animation
+        Public Sprite As Effect_Sprite_Enum
+        Public Frame() As Animation_Frame
+        Public Finished As Boolean = False
+        Public RepeatFrame As Integer = -1        
+    End Class
+
+    Enum Effect_Sprite_Enum
+        Engine_Mk1
+    End Enum
+
 End Module

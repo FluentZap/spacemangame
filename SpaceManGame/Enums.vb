@@ -281,6 +281,7 @@
         Road
         Shipyard
         House
+        House_Inside
 
         empty = 255
     End Enum
@@ -302,6 +303,7 @@
         Projectile_MK1
         Door_MK1
         Door_MK2
+        Airlock_MK1
         Pipeline_energy_Small
         Pipeline_energy_Medium
         Pipeline_energy_Large
@@ -458,21 +460,38 @@
 
 
     Enum planet_sprite_enum As Byte
-        CornerTL
-        CornerTR
-        CornerBL
-        CornerBR
-        WallT
-        WallB
-        WallL
-        WallR
-        AngleTL
-        AngleTR
-        AngleBL
-        AngleBR
-        Floor
+        Grass
+        Wood
+        Water
+        Tree1
+        Tree2
+        Tree3
+        Tree4
+        Tree5
+        Tree6
+        Tree7
+        Tree8
+        Tree9
+        Tree10
+        Tree11
+        Tree12
     End Enum
 
+    Enum building_type_enum
+        'Industrial
+        Manufacturer
+        Refinery
+        Mine
+        Laboratory
+        'Commercial
+        Shop
+        Pub
+        Faction_Office
+        Bank
+        'Residential
+        House
+        Apartment
+    End Enum
 
     Enum d3d_font_enum
         Big_Button
