@@ -9,8 +9,8 @@
 
     Public Ani_Index As Integer
     Public Ani_Step As Integer
-    Public Ani_Current As Unit_Animation
-    Public Current_Animation As Animation_Name_Enum = Animation_Name_Enum.None
+    Public Ani_Current As Basic_Animation
+    Public Current_Animation As Unit_Animation_Name_Enum = Unit_Animation_Name_Enum.None
 
     Dim faction As Integer
     Public name As String
@@ -20,6 +20,7 @@
 
     Public speed As Double
     Public StrafeSpeed As Double
+
     Public view_range As Integer
 
     Public region As Officer_location_enum
@@ -31,10 +32,15 @@
     Public FuelMax As Integer
     Public Energy As Integer
     Public EnergyMax As Integer
-    Public Health As New Limb_Health_Class(10)
+    Public Health As New Actor_Stats_Class(10, 10, 10)
 
 
-    Class Limb_Health_Class
+    Class Actor_Stats_Class
+        Public Endurace As Byte
+        Public Agility As Byte
+        Public Perception As Byte
+
+
         Public Head As Byte
         Public Torso As Byte
         Public LeftArm As Byte
@@ -48,22 +54,23 @@
         Public LeftLegM As Byte
         Public RightLegM As Byte
 
-        Sub New(ByVal Health As Byte)
-            Head = Health
-            Torso = Health
+        Sub New(ByVal Endurance As Byte, ByVal Agility As Byte, ByVal Perception As Byte)
+            Dim Health As Byte = 5
+            Head = CByte(Health + 5)
+            Torso = CByte(Health + 10)
             LeftArm = Health
             RightArm = Health
             LeftLeg = Health
             RightLeg = Health
-            HeadM = Health
-            TorsoM = Health
+            HeadM = CByte(Health + 5)
+            TorsoM = CByte(Health + 10)
             LeftArmM = Health
             RightArmM = Health
             LeftLegM = Health
             RightLegM = Health
         End Sub
 
-        Sub Damage_All(ByVal A As Byte)
+        Sub Damage_All_Limbs(ByVal A As Byte)
             If A > Head Then Head = 0 Else Head -= A
             If A > Torso Then Torso = 0 Else Torso -= A
             If A > LeftArm Then LeftArm = 0 Else LeftArm -= A
@@ -281,27 +288,27 @@
 
 
     Sub Set_Correct_Animation()
-        If Current_Animation = Animation_Name_Enum.None Then set_Animation(Animation_Name_Enum.Basic_Walk_Stand_Down)
+        If Current_Animation = Unit_Animation_Name_Enum.None Then set_Animation(Unit_Animation_Name_Enum.Basic_Walk_Stand_Down)
         If input_flages.walking = True Then
 
-            If input_flages.Facing = Move_Direction.Up Then set_Animation(Animation_Name_Enum.Basic_Walk_Up)
-            If input_flages.Facing = Move_Direction.Down Then set_Animation(Animation_Name_Enum.Basic_Walk_Down)
-            If input_flages.Facing = Move_Direction.Left Then set_Animation(Animation_Name_Enum.Basic_Walk_Left)
-            If input_flages.Facing = Move_Direction.Right Then set_Animation(Animation_Name_Enum.Basic_Walk_Right)
+            If input_flages.Facing = Move_Direction.Up Then set_Animation(Unit_Animation_Name_Enum.Basic_Walk_Up)
+            If input_flages.Facing = Move_Direction.Down Then set_Animation(Unit_Animation_Name_Enum.Basic_Walk_Down)
+            If input_flages.Facing = Move_Direction.Left Then set_Animation(Unit_Animation_Name_Enum.Basic_Walk_Left)
+            If input_flages.Facing = Move_Direction.Right Then set_Animation(Unit_Animation_Name_Enum.Basic_Walk_Right)
 
         Else
             If input_flages.MoveX = Move_Direction.None AndAlso input_flages.MoveY = Move_Direction.None Then
-                If Current_Animation = Animation_Name_Enum.Basic_Walk_Left Then set_Animation(Animation_Name_Enum.Basic_Walk_Stand_Left)
-                If Current_Animation = Animation_Name_Enum.Basic_Walk_Right Then set_Animation(Animation_Name_Enum.Basic_Walk_Stand_Right)
-                If Current_Animation = Animation_Name_Enum.Basic_Walk_Up Then set_Animation(Animation_Name_Enum.Basic_Walk_Stand_Up)
-                If Current_Animation = Animation_Name_Enum.Basic_Walk_Down Then set_Animation(Animation_Name_Enum.Basic_Walk_Stand_Down)
+                If Current_Animation = Unit_Animation_Name_Enum.Basic_Walk_Left Then set_Animation(Unit_Animation_Name_Enum.Basic_Walk_Stand_Left)
+                If Current_Animation = Unit_Animation_Name_Enum.Basic_Walk_Right Then set_Animation(Unit_Animation_Name_Enum.Basic_Walk_Stand_Right)
+                If Current_Animation = Unit_Animation_Name_Enum.Basic_Walk_Up Then set_Animation(Unit_Animation_Name_Enum.Basic_Walk_Stand_Up)
+                If Current_Animation = Unit_Animation_Name_Enum.Basic_Walk_Down Then set_Animation(Unit_Animation_Name_Enum.Basic_Walk_Stand_Down)
             End If
         End If
 
     End Sub
 
 
-    Sub set_Animation(ByVal Animation As Animation_Name_Enum)
+    Sub set_Animation(ByVal Animation As Unit_Animation_Name_Enum)
         If Not Animation = Current_Animation Then
             Ani_Index = 0
             Ani_Step = 0

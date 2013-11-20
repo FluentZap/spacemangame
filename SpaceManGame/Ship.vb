@@ -90,6 +90,7 @@ Public Class Ship
     'Public Capabilities As Capabilities_type
 
     Public vector_velocity As PointD
+    Public orbiting As Integer = -1    
     Public center_point As PointI
     Public Mass As Double
     Public rotation As Double
@@ -118,6 +119,8 @@ Public Class Ship
     Public Engine_Coltrol_Group As Dictionary(Of Direction_Enum, Dictionary(Of Integer, VectorD)) = New Dictionary(Of Direction_Enum, Dictionary(Of Integer, VectorD))
 
     Public device_animations As Dictionary(Of Integer, Device_Animation_class) = New Dictionary(Of Integer, Device_Animation_class)
+
+    Public ship_animations As Dictionary(Of Integer, Basic_Animation) = New Dictionary(Of Integer, Basic_Animation)
 
     Public open_doors As HashSet(Of Integer) = New HashSet(Of Integer)
 
@@ -366,6 +369,8 @@ Public Class Ship
                         Aniset = Animation_set_Enum.Door_MK1_open
                     Case Is = tech_list_enum.Door_MK2
                         Aniset = Animation_set_Enum.Door_MK2_open
+                    Case Is = tech_list_enum.Airlock_MK1
+                        Aniset = Animation_set_Enum.Airlock_MK1_open
                 End Select
                 device_animations.Add(tile_map(point.x, point.y).device_tile.device_ID, New Device_Animation_class(Aniset, Special_animation_action_enum.Open_door))
                 Return True
@@ -403,6 +408,8 @@ Public Class Ship
                             Aniset = Animation_set_Enum.Door_MK1_close
                         Case Is = tech_list_enum.Door_MK2
                             Aniset = Animation_set_Enum.Door_MK2_close
+                        Case Is = tech_list_enum.Airlock_MK1
+                            Aniset = Animation_set_Enum.Airlock_MK1_close
                     End Select
                     device_animations.Add(item, New Device_Animation_class(Aniset))
                 End If
@@ -443,6 +450,8 @@ Public Class Ship
                         Aniset = Animation_set_Enum.Door_MK1_hold
                     Case Is = tech_list_enum.Door_MK2
                         Aniset = Animation_set_Enum.Door_MK2_hold
+                    Case Is = tech_list_enum.Airlock_MK1
+                        Aniset = Animation_set_Enum.Airlock_MK1_hold
                 End Select
 
                 device_animations.Add(item, New Device_Animation_class(Aniset, Special_animation_action_enum.Hold_door))
@@ -806,7 +815,7 @@ Public Class Ship
 
                     For Each Crew In Crew_list
                         If Crew.Value.find_tile = New PointI(x, y) Then
-                            Crew.Value.Health.Damage_All(3)
+                            Crew.Value.Health.Damage_All_Limbs(3)
                         End If
 
                     Next
@@ -820,8 +829,9 @@ Public Class Ship
     Sub Update_Locataion()
         'Nav_Computer()
         'Move Ship
-        location.x += vector_velocity.x
-        location.y += vector_velocity.y
+
+        location.x += vector_velocity.x * 5
+        location.y += vector_velocity.y * 5
         rotation += angular_velocity
         If rotation < 0 Then rotation += PI * 2
         If rotation > PI * 2 Then rotation -= PI * 2
@@ -829,6 +839,15 @@ Public Class Ship
         angular_velocity -= angular_velocity / 100
         vector_velocity.x -= vector_velocity.x / 100
         vector_velocity.y -= vector_velocity.y / 100
+
+        If orbiting > -1 Then            
+            Dim planetPos As PointD
+            Dim planetPosNext As PointD
+            planetPos = Get_Planet_Location(orbiting)
+            planetPosNext = Get_Planet_Location(orbiting, 0.05)
+            location.x += planetPosNext.x - planetPos.x
+            location.y += planetPosNext.y - planetPos.y
+        End If
 
     End Sub
 

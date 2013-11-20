@@ -129,21 +129,22 @@
             Loop While systems_to_create.Contains(r)
             systems_to_create.Add(r)
         Next
+        systems_to_create.Add(0)
 
         Dim planetID As Integer = 0
         For Each star In systems_to_create
             For planet_number = 1 To random(1, 3)
                 Dim orbit_distance As Integer = 163840 * planet_number ' + random(0, 2000)
 
-                creat_planet(planetID, New PointI(512, 512), star, orbit_distance, False, randomD(0.1, 0.9))
+                create_planet(planetID, New PointI(512, 512), star, orbit_distance, False, randomD(0.1, 0.9))
 
                 'moon genoration
                 If random(0, 2) = 2 Then
                     Dim a As Planet = u.planets(0)
                     Dim moons As Integer = random(1, 1) + random(0, 1)
                     For moon_number = 1 To moons
-                        Dim moon_orbit_distance As Integer = 16384 * moon_number + random(0, 500)
-                        creat_planet(planetID + moon_number, New PointI(256, 256), planetID, moon_orbit_distance, True, randomD(0.1, 0.9))
+                        Dim moon_orbit_distance As Integer = 100000 '16384 * moon_number + random(0, 500)
+                        create_planet(planetID + moon_number, New PointI(256, 256), planetID, moon_orbit_distance, True, randomD(0.1, 0.9))
                     Next
                     planetID += moons
                 End If
@@ -189,7 +190,7 @@
 
     End Sub
 
-    Sub creat_planet(ByVal planetID As Integer, ByVal size As PointI, ByVal orbit As Integer, ByVal orbit_distance As Integer, ByVal orbits_planet As Boolean, ByVal theta_offset As Double)
+    Sub create_planet(ByVal planetID As Integer, ByVal size As PointI, ByVal orbit As Integer, ByVal orbit_distance As Integer, ByVal orbits_planet As Boolean, ByVal theta_offset As Double)
         If theta_offset = 0 Then theta_offset = randomD(0.1, 0.1)
         Dim p As Planet
         Select Case random(1, 3) + random(0, 4)

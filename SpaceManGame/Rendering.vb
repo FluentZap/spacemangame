@@ -61,8 +61,6 @@
     End Sub
 
 
-
-
     Sub Draw_Button(ByVal TileSet As button_texture_enum, ByVal Tile As Integer, ByVal Position As Rectangle, ByVal Color As Color)
         'd3d_sprite.Draw2D(button_texture(TileSet), New Rectangle(Tile * 32, 0, 32, 32), New SizeF(atSize(), atSize()), New PointF(0, 0), 0, New PointF(Position.X, Position.Y), Color)
         d3d_sprite.Draw(button_texture(TileSet), New Rectangle(Tile * 32, 0, 32, 32), New Vector3(0, 0, 0), New Vector3(Position.X, Position.Y, 0), Color)
@@ -203,14 +201,26 @@
         Dim viewRect As Rectangle = New Rectangle(CInt(view_location_personal.x * personal_zoom) \ atsize, CInt(view_location_personal.y * personal_zoom) \ atsize, (screen_size.x \ atsize) + 1, (screen_size.y \ atsize) + 1)
         'For x = (CInt(view_location_personal.intX * personal_zoom) \ atsize) - 1 To (CInt(view_location_personal.x * personal_zoom) \ atsize) + (screen_size.x \ atsize) + 1
         'For y = (CInt(view_location_personal.intY * personal_zoom) \ atsize) - 1 To (CInt(view_location_personal.y * personal_zoom) \ atsize) + (screen_size.y \ atsize) + 1
+        Dim InBuilding As Integer = -1
+
+        For Each item In planet.Building_List
+            Dim rect As New Rectangle(item.Value.Rect.X * 32, item.Value.Rect.Y * 32, item.Value.Rect.Width * 32, item.Value.Rect.Height * 32)
+            If rect.Contains(Officer_List(current_player).find_rect) Then InBuilding = item.Key : Exit For
+        Next
+
         For x = viewRect.X To viewRect.Right
             For y = viewRect.Y To viewRect.Bottom
-
                 pos.x = (x * 32) - view_location_personal.x
                 pos.y = (y * 32) - view_location_personal.y
                 If x >= 0 AndAlso x <= planet.size.x AndAlso y >= 0 AndAlso y <= planet.size.y Then
                     If TileMap(x, y).type < planet_tile_type_enum.empty Then
-                        Draw_Planet_Tile(TileMap(x, y).type, TileMap(x, y).sprite, pos, Color.FromArgb(255, 255, 255, 255))
+
+                        If InBuilding > -1 AndAlso planet.Building_List(InBuilding).Rect.Contains(New Point(x, y)) Then
+                            Draw_Planet_Tile(TileMap(x, y).type, TileMap(x, y).sprite2, pos, Color.FromArgb(255, 255, 255, 255))
+                        Else
+                            Draw_Planet_Tile(TileMap(x, y).type, TileMap(x, y).sprite, pos, Color.FromArgb(255, 255, 255, 255))
+                        End If
+
                         'If TileMap(x, y).device_tile IsNot Nothing Then Draw_Device_Tile(TileMap(x, y).device_tile.type, TileMap(x, y).device_tile.sprite, pos, TileMap(x, y).device_tile.rotate, TileMap(x, y).device_tile.flip, scale, Color.White)
                     End If
                 End If
@@ -475,7 +485,7 @@
     End Sub
 
 
-    Sub render_personal_health_overlay(ByVal Pos As PointI, ByVal H As Officer.Limb_Health_Class)
+    Sub render_personal_health_overlay(ByVal Pos As PointI, ByVal H As Officer.Actor_Stats_Class)
         'Dim pos As PointI = New PointI(256, screen_size.y - 96)        
         Dim F As Integer
 
@@ -986,7 +996,7 @@
 
         External_redraw(Ship)
 
-        d3d_device.Clear(ClearFlags.Target, Color.Black, 1, 0)
+        d3d_device.Clear(ClearFlags.Target, Color.FromArgb(0, 0, 0, 50), 1, 0)
         d3d_sprite.Begin(SpriteFlags.AlphaBlend)
         Dim scale As Single = external_zoom
         d3d_device.SetSamplerState(0, SamplerStageStates.MagFilter, TextureFilter.Point)
@@ -995,6 +1005,11 @@
 
         view_location_external.x = Ship.location.x - ((screen_size.x / 2) - (Ship.center_point.x * 32 + 16) * scale) / scale
         view_location_external.y = Ship.location.y - ((screen_size.y / 2) - (Ship.center_point.y * 32 + 16) * scale) / scale
+
+        If Loaded_planet > -1 Then
+            Render_Planet_External(Ship)
+        End If
+
 
         For Each Draw_Ship In Ship_List.Values
             If external_zoom > 0.25 Then
@@ -1026,7 +1041,35 @@
 
         d3d_sprite.Draw(Ship_Map_Texture, Rectangle.Empty, New Vector3(0, 0, 0), New Vector3(screen_size.x - (Ship.shipsize.x + 1) * 4 - 20, 200, 0), Color.White)
 
+        d3d_sprite.Transform = Matrix.Identity
+        draw_text(CInt(Distance_from).ToString, New Rectangle(0, 500, 100, 20), CType(DrawTextFormat.Center + DrawTextFormat.VerticalCenter, DrawTextFormat), Color.White, d3d_font(d3d_font_enum.SB_small))
         d3d_sprite.End()
+
+        'If Loaded_planet > -1 Then
+        For Each item In u.planets
+            render_external_Vector(item.Key)
+        Next
+
+
+        For Each item In u.planets
+            Dim pos As PointD            
+
+            If item.Value.orbits_planet = True Then
+                pos = Get_Planet_Location(item.Value.orbit_point)
+            Else
+                pos = u.stars(item.Value.orbit_point).location.ToPointD
+            End If            
+            pos.x = (pos.x - view_location_external.x) * external_zoom
+            pos.y = (pos.y - view_location_external.y) * external_zoom
+
+
+            render_Vector_Circle(pos, New PointD(external_zoom * item.Value.orbit_distance, external_zoom * item.Value.orbit_distance))
+
+
+        Next
+
+
+
         d3d_device.EndScene()
 
         Try
@@ -1038,6 +1081,170 @@
 
     End Sub
 
+
+    Sub Render_Planet_External(ByVal Ship As Ship)
+        Dim scale As Single = external_zoom
+        view_location_external.x = Ship.location.x - ((screen_size.x / 2) - (Ship.center_point.x * 32 + 16) * scale) / scale
+        view_location_external.y = Ship.location.y - ((screen_size.y / 2) - (Ship.center_point.y * 32 + 16) * scale) / scale
+
+
+        Dim planet = Planet_List(Loaded_planet)
+        Dim planetpos As PointD        
+        Dim pos As PointD
+        If Planet_List(Loaded_planet).orbits_planet = True Then
+            'moons
+            planetpos.x = u.stars(u.planets(planet.orbit_point).orbit_point).location.x + u.planets(planet.orbit_point).orbit_distance * Math.Cos((u.planets(planet.orbit_point).theta * planet_theta_offset) * 0.017453292519943295)
+            planetpos.y = u.stars(u.planets(planet.orbit_point).orbit_point).location.y + u.planets(planet.orbit_point).orbit_distance * Math.Sin((u.planets(planet.orbit_point).theta * planet_theta_offset) * 0.017453292519943295)
+
+            pos.x = planetpos.x + planet.orbit_distance * Math.Cos((planet.theta * planet_theta_offset) * 0.017453292519943295)
+            pos.y = planetpos.y + planet.orbit_distance * Math.Sin((planet.theta * planet_theta_offset) * 0.017453292519943295)
+
+            pos.x = pos.x + view_location_external.x
+            pos.y = pos.y + view_location_external.y
+        Else
+            'Planets
+            pos.x = u.stars(planet.orbit_point).location.x + planet.orbit_distance * Math.Cos((planet.theta * planet_theta_offset) * 0.017453292519943295)
+            pos.y = u.stars(planet.orbit_point).location.y + planet.orbit_distance * Math.Sin((planet.theta * planet_theta_offset) * 0.017453292519943295)
+
+            pos.x = pos.x - view_location_external.x
+            pos.y = pos.y - view_location_external.y
+        End If
+
+        d3d_sprite.Draw(projectile_tile_texture(Projectile_Tile_Type_Enum.Energy1), Rectangle.Empty, New Vector3(0, 0, 0), New Vector3(CSng(pos.x * scale), CSng(pos.y * scale), 0), Color.White)
+
+        
+        d3d_device.RenderState.SourceBlend = Blend.SourceAlpha
+        d3d_device.RenderState.DestinationBlend = Blend.InvSourceAlpha
+
+        Dim x, y As Double
+        For t = planet_cloud_theta To planet_cloud_theta + PI * 2 Step 0.05
+            For distance = 10000 To 5000 Step -512
+                x = (pos.x + Math.Cos(t) * distance) * scale
+                y = (pos.y + Math.Sin(t) * distance) * scale
+                d3d_sprite.Transform = Matrix.Transformation2D(New Vector2(0, 0), 0, New Vector2(scale, scale), New Vector2(256 * scale, 256 * scale), CSng(t), New Vector2(CSng(x), CSng(y)))
+                'd3d_sprite.Draw(effect_texture(0), Rectangle.Empty, New Vector3(0, 0, 0), New Vector3(0, 0, 0), Color.White)
+            Next
+        Next
+
+        For t = planet_cloud_theta * 2 To planet_cloud_theta * 2 + PI * 2 Step 0.05
+            For distance = 10000 To 5000 Step -512
+                x = (pos.x + Math.Cos(t) * distance) * scale
+                y = (pos.y + Math.Sin(t) * distance) * scale
+                d3d_sprite.Transform = Matrix.Transformation2D(New Vector2(0, 0), 0, New Vector2(scale, scale), New Vector2(256 * scale, 256 * scale), CSng(t), New Vector2(CSng(x), CSng(y)))
+                'd3d_sprite.Draw(effect_texture(1), Rectangle.Empty, New Vector3(0, 0, 0), New Vector3(0, 0, 0), Color.White)
+            Next
+        Next
+
+        Dim Alpha As Byte = 100
+        For x = -2500 To 2500 Step 512
+            For y = -2500 To 2500 Step 512
+                pos.x = (x - view_location_external.x + planet_cloud_theta) * scale
+                pos.y = (y - view_location_external.y + planet_cloud_theta) * scale
+                d3d_sprite.Transform = Matrix.Transformation2D(New Vector2(0, 0), 0, New Vector2(scale, scale), New Vector2(256 * scale, 256 * scale), 0, New Vector2(CSng(pos.x), CSng(pos.y)))
+                'd3d_sprite.Transform = Matrix.Scaling(scale, scale, 0) * Matrix.Translation(CSng(x * scale), CSng(y * scale), 0) * Matrix.RotationZ(CSng(planet_cloud_theta / 100))
+                'd3d_sprite.Draw(effect_texture(0), Rectangle.Empty, New Vector3(0, 0, 0), New Vector3(0, 0, 0), Color.FromArgb(255, 255, 255, 255))
+            Next
+        Next
+
+
+        For x = -2500 To 2500 Step 512
+            For y = -2500 To 2500 Step 512
+                pos.x = (x - view_location_external.x + planet_cloud_theta / 1.2) * scale
+                pos.y = (y - view_location_external.y + planet_cloud_theta / 2) * scale
+                d3d_sprite.Transform = Matrix.Transformation2D(New Vector2(0, 0), 0, New Vector2(scale, scale), New Vector2(256 * scale, 256 * scale), 0, New Vector2(CSng(pos.x), CSng(pos.y)))
+                'd3d_sprite.Draw(effect_texture(1), Rectangle.Empty, New Vector3(0, 0, 0), New Vector3(0, 0, 0), Color.FromArgb(CByte(Alpha + 50), 255, 255, 255))
+            Next
+        Next
+
+        For x = -2500 To 2500 Step 512
+            For y = -2500 To 2500 Step 512
+                pos.x = (x - view_location_external.x + planet_cloud_theta / 2) * scale
+                pos.y = (y - view_location_external.y + planet_cloud_theta / 1.2) * scale
+                d3d_sprite.Transform = Matrix.Transformation2D(New Vector2(0, 0), 0, New Vector2(scale, scale), New Vector2(256 * scale, 256 * scale), 0, New Vector2(CSng(pos.x), CSng(pos.y)))
+                'd3d_sprite.Draw(effect_texture(2), Rectangle.Empty, New Vector3(0, 0, 0), New Vector3(0, 0, 0), Color.FromArgb(CByte(Alpha), 255, 255, 255))
+            Next
+        Next
+
+
+        d3d_sprite.Transform = Matrix.Transformation2D(New Vector2(0, 0), 0, New Vector2(scale, scale), New Vector2(0, 0), 0, New Vector2(0, 0))
+        'd3d_sprite.Draw(effect_texture(0), Rectangle.Empty, New Vector3(0, 0, 0), New Vector3(512, 512, 0), Color.White)
+        'd3d_sprite.Draw(effect_texture(0), Rectangle.Empty, New Vector3(0, 0, 0), New Vector3(768, 512, 0), Color.White)
+        'd3d_sprite.Draw(effect_texture(0), Rectangle.Empty, New Vector3(0, 0, 0), New Vector3(640, 256, 0), Color.White)
+
+        Dim x2, x1 As Single
+        Dim y2, y1 As Single
+
+        d3d_sprite.Transform = Matrix.Identity
+        For Each Star In u.stars
+            x1 = CSng(Star.Value.location.x - view_location_external.x)
+            y1 = CSng(Star.Value.location.y - view_location_external.y)
+            d3d_sprite.Draw(icon_texture(0), Rectangle.Empty, Vector3.Empty, New Vector3(x1 * scale, y1 * scale, 0), Color.White)
+        Next
+
+        For Each planets In u.planets
+            If planets.Value.orbits_planet = True Then
+                x2 = Convert.ToInt32(u.stars(u.planets(planets.Value.orbit_point).orbit_point).location.x + u.planets(planets.Value.orbit_point).orbit_distance * Math.Cos((u.planets(planets.Value.orbit_point).theta * planet_theta_offset) * 0.017453292519943295))
+                y2 = Convert.ToInt32(u.stars(u.planets(planets.Value.orbit_point).orbit_point).location.y + u.planets(planets.Value.orbit_point).orbit_distance * Math.Sin((u.planets(planets.Value.orbit_point).theta * planet_theta_offset) * 0.017453292519943295))
+
+                x2 = Convert.ToInt32(x2 + planets.Value.orbit_distance * Math.Cos((planets.Value.theta * planet_theta_offset) * 0.017453292519943295))
+                y2 = Convert.ToInt32(y2 + planets.Value.orbit_distance * Math.Sin((planets.Value.theta * planet_theta_offset) * 0.017453292519943295))
+
+                x1 = CInt(x2 - view_location_external.x)
+                y1 = CInt(y2 - view_location_external.y)
+
+                d3d_sprite.Draw(icon_texture(1), Rectangle.Empty, Vector3.Empty, New Vector3(x1 * scale, y1 * scale, 0), Color.White)
+
+            Else
+                x2 = Convert.ToInt32(u.stars(planets.Value.orbit_point).location.x + planets.Value.orbit_distance * Math.Cos((planets.Value.theta * planet_theta_offset) * 0.017453292519943295))
+                y2 = Convert.ToInt32(u.stars(planets.Value.orbit_point).location.y + planets.Value.orbit_distance * Math.Sin((planets.Value.theta * planet_theta_offset) * 0.017453292519943295))
+
+                x1 = CInt(x2 - view_location_external.x)
+                y1 = CInt(y2 - view_location_external.y)
+
+                d3d_sprite.Draw(icon_texture(2), Rectangle.Empty, Vector3.Empty, New Vector3(x1 * scale, y1 * scale, 0), Color.White)
+
+            End If
+
+        Next
+
+        d3d_sprite.End()
+        d3d_sprite.Begin(SpriteFlags.AlphaBlend)
+
+        d3d_device.RenderState.SourceBlend = Blend.SourceAlpha
+        d3d_device.RenderState.DestinationBlend = Blend.InvSourceAlpha
+        'Planet_List(Loaded_planet)
+
+
+        
+
+
+    End Sub
+
+    Sub render_external_Vector(ByVal planetID As Integer)
+        Dim pos As PointD = Get_Planet_Location(planetID)
+        pos.x = (pos.x - view_location_external.x) * external_zoom
+        pos.y = (pos.y - view_location_external.y) * external_zoom
+
+
+        render_Vector_Circle(pos, New PointD(external_zoom * Planet_List(planetID).size.x * 32, external_zoom * Planet_List(planetID).size.x * 32))
+
+
+    End Sub
+
+
+
+    Sub render_Vector_Circle(ByVal Position As PointD, ByVal Size As PointD)
+
+        d3d_device.VertexFormat = CustomVertex.PositionColored.Format
+        d3d_device.SetStreamSource(0, Planet_VB, 0)
+        d3d_device.Transform.View = Matrix.OrthoOffCenterLH(0, screen_size.x, screen_size.y, 0, 0, 1)
+
+        d3d_device.Transform.World = Matrix.Scaling(Size.sngX, Size.sngY, 1) * Matrix.Translation(Position.sngX, Position.sngY, 0)
+        d3d_device.RenderState.Lighting = False
+
+        d3d_device.DrawPrimitives(PrimitiveType.LineStrip, 0, 64)
+        d3d_device.Transform.World = Matrix.Identity
+    End Sub
 
 
 
@@ -1054,7 +1261,7 @@
         End If
 
 
-        If Not Near_planet = Loaded_planet Then
+        If Not Near_planet = Loaded_planet AndAlso Planet_List.ContainsKey(Near_planet) Then
             Render_Planet_Texture(Planet_List(Near_planet), external_planet_texture, 8)
             Loaded_planet = Near_planet
         End If
@@ -1062,7 +1269,7 @@
     End Sub
 
 
-    Sub render_ship_external(ByRef ship As Ship)                
+    Sub render_ship_external(ByRef ship As Ship)
         Dim atsize As Integer = Convert.ToInt32(32 * external_zoom)
         Dim pos As PointD
         d3d_device.BeginScene()
@@ -1118,11 +1325,11 @@
                 For x = 0 To 3
                     drawpos.x = pos.x + (planet.size.x * x)
                     drawpos.y = pos.y + (planet.size.y * y)
-                    'd3d_sprite.Draw(external_planet_texture(y * 4 + x), Rectangle.Empty, New Vector3(0, 0, 0), New Vector3(drawpos.sngX, drawpos.sngY, 0), Color.White)
-                    'd3d_sprite.Draw(external_planet_texture(y * 4 + x), Rectangle.Empty, New Vector3(0, 0, 0), New Vector3(0, 0, 0), Color.White)
+                    d3d_sprite.Draw(external_planet_texture(y * 4 + x), Rectangle.Empty, New Vector3(0, 0, 0), New Vector3(drawpos.sngX, drawpos.sngY, 0), Color.White)
+                    d3d_sprite.Draw(external_planet_texture(y * 4 + x), Rectangle.Empty, New Vector3(0, 0, 0), New Vector3(0, 0, 0), Color.White)
                 Next
             Next
-            'd3d_sprite.Draw(external_planet_texture(0), Rectangle.Empty, New Vector3(0, 0, 0), New Vector3(0, 0, 0), Color.White)
+            d3d_sprite.Draw(external_planet_texture(0), Rectangle.Empty, New Vector3(0, 0, 0), New Vector3(0, 0, 0), Color.White)
         End If
 
         'Draw ship
@@ -1201,7 +1408,7 @@
 
 
 
-    Sub render_ship_external_UI()        
+    Sub render_ship_external_UI()
 
         For Each item In External_Menu_Items
             If item.Value.enabled = True Then

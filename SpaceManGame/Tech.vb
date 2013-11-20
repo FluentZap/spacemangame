@@ -52,7 +52,7 @@
         Projectile_MK1
         Door_MK1
         Door_MK2
-
+        Airlock_MK1
         Thruster_MK1
 
         Weapon__Projectile_MK1
@@ -229,6 +229,8 @@
         Tech_list.Add(tech_list_enum.Door_MK1, New Tech_type("Basic Door", Tech_type_enum.Device, tech_list_enum.All_rooms))
         Tech_list.Add(tech_list_enum.Door_MK2, New Tech_type("Basic Energy Door", Tech_type_enum.Device, tech_list_enum.All_rooms))
 
+        Tech_list.Add(tech_list_enum.Airlock_MK1, New Tech_type("Airlock", Tech_type_enum.Device, tech_list_enum.Airlock))
+
 
         Tech_list.Add(tech_list_enum.Bridge_Control_Panel, New Tech_type("Basic Energy Door", Tech_type_enum.Device, tech_list_enum.Bridge))
 
@@ -325,7 +327,7 @@
         Const W As Byte = 2
         Const E As Byte = 3
 
-        Const AE As Byte = 4
+        'Const AE As Byte = 4
         Const RE As Byte = 5
         Const WE As Byte = 6
         Const EE As Byte = 7
@@ -445,6 +447,14 @@
         Pipe = New HashSet(Of Device_Pipeline)
         Pipe.Add(New Device_Pipeline(Pipeline_type_enum.Data, 50))
         Device_tech_list.Add(tech_list_enum.Computer_MK1, New device_data(device_type_enum.generator, 100, New crew_resource_type(0, 0), New PointI(0, 1), c_map, Pipe, device_tile_type_enum.Computer_MK1, False, flip_enum.None))
+
+
+        c_map = New Byte(0)() {}
+        c_map(0) = New Byte() {W, W}
+
+        Pipe = New HashSet(Of Device_Pipeline)
+        Pipe.Add(New Device_Pipeline(Pipeline_type_enum.Data, 50))
+        Device_tech_list.Add(tech_list_enum.Airlock_MK1, New device_data(device_type_enum.door, 100, New crew_resource_type(0, 0), New PointI(0, 1), c_map, Pipe, device_tile_type_enum.Airlock_MK1, True, flip_enum.Both, True))
 
 
 

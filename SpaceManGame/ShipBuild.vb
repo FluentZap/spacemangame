@@ -744,7 +744,7 @@
         Build_ship = New Ship(-1, New PointD(0, 0), CType(shiptype, ship_type_enum), CType(shipclass, ship_class_enum), shipsize, 0)
         For x = 0 To shipsize.x
             For y = 0 To shipsize.y
-                Build_ship.SetTile(x, y, New Ship_tile(0, tile_type_enum.empty, 0, 0, 0, walkable_type_enum.Impassable))
+                Build_ship.SetTile(x, y, New Ship_tile(0, tile_type_enum.empty, 0, 0, 0, walkable_type_enum.Walkable))
             Next y
         Next x
     End Sub
@@ -1845,17 +1845,19 @@
                 If Build_ship.tile_map(selection.x, selection.y).device_tile Is Nothing AndAlso Build_ship.tile_map(selection.x, selection.y).roomID > 1 Then
                     clear_id = Build_ship.tile_map(selection.x, selection.y).roomID
 
-                    Dim device_list(Build_ship.room_list(clear_id).device_list.Count) As Integer
-                    Build_ship.room_list(clear_id).device_list.CopyTo(device_list, 0)
-                    For Each item In device_list
-                        Remove_Device(item)                        
-                    Next
+                    If Build_ship.room_list(clear_id).device_list.Count > 0 Then
+                        Dim device_list(Build_ship.room_list(clear_id).device_list.Count - 1) As Integer
+                        Build_ship.room_list(clear_id).device_list.CopyTo(device_list, 0)
+                        For Each item In device_list
+                            Remove_Device(item)
+                        Next
+                    End If
 
                     'remove pipelines
                     For x = 0 To Build_ship.shipsize.x
                         For y = 0 To Build_ship.shipsize.y
                             If Build_ship.tile_map(x, y).roomID = clear_id Then
-                                Build_ship.tile_map(x, y) = New Ship_tile(0, tile_type_enum.empty, 0, 0, 0, walkable_type_enum.Impassable)
+                                Build_ship.tile_map(x, y) = New Ship_tile(0, tile_type_enum.empty, 0, 0, 0, walkable_type_enum.Walkable)
                                 Dim removelist As HashSet(Of Integer) = New HashSet(Of Integer)
                                 For Each pipe In Build_ship.pipeline_list
                                     'If pipe.Value.Tiles.ContainsKey(New PointI(x, y)) Then pipe.Value.Tiles.Remove(New PointI(x, y))
@@ -1889,7 +1891,7 @@
             If mouse_info.left_down = True Then
                 'Clear armor
                 If Build_ship.tile_map(selection.x, selection.y).roomID = 1 Then
-                    Build_ship.tile_map(selection.x, selection.y) = New Ship_tile(0, tile_type_enum.empty, 0, 0, 0, walkable_type_enum.Impassable)
+                    Build_ship.tile_map(selection.x, selection.y) = New Ship_tile(0, tile_type_enum.empty, 0, 0, 0, walkable_type_enum.Walkable)
 
                     For x = 0 To shipsize.x
                         For y = 0 To shipsize.y
@@ -1906,7 +1908,7 @@
                             If selection_tile_map(x + 1, y + 1) < room_sprite_enum.empty Then
                                 'Set Room Tiles
                                 If Build_ship.tile_map(x, y).roomID = 1 Then
-                                    Build_ship.tile_map(x, y) = New Ship_tile(1, Build_ship.tile_map(x, y).type, 0, 100, CType(selection_tile_map(x + 1, y + 1), room_sprite_enum), walkable_type_enum.Impassable)
+                                    Build_ship.tile_map(x, y) = New Ship_tile(1, Build_ship.tile_map(x, y).type, 0, 100, CType(selection_tile_map(x + 1, y + 1), room_sprite_enum), walkable_type_enum.Walkable)
                                 End If
 
                             End If
@@ -1932,8 +1934,8 @@
             For y = 0 To Build_ship.shipsize.y
                 If Build_ship.tile_map(x, y).device_tile IsNot Nothing AndAlso Build_ship.tile_map(x, y).device_tile.device_ID = clear_id Then
                     'If Build_ship.tile_map(x, y).type = tile_type_enum.empty Then Build_ship.tile_map(x, y) = New Ship_tile(0, tile_type_enum.empty, 0, 0, room_sprite_enum.empty, walkable_type_enum.Impassable)
-                    If Build_ship.tile_map(x, y).type = tile_type_enum.Device_Base Then Build_ship.tile_map(x, y) = New Ship_tile(0, tile_type_enum.empty, 0, 0, room_sprite_enum.empty, walkable_type_enum.Impassable)
-                    If Build_ship.tile_map(x, y).type = tile_type_enum.Restricted Then Build_ship.tile_map(x, y) = New Ship_tile(0, tile_type_enum.empty, 0, 0, room_sprite_enum.empty, walkable_type_enum.Impassable)
+                    If Build_ship.tile_map(x, y).type = tile_type_enum.Device_Base Then Build_ship.tile_map(x, y) = New Ship_tile(0, tile_type_enum.empty, 0, 0, room_sprite_enum.empty, walkable_type_enum.Walkable)
+                    If Build_ship.tile_map(x, y).type = tile_type_enum.Restricted Then Build_ship.tile_map(x, y) = New Ship_tile(0, tile_type_enum.empty, 0, 0, room_sprite_enum.empty, walkable_type_enum.Walkable)
 
                     If Device_tech_list(Build_ship.device_list(clear_id).tech_ID).IsDoor = True AndAlso Build_ship.tile_map(x, y).device_tile.sprite > -1 Then
                         If Build_ship.tile_map(x, y).device_tile.rotate = rotate_enum.Zero OrElse Build_ship.tile_map(x, y).device_tile.rotate = rotate_enum.OneEighty Then
@@ -1957,7 +1959,7 @@
 
                     Build_ship.tile_map(x, y).device_tile = Nothing
                     If Build_ship.tile_map(x, y).sprite = room_sprite_enum.Floor Then Build_ship.tile_map(x, y).walkable = walkable_type_enum.Walkable
-                    If Build_ship.tile_map(x, y).type = tile_type_enum.empty Then Build_ship.tile_map(x, y) = New Ship_tile(0, tile_type_enum.empty, 0, 0, room_sprite_enum.empty, walkable_type_enum.Impassable)
+                    If Build_ship.tile_map(x, y).type = tile_type_enum.empty Then Build_ship.tile_map(x, y) = New Ship_tile(0, tile_type_enum.empty, 0, 0, room_sprite_enum.empty, walkable_type_enum.Walkable)
                 End If
             Next
         Next
@@ -2295,12 +2297,14 @@
         Player_Tech.Add(tech_list_enum.Bridge)
         Player_Tech.Add(tech_list_enum.Corridor)
         Player_Tech.Add(tech_list_enum.Engineering)
+        Player_Tech.Add(tech_list_enum.Crew_Quarters)
 
         Player_Tech.Add(tech_list_enum.Combustion_Engine_MK1)
         Player_Tech.Add(tech_list_enum.Energy_Generator_MK1)
         Player_Tech.Add(tech_list_enum.Projectile_MK1)
         Player_Tech.Add(tech_list_enum.Door_MK1)
         Player_Tech.Add(tech_list_enum.Door_MK2)
+        Player_Tech.Add(tech_list_enum.Airlock_MK1)
         Player_Tech.Add(tech_list_enum.Thruster_MK1)
 
         Player_Tech.Add(tech_list_enum.Bridge_Control_Panel)

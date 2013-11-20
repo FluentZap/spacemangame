@@ -27,8 +27,10 @@
     Public DeviceLost As Boolean
     Public AnimationTick As UInteger
 
-    Public Nebula_VB As VertexBuffer
+    Public Nebula_VB As VertexBuffer    
     Public Nebula_VB_FVF As CustomVertex
+
+    Public Planet_VB As VertexBuffer
 
     Structure Nebula_VB_struct
         Dim pos As Vector3
@@ -43,6 +45,9 @@
     Public tile_texture(100) As Texture
     Public planet_tile_texture(100) As Texture
     Public projectile_tile_texture(100) As Texture
+
+    Public effect_texture(100) As Texture
+
 
     Public device_tile_texture(100) As Texture
     Public character_texture(100) As Texture
@@ -182,6 +187,8 @@
 
     'Temp varables
     Public FPS As Double
+    Public Distance_from As Double
+
     Public Logic_Time As Double
     Public render_start, render_end, time_current, cps, refresh_rate As Long
     Public logic_start, logic_end, logic_rate As Long
@@ -250,6 +257,7 @@
     Public star_map_sector As Integer
     Public planet_theta_offset As Double
 
+    Public planet_cloud_theta As Double
 
     Public current_player As Integer
     Public current_selected_ship_view As Integer
@@ -440,6 +448,22 @@
         myfont = New Drawing.Font("Ariel", 10, FontStyle.Regular)
         d3d_font(d3d_font_enum.SB_small) = New Microsoft.DirectX.Direct3D.Font(d3d_device, myfont)
         Nebula_VB = New VertexBuffer(GetType(CustomVertex.TransformedColored), 17, d3d_device, 0, CustomVertex.TransformedColored.Format, Pool.Managed)
+
+        Planet_VB = New VertexBuffer(GetType(CustomVertex.PositionColored), 65, d3d_device, 0, CustomVertex.PositionColored.Format, Pool.Managed)
+
+
+
+        Dim ver(64) As CustomVertex.PositionColored
+        Dim x, y As Single
+        Dim theta As Single = 0
+        For p = 0 To 64
+            y = CSng(Math.Cos(theta)) ' * external_zoom
+            x = CSng(Math.Sin(theta)) ' * external_zoom
+            ver(p) = New CustomVertex.PositionColored(x, y, 0, Color.Gold.ToArgb)
+            theta += CSng(PI / 32)
+        Next
+        Planet_VB.SetData(ver, 0, LockFlags.None)
+
 
 
         'set planet external textures
@@ -638,9 +662,14 @@
 
     Sub check_near_planet(ByVal ship As Integer)
         Dim pos, planetpos As PointI
-        Dim shiprect As New Rectangle(Ship_List(ship).location.intX, Ship_List(ship).location.intY, 10000, 10000)
 
+        Dim shipcenter As PointD = Ship_List(ship).Get_Relative_Pos
+        'Dim shiprectPlanet As New Rectangle(Ship_List(ship).location.intX - 8192, Ship_List(ship).location.intY - 8192, 16384, 16384)
+        'Dim shiprectMoon As New Rectangle(Ship_List(ship).location.intX - 4096, Ship_List(ship).location.intY - 4096, 8192, 8192)
+
+        Ship_List(ship).orbiting = -1
         For Each planet In u.planets
+
             If planet.Value.orbits_planet = True Then
                 'moons
                 planetpos.x = Convert.ToInt32(u.stars(u.planets(planet.Value.orbit_point).orbit_point).location.x + u.planets(planet.Value.orbit_point).orbit_distance * Math.Cos((u.planets(planet.Value.orbit_point).theta * planet_theta_offset) * 0.017453292519943295))
@@ -649,8 +678,10 @@
                 pos.x = Convert.ToInt32(planetpos.x + planet.Value.orbit_distance * Math.Cos((planet.Value.theta * planet_theta_offset) * 0.017453292519943295))
                 pos.y = Convert.ToInt32(planetpos.y + planet.Value.orbit_distance * Math.Sin((planet.Value.theta * planet_theta_offset) * 0.017453292519943295))
 
-                If shiprect.Contains(pos.ToPoint) Then
+                Dim distance As Double = Math.Sqrt(((shipcenter.x - pos.x) ^ 2) + ((shipcenter.y - pos.y) ^ 2))
+                If distance < planet.Value.size.x * 32 Then
                     Near_planet = planet.Key
+                    Ship_List(ship).orbiting = planet.Key
                 End If
 
             Else
@@ -658,9 +689,12 @@
                 pos.x = Convert.ToInt32(u.stars(planet.Value.orbit_point).location.x + planet.Value.orbit_distance * Math.Cos((planet.Value.theta * planet_theta_offset) * 0.017453292519943295))
                 pos.y = Convert.ToInt32(u.stars(planet.Value.orbit_point).location.y + planet.Value.orbit_distance * Math.Sin((planet.Value.theta * planet_theta_offset) * 0.017453292519943295))
 
-                If shiprect.Contains(pos.ToPoint) Then
+                Dim distance As Double = Math.Sqrt(((shipcenter.x - pos.x) ^ 2) + ((shipcenter.y - pos.y) ^ 2))
+                If distance < planet.Value.size.x * 32 Then
                     Near_planet = planet.Key
-                End If
+                    Ship_List(ship).orbiting = planet.Key
+                End If                
+
             End If
         Next
     End Sub
@@ -698,12 +732,14 @@
 
 
 
-        Dim planet1 As Planet = New Planet(planet_type_enum.Forest, New PointI(512, 512), 0, 0, False, 0)
+        Dim planet1 As Planet = New Planet(planet_type_enum.Forest, New PointI(512, 512), 0, 50000, False, 0.5)
         planet1.populate()
         planet1.landed_ships.Add(0, New PointI(0, 0))
-        Planet_List.Add(0, planet1)
+        Planet_List = u.planets
+        u.planets.Remove(0)
+        u.planets.Add(0, planet1)
 
-        Add_Officer(0, New Officer(0, "Captian", Officer_location_enum.Ship, 0, pos, 1, 0.2, New Officer.sprite_list(character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head)))
+        Add_Officer(0, New Officer(0, "Captian", Officer_location_enum.Planet, 0, pos, 1, 0.2, New Officer.sprite_list(character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head)))
 
         Officer_List(0).Officer_Classes.Add(New Officer_Class(Class_List_Enum.Mage, 0, 1))
         Officer_List(0).Officer_Classes.Add(New Officer_Class(Class_List_Enum.SpellSword, 0, 1))
@@ -786,6 +822,7 @@
                         For Each ship In Ship_List.Values
                             ship.DoEvents()
                         Next
+
                     Case Is = current_view_enum.ship_external
 
                         For Each ship In Ship_List.Values
@@ -794,7 +831,7 @@
                         External_UI()
                         update_Planet_Movements()
                         Handle_Projectiles()
-                        'check_near_planet(current_selected_ship_view)
+                        check_near_planet(current_selected_ship_view)
                         Near_planet = 0
 
                     Case Is = current_view_enum.planet
@@ -1048,25 +1085,26 @@
         'If (pressedkeys.Contains(Keys.S) AndAlso pressedkeys.Contains(Keys.A)) OrElse (pressedkeys.Contains(Keys.S) AndAlso pressedkeys.Contains(Keys.D)) Then amount = Convert.ToSingle(amount * DIAGONAL_SPEED_MODIFIER)
 
 
+        Dim Input_flage As Officer.officer_input_flages = Officer_List(current_player).input_flages
+        Input_flage.walking = False
+        Input_flage.MoveX = Move_Direction.None
+        Input_flage.MoveY = Move_Direction.None
+        If pressedkeys.Contains(Keys.W) Then Input_flage.MoveY = Move_Direction.Up : Input_flage.walking = True
+        If pressedkeys.Contains(Keys.S) Then Input_flage.MoveY = Move_Direction.Down : Input_flage.walking = True
+
+        If pressedkeys.Contains(Keys.A) Then Input_flage.MoveX = Move_Direction.Left : Input_flage.walking = True
+        If pressedkeys.Contains(Keys.D) Then Input_flage.MoveX = Move_Direction.Right : Input_flage.walking = True
+
+        If pressedkeys.Contains(Keys.A) AndAlso pressedkeys.Contains(Keys.D) Then Input_flage.MoveX = Move_Direction.None
+        If pressedkeys.Contains(Keys.W) AndAlso pressedkeys.Contains(Keys.S) Then Input_flage.MoveY = Move_Direction.None
+
+
+        If Input_flage.MoveX = Move_Direction.None AndAlso Input_flage.MoveY > Move_Direction.None Then Input_flage.Facing = Input_flage.MoveY
+        If Input_flage.MoveY = Move_Direction.None AndAlso Input_flage.MoveX > Move_Direction.None Then Input_flage.Facing = Input_flage.MoveX
+
+
+
         If Officer_List(current_player).region = Officer_location_enum.Ship Then
-            Dim Input_flage As Officer.officer_input_flages = Ship_List(current_selected_ship_view).Officer_List(current_player).input_flages
-            'have to be separate
-            Input_flage.walking = False
-            Input_flage.MoveX = Move_Direction.None
-            Input_flage.MoveY = Move_Direction.None
-            If pressedkeys.Contains(Keys.W) Then Input_flage.MoveY = Move_Direction.Up : Input_flage.walking = True
-            If pressedkeys.Contains(Keys.S) Then Input_flage.MoveY = Move_Direction.Down : Input_flage.walking = True
-
-            If pressedkeys.Contains(Keys.A) Then Input_flage.MoveX = Move_Direction.Left : Input_flage.walking = True
-            If pressedkeys.Contains(Keys.D) Then Input_flage.MoveX = Move_Direction.Right : Input_flage.walking = True
-
-            If pressedkeys.Contains(Keys.A) AndAlso pressedkeys.Contains(Keys.D) Then Input_flage.MoveX = Move_Direction.None
-            If pressedkeys.Contains(Keys.W) AndAlso pressedkeys.Contains(Keys.S) Then Input_flage.MoveY = Move_Direction.None
-
-
-            If Input_flage.MoveX = Move_Direction.None AndAlso Input_flage.MoveY > Move_Direction.None Then Input_flage.Facing = Input_flage.MoveY
-            If Input_flage.MoveY = Move_Direction.None AndAlso Input_flage.MoveX > Move_Direction.None Then Input_flage.Facing = Input_flage.MoveX
-
 
             view_location_personal.x = Ship_List(current_selected_ship_view).GetOfficer.Item(0).GetLocationD.x + 16 - ((screen_size.x / 2) / personal_zoom)
             view_location_personal.y = Ship_List(current_selected_ship_view).GetOfficer.Item(0).GetLocationD.y + 16 - ((screen_size.y / 2) / personal_zoom)
@@ -1275,7 +1313,7 @@
         mouse_info.wheel = 0
         Math.Round(external_zoom, 2)
         If external_zoom > 5 Then external_zoom = 5
-        If external_zoom < 0.01 Then external_zoom = 0.01
+        If external_zoom < 0.0000001 Then external_zoom = 0.0000001
 
         'Dim dest_point, dest_release_point As PointI
 
@@ -1356,8 +1394,8 @@
         If pressedkeys.Contains(Keys.Tab) Then current_view = current_view_enum.personal : pressedkeys.Remove(Keys.Tab)
 
 
-        If Ship_List(current_selected_ship_view).angular_velocity > 0.005 Then Ship_List(current_selected_ship_view).angular_velocity = 0.005
-        If Ship_List(current_selected_ship_view).angular_velocity < -0.005 Then Ship_List(current_selected_ship_view).angular_velocity = -0.005
+        'If Ship_List(current_selected_ship_view).angular_velocity > 0.005 Then Ship_List(current_selected_ship_view).angular_velocity = 0.005
+        'If Ship_List(current_selected_ship_view).angular_velocity < -0.005 Then Ship_List(current_selected_ship_view).angular_velocity = -0.005
 
 
 
@@ -1760,9 +1798,38 @@
 
     Sub update_Planet_Movements()
 
-        planet_theta_offset += 0.001
-
+        planet_theta_offset += 0.05
+        planet_cloud_theta += 0.0001
     End Sub
+
+
+
+
+
+
+
+
+
+    Public Function Get_Planet_Location(ByVal PlanetID As Integer, Optional ByVal ThetaOffset As Double = 0) As PointD
+        Dim planet = Planet_List(PlanetID)
+        Dim planetpos As PointD
+        Dim pos As PointD
+        If Planet_List(PlanetID).orbits_planet = True Then
+            'moons
+            planetpos.x = u.stars(u.planets(planet.orbit_point).orbit_point).location.x + u.planets(planet.orbit_point).orbit_distance * Math.Cos((u.planets(planet.orbit_point).theta * (planet_theta_offset + ThetaOffset)) * 0.017453292519943295)
+            planetpos.y = u.stars(u.planets(planet.orbit_point).orbit_point).location.y + u.planets(planet.orbit_point).orbit_distance * Math.Sin((u.planets(planet.orbit_point).theta * (planet_theta_offset + ThetaOffset)) * 0.017453292519943295)
+            pos.x = planetpos.x + planet.orbit_distance * Math.Cos((planet.theta * (planet_theta_offset + ThetaOffset)) * 0.017453292519943295)
+            pos.y = planetpos.y + planet.orbit_distance * Math.Sin((planet.theta * (planet_theta_offset + ThetaOffset)) * 0.017453292519943295)
+        Else
+            'Planets
+            pos.x = u.stars(planet.orbit_point).location.x + planet.orbit_distance * Math.Cos((planet.theta * (planet_theta_offset + ThetaOffset)) * 0.017453292519943295)
+            pos.y = u.stars(planet.orbit_point).location.y + planet.orbit_distance * Math.Sin((planet.theta * (planet_theta_offset + ThetaOffset)) * 0.017453292519943295)
+        End If
+        Return pos
+    End Function
+
+    
+
 
     'Function distance(ByVal point1 As PointD, ByVal point2 As PointD) As Double
     'Dim result As Double
