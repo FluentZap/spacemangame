@@ -469,7 +469,7 @@
 
 
     Sub Set_Weapon_Tech()
-        Weapon_tech_list.Add(Ship_weapon_enum.Projectile_MK1, New Ship_Weapon(Weapon_fire_mode_enum.Projectile_Single, 100, 1, 10, 1, 1))
+        Weapon_tech_list.Add(Ship_weapon_enum.Projectile_MK1, New Ship_Weapon(Weapon_fire_mode_enum.Projectile_Single, 100, 1, 100, 1, 1))
 
     End Sub
 

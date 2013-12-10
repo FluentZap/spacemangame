@@ -830,8 +830,8 @@ Public Class Ship
         'Nav_Computer()
         'Move Ship
 
-        location.x += vector_velocity.x * 5
-        location.y += vector_velocity.y * 5
+        location.x += vector_velocity.x * 50
+        location.y += vector_velocity.y * 50
         rotation += angular_velocity
         If rotation < 0 Then rotation += PI * 2
         If rotation > PI * 2 Then rotation -= PI * 2
@@ -1132,15 +1132,15 @@ Public Class Ship
             Case Is = Direction_Enum.Top
                 x = Math.Cos(rotation + 3.14159265)
                 y = Math.Sin(rotation + 3.14159265)
-                Distance = CInt(-(center_point.x - point.x))
+                Distance = CInt((center_point.x - point.x))
             Case Is = Direction_Enum.Bottom
                 x = Math.Cos(rotation)
                 y = Math.Sin(rotation)
-                Distance = CInt(center_point.x - point.x)
+                Distance = CInt(-(center_point.x - point.x))
             Case Is = Direction_Enum.Left
                 x = Math.Cos(rotation - 1.57079633)
                 y = Math.Sin(rotation - 1.57079633)
-                Distance = CInt(center_point.y - point.y)
+                Distance = CInt(Math.Abs(center_point.y - point.y))
             Case Is = Direction_Enum.Right
                 x = Math.Cos(rotation + 1.57079633)
                 y = Math.Sin(rotation + 1.57079633)

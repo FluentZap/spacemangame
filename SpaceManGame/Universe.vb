@@ -60,48 +60,47 @@
         Dim points As List(Of PointI) = New List(Of PointI)(150)
 
         Dim rotate = 0
-        'random(50, 25)
+        'random(50, 25)        
         For r = 50 To 600 Step 50
             For theta = 0 To 359 Step 360 / 2
-                Dim x = r * Math.Cos((theta + rotate) * 0.017453292519943295)
-                Dim y = r * Math.Sin((theta + rotate) * 0.017453292519943295)
-                points.Add(New PointI(x * 32768, y * 32768))
+                Dim x = r * Math.Cos((theta + rotate) * 0.017453292519943295) + random(0, 100)
+                Dim y = r * Math.Sin((theta + rotate) * 0.017453292519943295) + random(0, 100)
+                points.Add(New PointI(x * 50000, y * 50000))
             Next
-            rotate += random(16, 8)
+            rotate += 32
         Next
 
         rotate = 0
         For r = 50 To 600 Step 50
             For theta = 0 + 90 To 359 + 90 Step 360 / 2
-                Dim x = r * Math.Cos((theta + rotate) * 0.017453292519943295)
-                Dim y = r * Math.Sin((theta + rotate) * 0.017453292519943295)
-
-                points.Add(New PointI(x * 32768, y * 32768))
+                Dim x = r * Math.Cos((theta + rotate) * 0.017453292519943295) + random(0, 100)
+                Dim y = r * Math.Sin((theta + rotate) * 0.017453292519943295) + random(0, 100)
+                points.Add(New PointI(x * 50000, y * 50000))
             Next
-            rotate += random(16, 8)
+            rotate += 32
         Next
 
 
 
-        For a = 1 To 30
-            Dim x, y As Integer
-            Dim redo As Boolean
-            x = random(-600, 1200) * 32768
-            y = random(-600, 1200) * 32768
+        'For a = 1 To 30
+        'Dim x, y As Integer
+        'Dim redo As Boolean
+        'x = random(-600, 1200) * 32768
+        'y = random(-600, 1200) * 32768
+        '
+        'For Each point In points
+        'If Math.Abs(x - Point.X) < 50000 OrElse Math.Abs(y - Point.Y) < 50000 Then redo = True
+        'Next
 
-            For Each point In points
-                If Math.Abs(x - point.x) < 50000 OrElse Math.Abs(y - point.y) < 50000 Then redo = True
-            Next
-
-            If redo = True Then
-                a = a - 1
-                redo = False
-            Else
-                points.Add(New PointI(x, y))
-            End If
+        'If redo = True Then
+        'a = a - 1
+        'redo = False
+        'Else
+        'points.Add(New PointI(x, y))
+        'End If
 
 
-        Next
+        'Next
 
         For p As Integer = 0 To points.Count - 1
             Dim st As New Star()
@@ -120,12 +119,13 @@
         u.stars.Add(0, bh)
     End Sub
 
-    Sub generate_planets()
+    Sub generate_planets()        
+        'Exit Sub
         Dim systems_to_create As List(Of Integer) = New List(Of Integer)
         Dim r As Integer
         For a = 1 To 40
             Do
-                r = random(1, 77)
+                r = random(1, u.stars.Count - 2)
             Loop While systems_to_create.Contains(r)
             systems_to_create.Add(r)
         Next
@@ -133,18 +133,22 @@
 
         Dim planetID As Integer = 0
         For Each star In systems_to_create
+            Dim last_orbit_distance As Integer = 0
             For planet_number = 1 To random(1, 3)
-                Dim orbit_distance As Integer = 163840 * planet_number ' + random(0, 2000)
+                Dim orbit_distance As Integer = 163840 + last_orbit_distance + random(0, 163840)
+                last_orbit_distance = orbit_distance
 
                 create_planet(planetID, New PointI(512, 512), star, orbit_distance, False, randomD(0.1, 0.9))
 
                 'moon genoration
-                If random(0, 2) = 2 Then
+                If random(0, 0) = 0 Then
                     Dim a As Planet = u.planets(0)
                     Dim moons As Integer = random(1, 1) + random(0, 1)
+                    Dim moon_last_orbit_distance As Integer = 0
                     For moon_number = 1 To moons
-                        Dim moon_orbit_distance As Integer = 100000 '16384 * moon_number + random(0, 500)
-                        create_planet(planetID + moon_number, New PointI(256, 256), planetID, moon_orbit_distance, True, randomD(0.1, 0.9))
+                        Dim moon_orbit_distance As Integer = 25000 + moon_last_orbit_distance '+ random(0, 10000)
+                        moon_last_orbit_distance = moon_orbit_distance
+                        create_planet(planetID + moon_number, New PointI(256, 256), planetID, moon_orbit_distance, True, 0) ' randomD(0.1, 0.9))
                     Next
                     planetID += moons
                 End If

@@ -495,21 +495,21 @@
 
 
             'Screen Scroll/ Safegaurds
-            If pressedkeys.Contains(Keys.W) Then view_location_sb.y -= 10
-            If pressedkeys.Contains(Keys.S) Then view_location_sb.y += 10
-            If pressedkeys.Contains(Keys.A) Then view_location_sb.x -= 10
-            If pressedkeys.Contains(Keys.D) Then view_location_sb.x += 10
+            If pressedkeys.Contains(Keys.W) Then view_location_sb.y -= 256 : pressedkeys.Remove(Keys.W)
+            If pressedkeys.Contains(Keys.S) Then view_location_sb.y += 256 : pressedkeys.Remove(Keys.S)
+            If pressedkeys.Contains(Keys.A) Then view_location_sb.x -= 256 : pressedkeys.Remove(Keys.A)
+            If pressedkeys.Contains(Keys.D) Then view_location_sb.x += 256 : pressedkeys.Remove(Keys.D)
 
 
             If mouse_info.position.x = 0 Then
-                view_location_sb.x -= 10
+                'view_location_sb.x -= 10
             ElseIf mouse_info.position.x >= screen_size.x - 1 Then
-                view_location_sb.x += 10
+                'view_location_sb.x += 10
             End If
             If mouse_info.position.y = 0 Then
-                view_location_sb.y -= 10
+                'view_location_sb.y -= 10
             ElseIf mouse_info.position.y >= screen_size.y - 1 Then
-                view_location_sb.y += 10
+                'view_location_sb.y += 10
             End If
             'view_location_sb.x = 0
             'view_location_sb.y = 0
@@ -565,13 +565,13 @@
                 If pressedkeys.Contains(Keys.R) Then
                     Select Case Device_rotation
                         Case Is = rotate_enum.Zero
-                            Device_rotation = rotate_enum.TwoSeventy
-                        Case Is = rotate_enum.Ninty
-                            Device_rotation = rotate_enum.Zero
-                        Case Is = rotate_enum.OneEighty
                             Device_rotation = rotate_enum.Ninty
-                        Case Is = rotate_enum.TwoSeventy
+                        Case Is = rotate_enum.Ninty
                             Device_rotation = rotate_enum.OneEighty
+                        Case Is = rotate_enum.OneEighty
+                            Device_rotation = rotate_enum.TwoSeventy
+                        Case Is = rotate_enum.TwoSeventy
+                            Device_rotation = rotate_enum.Zero
                     End Select
                     pressedkeys.Remove(Keys.R)
                 End If
@@ -1339,6 +1339,7 @@
                                 Build_ship.device_list(id).Thrust_Direction = Direction_Enum.Right
                         End Select
                     End If
+
                     If Build_ship.device_list(id).type = device_type_enum.thruster Then
                         Select Case Build_ship.device_list(id).Device_Face
                             Case Is = rotate_enum.Zero

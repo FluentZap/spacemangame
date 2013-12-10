@@ -799,8 +799,8 @@
                     d3d_sprite.Begin(SpriteFlags.AlphaBlend)
                     d3d_device.SetSamplerState(0, SamplerStageStates.MinFilter, TextureFilter.None)
                     d3d_device.SetSamplerState(0, SamplerStageStates.MagFilter, TextureFilter.None)
-                    Dim s As Single = Convert.ToSingle(0.125 / (2 ^ Level))
-                    If Level = 0 Then s = 0.125
+                    Dim s As Single = Convert.ToSingle(0.5 / (2 ^ Level))
+                    If Level = 0 Then s = 0.5
                     d3d_sprite.Transform = Matrix.AffineTransformation2D(s, Vector2.Empty, 0, Vector2.Empty)
 
                     Dim pos As PointI
@@ -1037,6 +1037,7 @@
         d3d_sprite.Transform = Matrix.Identity
         'Render UI
         Draw_pipeline(Ship)
+        Draw_engine_Status(Ship)
         render_ship_external_UI()
 
         d3d_sprite.Draw(Ship_Map_Texture, Rectangle.Empty, New Vector3(0, 0, 0), New Vector3(screen_size.x - (Ship.shipsize.x + 1) * 4 - 20, 200, 0), Color.White)
@@ -1062,13 +1063,15 @@
             pos.x = (pos.x - view_location_external.x) * external_zoom
             pos.y = (pos.y - view_location_external.y) * external_zoom
 
+            If item.Value.orbits_planet = True Then
+                render_Vector_Circle(pos, New PointD(external_zoom * item.Value.orbit_distance, external_zoom * item.Value.orbit_distance), Orbit2_VB)
+            Else
+                render_Vector_Circle(pos, New PointD(external_zoom * item.Value.orbit_distance, external_zoom * item.Value.orbit_distance), Orbit_VB)
+            End If
 
-            render_Vector_Circle(pos, New PointD(external_zoom * item.Value.orbit_distance, external_zoom * item.Value.orbit_distance))
 
 
         Next
-
-
 
         d3d_device.EndScene()
 
@@ -1171,14 +1174,14 @@
         'd3d_sprite.Draw(effect_texture(0), Rectangle.Empty, New Vector3(0, 0, 0), New Vector3(768, 512, 0), Color.White)
         'd3d_sprite.Draw(effect_texture(0), Rectangle.Empty, New Vector3(0, 0, 0), New Vector3(640, 256, 0), Color.White)
 
-        Dim x2, x1 As Single
-        Dim y2, y1 As Single
+        Dim x2, x1 As Double
+        Dim y2, y1 As Double
 
         d3d_sprite.Transform = Matrix.Identity
         For Each Star In u.stars
             x1 = CSng(Star.Value.location.x - view_location_external.x)
             y1 = CSng(Star.Value.location.y - view_location_external.y)
-            d3d_sprite.Draw(icon_texture(0), Rectangle.Empty, Vector3.Empty, New Vector3(x1 * scale, y1 * scale, 0), Color.White)
+            d3d_sprite.Draw(icon_texture(0), Rectangle.Empty, Vector3.Empty, New Vector3(CSng(x1 * scale) - 8, CSng(y1 * scale) - 8, 0), Color.White)
         Next
 
         For Each planets In u.planets
@@ -1190,9 +1193,8 @@
                 y2 = Convert.ToInt32(y2 + planets.Value.orbit_distance * Math.Sin((planets.Value.theta * planet_theta_offset) * 0.017453292519943295))
 
                 x1 = CInt(x2 - view_location_external.x)
-                y1 = CInt(y2 - view_location_external.y)
-
-                d3d_sprite.Draw(icon_texture(1), Rectangle.Empty, Vector3.Empty, New Vector3(x1 * scale, y1 * scale, 0), Color.White)
+                y1 = CInt(y2 - view_location_external.y)                
+                d3d_sprite.Draw(icon_texture(1), Rectangle.Empty, Vector3.Empty, New Vector3(CSng(x1 * scale) - 4, CSng(y1 * scale) - 4, 0), Color.White)
 
             Else
                 x2 = Convert.ToInt32(u.stars(planets.Value.orbit_point).location.x + planets.Value.orbit_distance * Math.Cos((planets.Value.theta * planet_theta_offset) * 0.017453292519943295))
@@ -1200,8 +1202,7 @@
 
                 x1 = CInt(x2 - view_location_external.x)
                 y1 = CInt(y2 - view_location_external.y)
-
-                d3d_sprite.Draw(icon_texture(2), Rectangle.Empty, Vector3.Empty, New Vector3(x1 * scale, y1 * scale, 0), Color.White)
+                d3d_sprite.Draw(icon_texture(2), Rectangle.Empty, Vector3.Empty, New Vector3(CSng(x1 * scale) - 8, CSng(y1 * scale) - 8, 0), Color.White)
 
             End If
 
@@ -1212,8 +1213,32 @@
 
         d3d_device.RenderState.SourceBlend = Blend.SourceAlpha
         d3d_device.RenderState.DestinationBlend = Blend.InvSourceAlpha
-        'Planet_List(Loaded_planet)
 
+        d3d_device.SetSamplerState(0, SamplerStageStates.MagFilter, TextureFilter.Point)
+        d3d_device.SetSamplerState(0, SamplerStageStates.MipFilter, TextureFilter.Linear)
+        d3d_device.SetSamplerState(0, SamplerStageStates.MinFilter, TextureFilter.None)
+
+        d3d_sprite.Transform = Matrix.Transformation2D(New Vector2(0, 0), 0, New Vector2(scale, scale), New Vector2(0, 0), 0, New Vector2(0, 0))
+        Dim drawpos As PointD
+        If Loaded_planet > -1 Then
+            pos = Get_Planet_Location(Loaded_planet)
+            pos.x -= view_location_external.x
+            pos.y -= view_location_external.y
+            'd3d_sprite.Draw(external_planet_texture(0), Rectangle.Empty, New Vector3(0, 0, 0), New Vector3(pos.sngX, pos.sngY, 0), Color.White)
+            pos.x -= (planet.size.x * 4) / 2
+            pos.y -= (planet.size.y * 4) / 2
+            For y = 0 To 3
+                For x = 0 To 3
+                    drawpos.x = pos.x + ((planet.size.x * 4) * x)
+                    drawpos.y = pos.y + ((planet.size.y * 4) * y)
+                    d3d_sprite.Draw(external_planet_texture(CInt(y * 4 + x)), Rectangle.Empty, New Vector3(0, 0, 0), New Vector3(drawpos.sngX, drawpos.sngY, 0), Color.White)
+                    'd3d_sprite.Draw(external_planet_texture(CInt(y * 4 + x)), Rectangle.Empty, New Vector3(0, 0, 0), New Vector3(0, 0, 0), Color.White)
+                Next
+            Next
+
+        End If
+        'd3d_sprite.Draw(external_planet_texture(0), Rectangle.Empty, New Vector3(0, 0, 0), New Vector3(0, 0, 0), Color.White)
+        'Planet_List(Loaded_planet)        
 
         
 
@@ -1226,17 +1251,17 @@
         pos.y = (pos.y - view_location_external.y) * external_zoom
 
 
-        render_Vector_Circle(pos, New PointD(external_zoom * Planet_List(planetID).size.x * 32, external_zoom * Planet_List(planetID).size.x * 32))
+        render_Vector_Circle(pos, New PointD(external_zoom * Planet_List(planetID).size.x * 32, external_zoom * Planet_List(planetID).size.x * 32), Planet_VB)
 
 
     End Sub
 
 
 
-    Sub render_Vector_Circle(ByVal Position As PointD, ByVal Size As PointD)
+    Sub render_Vector_Circle(ByVal Position As PointD, ByVal Size As PointD, ByVal VB As VertexBuffer)
 
         d3d_device.VertexFormat = CustomVertex.PositionColored.Format
-        d3d_device.SetStreamSource(0, Planet_VB, 0)
+        d3d_device.SetStreamSource(0, VB, 0)
         d3d_device.Transform.View = Matrix.OrthoOffCenterLH(0, screen_size.x, screen_size.y, 0, 0, 1)
 
         d3d_device.Transform.World = Matrix.Scaling(Size.sngX, Size.sngY, 1) * Matrix.Translation(Position.sngX, Position.sngY, 0)
@@ -1443,6 +1468,53 @@
             pos.y += 20
         Next
     End Sub
+
+
+    Sub Draw_engine_Status(ByVal ship As Ship)
+        Dim pos As PointI
+        Dim PipeSupply As Integer
+        Dim CrewSupply As Integer
+        Dim Throttle As Integer
+        Dim Power As Integer
+        Dim scale As Double
+
+        Dim Drawn As HashSet(Of Integer) = New HashSet(Of Integer)
+
+        pos.x = 0
+        pos.y = 500
+        For Each group In ship.Engine_Coltrol_Group
+            For Each device In group.Value
+                If Not Drawn.Contains(device.Key) Then
+                    Dim SD As Ship_device = ship.device_list(device.Key)
+                    d3d_sprite.Draw(button_texture(button_texture_enum.ship_external__Engine_Display), Rectangle.Empty, New Vector3(0, 0, 0), New Vector3(pos.x, pos.y, 0), Color.Gray)
+
+                    scale = 160 / SD.Thrust_Max
+
+                    'If pipe.Value.Supply >= 0 Then Supply = Convert.ToInt32(scale * pipe.Value.Supply)
+                    'If pipe.Value.Supply_Drain >= 0 Then Drain = Convert.ToInt32(scale * pipe.Value.Supply_Drain)
+                    'If pipe.Value.Supply_Drain >= pipe.Value.Supply_Limit Then Drain = Convert.ToInt32(scale * pipe.Value.Supply_Limit)
+                    PipeSupply = CInt(SD.supply_efficiency * 1.6)
+                    CrewSupply = CInt(SD.crew_efficiency * 1.6)
+                    If PipeSupply > 48 Then PipeSupply = 48
+                    If CrewSupply > 48 Then CrewSupply = 48
+
+                    d3d_sprite.Draw(button_texture(button_texture_enum.ship_external__Engine_Display), New Rectangle(0, 0, 3, PipeSupply), New Vector3(0, 0, 0), New Vector3(pos.x, pos.y, 0), Color.Orange)
+                    d3d_sprite.Draw(button_texture(button_texture_enum.ship_external__Engine_Display), New Rectangle(0, 0, 3, CrewSupply), New Vector3(0, 0, 0), New Vector3(pos.x + 3, pos.y, 0), Color.LightBlue)
+
+
+
+
+                    'draw_text(pipe.Value.Name, New Rectangle(pos.x, pos.y, 160, 16), DrawTextFormat.Center, Color.White, d3d_font(d3d_font_enum.SB_small))
+                    pos.x += 10
+                    Drawn.Add(device.Key)
+                End If
+            Next
+        Next
+        Drawn = Nothing
+    End Sub
+
+
+
 
     Sub render_ship_map(ByVal ship As Ship, ByVal Ship_Texture As Texture, ByVal scale As Integer)
         'Dim scale As Integer = 4
