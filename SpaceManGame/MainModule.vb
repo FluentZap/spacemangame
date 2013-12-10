@@ -31,6 +31,8 @@
     Public Nebula_VB_FVF As CustomVertex
 
     Public Planet_VB As VertexBuffer
+    Public Orbit_VB As VertexBuffer
+    Public Orbit2_VB As VertexBuffer
 
     Structure Nebula_VB_struct
         Dim pos As Vector3
@@ -450,8 +452,8 @@
         Nebula_VB = New VertexBuffer(GetType(CustomVertex.TransformedColored), 17, d3d_device, 0, CustomVertex.TransformedColored.Format, Pool.Managed)
 
         Planet_VB = New VertexBuffer(GetType(CustomVertex.PositionColored), 65, d3d_device, 0, CustomVertex.PositionColored.Format, Pool.Managed)
-
-
+        Orbit_VB = New VertexBuffer(GetType(CustomVertex.PositionColored), 65, d3d_device, 0, CustomVertex.PositionColored.Format, Pool.Managed)
+        Orbit2_VB = New VertexBuffer(GetType(CustomVertex.PositionColored), 65, d3d_device, 0, CustomVertex.PositionColored.Format, Pool.Managed)
 
         Dim ver(64) As CustomVertex.PositionColored
         Dim x, y As Single
@@ -462,13 +464,24 @@
             ver(p) = New CustomVertex.PositionColored(x, y, 0, Color.Gold.ToArgb)
             theta += CSng(PI / 32)
         Next
+
         Planet_VB.SetData(ver, 0, LockFlags.None)
+
+        For p = 0 To 64
+            ver(p).Color = Color.Green.ToArgb
+        Next
+        Orbit_VB.SetData(ver, 0, LockFlags.None)
+
+        For p = 0 To 64
+            ver(p).Color = Color.Silver.ToArgb
+        Next
+        Orbit2_VB.SetData(ver, 0, LockFlags.None)
 
 
 
         'set planet external textures
         For a = 0 To 15
-            external_planet_texture(a) = New Texture(d3d_device, 512, 512, 0, Usage.RenderTarget, Format.X8R8G8B8, Pool.Default)
+            external_planet_texture(a) = New Texture(d3d_device, 2048, 2048, 0, Usage.RenderTarget, Format.X8R8G8B8, Pool.Default)
         Next
     End Sub
 
@@ -822,6 +835,8 @@
                         For Each ship In Ship_List.Values
                             ship.DoEvents()
                         Next
+                        check_near_planet(current_selected_ship_view)
+
 
                     Case Is = current_view_enum.ship_external
 
@@ -1345,17 +1360,18 @@
 
         If pressedkeys.Contains(Keys.Q) Then
             For Each Device In Ship_List(current_selected_ship_view).Engine_Coltrol_Group(Direction_Enum.Right)
-                If Ship_List(current_selected_ship_view).device_list(Device.Key).type = device_type_enum.thruster Then
-                    Ship_List(current_selected_ship_view).Fire_Engine(Device.Key, 1)
-                End If
+                'Device.Value.
+                'If Ship_List(current_selected_ship_view).device_list(Device.Key).type = device_type_enum.thruster Then
+                Ship_List(current_selected_ship_view).Fire_Engine(Device.Key, 1)
+                'End If
             Next
         End If
 
         If pressedkeys.Contains(Keys.E) Then
             For Each Device In Ship_List(current_selected_ship_view).Engine_Coltrol_Group(Direction_Enum.Left)
-                If Ship_List(current_selected_ship_view).device_list(Device.Key).type = device_type_enum.thruster Then
-                    Ship_List(current_selected_ship_view).Fire_Engine(Device.Key, 1)
-                End If
+                'If Ship_List(current_selected_ship_view).device_list(Device.Key).type = device_type_enum.thruster Then
+                Ship_List(current_selected_ship_view).Fire_Engine(Device.Key, 1)
+                'End If
             Next
         End If
 
@@ -1374,17 +1390,17 @@
 
         If pressedkeys.Contains(Keys.A) Then
             For Each Device In Ship_List(current_selected_ship_view).Engine_Coltrol_Group(Direction_Enum.RotateL)
-                If Ship_List(current_selected_ship_view).device_list(Device.Key).type = device_type_enum.thruster Then
-                    Ship_List(current_selected_ship_view).Fire_Engine(Device.Key, 1)
-                End If
+                'If Ship_List(current_selected_ship_view).device_list(Device.Key).type = device_type_enum.thruster Then
+                Ship_List(current_selected_ship_view).Fire_Engine(Device.Key, 1)
+                'End If
             Next
         End If
 
         If pressedkeys.Contains(Keys.D) Then
             For Each Device In Ship_List(current_selected_ship_view).Engine_Coltrol_Group(Direction_Enum.RotateR)
-                If Ship_List(current_selected_ship_view).device_list(Device.Key).type = device_type_enum.thruster Then
-                    Ship_List(current_selected_ship_view).Fire_Engine(Device.Key, 1)
-                End If
+                'If Ship_List(current_selected_ship_view).device_list(Device.Key).type = device_type_enum.thruster Then
+                Ship_List(current_selected_ship_view).Fire_Engine(Device.Key, 1)
+                'End If
             Next
         End If
 

@@ -360,6 +360,7 @@
 
 
         ship_external__Pipeline_Display
+        ship_external__Engine_Display
 
 
         PLV__Officer_Background
