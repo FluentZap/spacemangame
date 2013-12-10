@@ -23,14 +23,13 @@ End Class
     Public integrityMax As Integer
     Public temperature As Byte
     Public required_Points As crew_resource_type
-    Public crew_efficiency As Integer
-    Public supply_efficiency As Integer
+    Public crew_efficiency As Double
+    Public supply_efficiency As Double
 
-    'Thrusters    
+    'Engine/Thruster Power
     Public Thrust_Power As Double
     Public Thrust_Max As Double
-    Public Throttle As Double
-    Public Throttled_Engine As Boolean
+    Public Throttle As Double    
 
     Public Active_Point As PointI
     Public Thrust_Direction As Direction_Enum
