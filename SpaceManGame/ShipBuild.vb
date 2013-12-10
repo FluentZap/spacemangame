@@ -3234,8 +3234,8 @@
         For Each room In Build_ship.room_list
             Eng = 0 : Sci = 0
             For Each Device In room.Value.device_list
-                Eng += Build_ship.device_list(Device).required_Points.engineering
-                Sci += Build_ship.device_list(Device).required_Points.science
+                Eng += CInt(Build_ship.device_list(Device).required_Points.engineering)
+                Sci += CInt(Build_ship.device_list(Device).required_Points.science)
             Next
 
             draw_text(Tech_list(room.Value.type).Name + "    " + Eng.ToString + "   " + Sci.ToString, New Rectangle(6, y, 300, 32), CType(4, DrawTextFormat), Color.White, d3d_font(d3d_font_enum.SB_small))

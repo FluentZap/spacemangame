@@ -68,7 +68,7 @@
 
         'Ship External
         button_texture(button_texture_enum.ship_external__Pipeline_Display) = Direct3D.TextureLoader.FromFile(d3d_device, Application.StartupPath + "\Data\Textures\menu\Pipeline_Display.png", 160, 16, 0, Direct3D.Usage.None, Texture_Format, Direct3D.Pool.Managed, Filter, MipFilter, 0)
-        button_texture(button_texture_enum.ship_external__Engine_Display) = Direct3D.TextureLoader.FromFile(d3d_device, Application.StartupPath + "\Data\Textures\menu\Engine_Display.png", 6, 48, 0, Direct3D.Usage.None, Texture_Format, Direct3D.Pool.Managed, Filter, MipFilter, 0)
+        button_texture(button_texture_enum.ship_external__Engine_Display) = Direct3D.TextureLoader.FromFile(d3d_device, Application.StartupPath + "\Data\Textures\menu\Engine_Display.png", 8, 64, 0, Direct3D.Usage.None, Texture_Format, Direct3D.Pool.Managed, Filter, MipFilter, 0)
 
 
 

@@ -19,7 +19,7 @@ End Class
     Public Supply As Integer
     Public Supply_Limit As Integer
     Public Supply_Drain As Integer
-    Public Efficiency As Integer
+    Public Efficiency As Double
 
     Sub New(ByVal Type As Pipeline_type_enum, ByVal Supply_Limit As Integer, ByVal color As Color, ByVal Tile_Type As device_tile_type_enum, Optional ByVal Name As String = "")
         Me.Type = Type
@@ -30,10 +30,11 @@ End Class
     End Sub
 
 
-    Function Pipeline_efficiency() As Integer
-        If Supply_Drain <= 0 Then Return Supply
+    Function Pipeline_efficiency() As Double
+        If Supply_Drain <= 0 Then Return 1
         If Supply <= 0 Then Return 0
-        Me.Efficiency = Convert.ToInt32(Supply / Supply_Drain * 100)
+        Me.Efficiency = Supply / Supply_Drain
+        If Me.Efficiency > 1 Then Me.Efficiency = 1
         Return Efficiency
     End Function
 
@@ -175,6 +176,7 @@ Public Class Ship
         close_doors()
         Process_Devices()
         Calculate_Engines()
+        Process_Engines()
 
         Update_Locataion()
         Handle_Projectiles()
@@ -191,8 +193,8 @@ Public Class Ship
 
     Sub Process_Devices()
 
-        Dim Room_sci_points As Integer
-        Dim Room_eng_points As Integer
+        Dim Room_sci_points As Double
+        Dim Room_eng_points As Double
 
         For Each room In room_list
             Room_eng_points = 0
@@ -210,8 +212,10 @@ Public Class Ship
                 room.Value.required_crew_resources.science += device_list(dev).required_Points.science
             Next
 
-            If room.Value.required_crew_resources.engineering > 0 Then room.Value.efficiency.engineering = Convert.ToInt32((Room_eng_points / room.Value.required_crew_resources.engineering) * 100)
-            If room.Value.required_crew_resources.science > 0 Then room.Value.efficiency.science = Convert.ToInt32((Room_sci_points / room.Value.required_crew_resources.science) * 100)
+            If room.Value.required_crew_resources.engineering > 0 Then room.Value.efficiency.engineering = Room_eng_points / room.Value.required_crew_resources.engineering
+            If room.Value.required_crew_resources.science > 0 Then room.Value.efficiency.science = Room_sci_points / room.Value.required_crew_resources.science
+            If room.Value.efficiency.engineering > 1 Then room.Value.efficiency.engineering = 1
+            If room.Value.efficiency.science > 1 Then room.Value.efficiency.science = 1
 
             For Each dev In room.Value.device_list
 
@@ -260,37 +264,33 @@ Public Class Ship
                             Case device_type_enum.generator
                                 If pipeline.Amount > 0 Then
                                     'Add to pipeline
-                                    Device.Value.supply_efficiency = 100
-                                    Dim crew_ef = (Device.Value.crew_efficiency * 0.01 * 0.8 + 0.2)
-                                    Dim supply_ef = Device.Value.supply_efficiency * 0.01
+                                    Device.Value.supply_efficiency = 1
+                                    Dim crew_ef = (Device.Value.crew_efficiency * 0.8 + 0.2)
+                                    Dim supply_ef = Device.Value.supply_efficiency
                                     Dim device_max = pipeline.Amount
                                     Pipeline_Supply += Convert.ToInt32(crew_ef * device_max * supply_ef)
                                 Else
                                     'Add to drain
-                                    Pipeline_Drain += -Convert.ToInt32(Device.Value.crew_efficiency * 0.01 * pipeline.Amount)
+                                    Pipeline_Drain += -Convert.ToInt32(Device.Value.crew_efficiency * pipeline.Amount)
                                 End If
 
                             Case device_type_enum.engine
-                                Dim crew_ef = (Device.Value.crew_efficiency * 0.01 * 0.8 + 0.2)
-                                Dim supply_ef = Device.Value.supply_efficiency * 0.01
+                                Dim crew_ef = (Device.Value.crew_efficiency * 0.8 + 0.2)
+                                Dim supply_ef = Device.Value.supply_efficiency
                                 Dim device_max = pipeline.Amount
                                 'Add to drain
                                 'Pipeline_Drain += Convert.ToInt32(device_list(con_device).crew_efficiency * 0.01 * device_list(con_device).pipeline(pipeline.Value.Type))
                                 'Throttled_Engine
-                                If Device.Value.Throttled_Engine = True Then
-                                    Pipeline_Drain += -Convert.ToInt32(crew_ef * device_max)
-                                    Device.Value.Thrust_Power = Device_tech_list(Device.Value.tech_ID).Thrust_Power * crew_ef * supply_ef
-                                Else 'Instant_Engine
-                                    Pipeline_Drain += -Convert.ToInt32(crew_ef * device_max)
-                                    Device.Value.Thrust_Power = Device_tech_list(Device.Value.tech_ID).Thrust_Power * crew_ef * supply_ef
-                                End If
+
+                                Pipeline_Drain += -Convert.ToInt32(crew_ef * device_max)
+                                Device.Value.Thrust_Max = Device_tech_list(Device.Value.tech_ID).Thrust_Power * crew_ef * supply_ef
 
 
                             Case device_type_enum.thruster
-                                Dim supply_ef = Device.Value.supply_efficiency * 0.01
+                                Dim supply_ef = Device.Value.supply_efficiency
                                 'Add to drain                        
                                 Pipeline_Drain += -Convert.ToInt32(pipeline.Amount)
-                                Device.Value.Thrust_Power = Device_tech_list(Device.Value.tech_ID).Thrust_Power * supply_ef
+                                Device.Value.Thrust_Max = Device_tech_list(Device.Value.tech_ID).Thrust_Power * supply_ef
                         End Select
 
 
@@ -863,7 +863,7 @@ Public Class Ship
         For Each Device In device_list
             If Device.Value.type = device_type_enum.engine OrElse Device.Value.type = device_type_enum.thruster Then
 
-                Dim accelerate As Double = Device.Value.Thrust_Power / Mass
+                Dim accelerate As Double = Device.Value.Thrust_Max / Mass
                 Dim Distance As Double
                 Dim x As Double
                 Dim y As Double
@@ -892,7 +892,7 @@ Public Class Ship
 
                 x = x * accelerate
                 y = y * accelerate
-                r = accelerate * Distance / 32
+                r = accelerate * (Distance / 32)
 
                 If x > 0 Then
                     Engine_Coltrol_Group(Direction_Enum.Left).Add(Device.Key, New VectorD(x, y, r))
@@ -1048,8 +1048,16 @@ Public Class Ship
     Sub Fire_Engine(ByVal DeviceID As Integer, ByVal percent As Double)
         'Me.Apply_Force(device_list(DeviceID).Thrust_Power * percent, device_list(DeviceID).Active_Point.ToPointD, device_list(DeviceID).Thrust_Direction)
 
+        'For Each Device In Me.device_list
+        'If Device.Value.type = device_type_enum.engine OrElse Device.Value.type = device_type_enum.thruster Then
+        'Device.Value.Throttle = 0
+        'End If
+        'Next
 
-        Me.Apply_Force(device_list(DeviceID).Thrust_Power * percent, device_list(DeviceID).Active_Point.ToPointD, device_list(DeviceID).Thrust_Direction)
+        Me.device_list(DeviceID).Throttle += percent
+        If Me.device_list(DeviceID).Throttle > 1 Then Me.device_list(DeviceID).Throttle = 1
+        If Me.device_list(DeviceID).Throttle < 0 Then Me.device_list(DeviceID).Throttle = 0
+        'Me.Apply_Force(device_list(DeviceID).Thrust_Power * percent, device_list(DeviceID).Active_Point.ToPointD, device_list(DeviceID).Thrust_Direction)
 
     End Sub
 
@@ -1113,12 +1121,46 @@ Public Class Ship
 
 
     Sub Process_Engines()
+        'Dim Thrust As Double
+        'Dim ThrustMax As Double
+        For Each Device In Me.device_list
+            If Device.Value.type = device_type_enum.engine OrElse Device.Value.type = device_type_enum.thruster Then
+                'Dim Thrust_Point As New PointD(Device.Value.Active_Point.ToPointD.x + 16, Device.Value.Active_Point.ToPointD.y + 16)
+                Me.Apply_Force(Device.Value.Thrust_Power, Device.Value.Active_Point.ToPointD, Device.Value.Thrust_Direction)
+
+                Dim T As Double = Device.Value.Throttle
+                Dim Acc As Double = Device_tech_list(Device.Value.tech_ID).Acceleration
+                Dim Dec As Double = Device_tech_list(Device.Value.tech_ID).Deceleration
+                Dim TMax As Double = Device_tech_list(Device.Value.tech_ID).Thrust_Power
+
+                'Add acceleration To throttled engines                
+                If Device.Value.Thrust_Power < TMax * T Then
+                    If Device.Value.Thrust_Power < Device.Value.Thrust_Max Then
+
+                        Device.Value.Thrust_Power += Acc
+                        If Device.Value.Thrust_Power > Device.Value.Thrust_Max Then Device.Value.Thrust_Power = Device.Value.Thrust_Max
+                        If Device.Value.Thrust_Power > TMax * T Then Device.Value.Thrust_Power = TMax * T
+
+                    End If
+                End If
+
+                Dim min As Double = TMax * T
+                If Device.Value.Thrust_Max < TMax * T Then
+                    min = Device.Value.Thrust_Max
+                End If
 
 
+                If Device.Value.Thrust_Power > min Then
+                    Device.Value.Thrust_Power -= Dec
+
+                    If Device.Value.Thrust_Power < min Then Device.Value.Thrust_Power = min
+                    If Device.Value.Thrust_Power < 0 Then Device.Value.Thrust_Power = 0
+                End If
 
 
+            End If
 
-
+        Next
     End Sub
 
 
@@ -1132,7 +1174,7 @@ Public Class Ship
             Case Is = Direction_Enum.Top
                 x = Math.Cos(rotation + 3.14159265)
                 y = Math.Sin(rotation + 3.14159265)
-                Distance = CInt((center_point.x - point.x))
+                Distance = CInt(center_point.x - point.x)
             Case Is = Direction_Enum.Bottom
                 x = Math.Cos(rotation)
                 y = Math.Sin(rotation)
@@ -1140,7 +1182,7 @@ Public Class Ship
             Case Is = Direction_Enum.Left
                 x = Math.Cos(rotation - 1.57079633)
                 y = Math.Sin(rotation - 1.57079633)
-                Distance = CInt(Math.Abs(center_point.y - point.y))
+                Distance = CInt(center_point.y - point.y)
             Case Is = Direction_Enum.Right
                 x = Math.Cos(rotation + 1.57079633)
                 y = Math.Sin(rotation + 1.57079633)

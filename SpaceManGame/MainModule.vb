@@ -752,7 +752,7 @@
         u.planets.Remove(0)
         u.planets.Add(0, planet1)
 
-        Add_Officer(0, New Officer(0, "Captian", Officer_location_enum.Planet, 0, pos, 1, 0.2, New Officer.sprite_list(character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head)))
+        Add_Officer(0, New Officer(0, "Captian", Officer_location_enum.Ship, 0, pos, 1, 0.2, New Officer.sprite_list(character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head)))
 
         Officer_List(0).Officer_Classes.Add(New Officer_Class(Class_List_Enum.Mage, 0, 1))
         Officer_List(0).Officer_Classes.Add(New Officer_Class(Class_List_Enum.SpellSword, 0, 1))
@@ -1357,12 +1357,15 @@
         'If pressedkeys.Contains(Keys.A) Then Ships(0).Apply_Force(0.01, New PointD(15, 18), Direction_Enum.Left)
         'If pressedkeys.Contains(Keys.D) Then Ships(0).Apply_Force(0.01, New PointD(15, 18), Direction_Enum.Right)
 
+        Dim percent As Double = 0.01
+
+        If pressedkeys.Contains(Keys.ShiftKey) Then percent = -0.01
 
         If pressedkeys.Contains(Keys.Q) Then
             For Each Device In Ship_List(current_selected_ship_view).Engine_Coltrol_Group(Direction_Enum.Right)
                 'Device.Value.
                 'If Ship_List(current_selected_ship_view).device_list(Device.Key).type = device_type_enum.thruster Then
-                Ship_List(current_selected_ship_view).Fire_Engine(Device.Key, 1)
+                Ship_List(current_selected_ship_view).Fire_Engine(Device.Key, percent)
                 'End If
             Next
         End If
@@ -1370,7 +1373,7 @@
         If pressedkeys.Contains(Keys.E) Then
             For Each Device In Ship_List(current_selected_ship_view).Engine_Coltrol_Group(Direction_Enum.Left)
                 'If Ship_List(current_selected_ship_view).device_list(Device.Key).type = device_type_enum.thruster Then
-                Ship_List(current_selected_ship_view).Fire_Engine(Device.Key, 1)
+                Ship_List(current_selected_ship_view).Fire_Engine(Device.Key, percent)
                 'End If
             Next
         End If
@@ -1378,20 +1381,20 @@
 
         If pressedkeys.Contains(Keys.W) Then
             For Each Device In Ship_List(current_selected_ship_view).Engine_Coltrol_Group(Direction_Enum.Bottom)
-                Ship_List(current_selected_ship_view).Fire_Engine(Device.Key, 1)
+                Ship_List(current_selected_ship_view).Fire_Engine(Device.Key, percent)
             Next
         End If
 
         If pressedkeys.Contains(Keys.S) Then
             For Each Device In Ship_List(current_selected_ship_view).Engine_Coltrol_Group(Direction_Enum.Top)
-                Ship_List(current_selected_ship_view).Fire_Engine(Device.Key, 1)
+                Ship_List(current_selected_ship_view).Fire_Engine(Device.Key, percent)
             Next
         End If
 
         If pressedkeys.Contains(Keys.A) Then
             For Each Device In Ship_List(current_selected_ship_view).Engine_Coltrol_Group(Direction_Enum.RotateL)
                 'If Ship_List(current_selected_ship_view).device_list(Device.Key).type = device_type_enum.thruster Then
-                Ship_List(current_selected_ship_view).Fire_Engine(Device.Key, 1)
+                Ship_List(current_selected_ship_view).Fire_Engine(Device.Key, percent)
                 'End If
             Next
         End If
@@ -1399,7 +1402,7 @@
         If pressedkeys.Contains(Keys.D) Then
             For Each Device In Ship_List(current_selected_ship_view).Engine_Coltrol_Group(Direction_Enum.RotateR)
                 'If Ship_List(current_selected_ship_view).device_list(Device.Key).type = device_type_enum.thruster Then
-                Ship_List(current_selected_ship_view).Fire_Engine(Device.Key, 1)
+                Ship_List(current_selected_ship_view).Fire_Engine(Device.Key, percent)
                 'End If
             Next
         End If

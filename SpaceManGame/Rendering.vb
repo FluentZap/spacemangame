@@ -1488,24 +1488,32 @@
                     Dim SD As Ship_device = ship.device_list(device.Key)
                     d3d_sprite.Draw(button_texture(button_texture_enum.ship_external__Engine_Display), Rectangle.Empty, New Vector3(0, 0, 0), New Vector3(pos.x, pos.y, 0), Color.Gray)
 
-                    scale = 160 / SD.Thrust_Max
+                    scale = 64 / Device_tech_list(SD.tech_ID).Thrust_Power
 
                     'If pipe.Value.Supply >= 0 Then Supply = Convert.ToInt32(scale * pipe.Value.Supply)
                     'If pipe.Value.Supply_Drain >= 0 Then Drain = Convert.ToInt32(scale * pipe.Value.Supply_Drain)
                     'If pipe.Value.Supply_Drain >= pipe.Value.Supply_Limit Then Drain = Convert.ToInt32(scale * pipe.Value.Supply_Limit)
-                    PipeSupply = CInt(SD.supply_efficiency * 1.6)
-                    CrewSupply = CInt(SD.crew_efficiency * 1.6)
-                    If PipeSupply > 48 Then PipeSupply = 48
-                    If CrewSupply > 48 Then CrewSupply = 48
+                    PipeSupply = CInt(SD.supply_efficiency * 64)
+                    CrewSupply = CInt((SD.crew_efficiency * 0.8 + 0.2) * 64)
+                    
 
-                    d3d_sprite.Draw(button_texture(button_texture_enum.ship_external__Engine_Display), New Rectangle(0, 0, 3, PipeSupply), New Vector3(0, 0, 0), New Vector3(pos.x, pos.y, 0), Color.Orange)
-                    d3d_sprite.Draw(button_texture(button_texture_enum.ship_external__Engine_Display), New Rectangle(0, 0, 3, CrewSupply), New Vector3(0, 0, 0), New Vector3(pos.x + 3, pos.y, 0), Color.LightBlue)
+                    Throttle = CInt(SD.Throttle * 64)
+                    Power = CInt((SD.Thrust_Power / Device_tech_list(SD.tech_ID).Thrust_Power) * 64)
 
+                    If PipeSupply > 64 Then PipeSupply = 64
+                    If CrewSupply > 64 Then CrewSupply = 64
+
+
+                    d3d_sprite.Draw(button_texture(button_texture_enum.ship_external__Engine_Display), New Rectangle(0, 0, 4, PipeSupply), New Vector3(0, 0, 0), New Vector3(pos.x, pos.y, 0), Color.Orange)
+                    d3d_sprite.Draw(button_texture(button_texture_enum.ship_external__Engine_Display), New Rectangle(0, 0, 4, CrewSupply), New Vector3(0, 0, 0), New Vector3(pos.x + 4, pos.y, 0), Color.LightBlue)
+
+                    d3d_sprite.Draw(button_texture(button_texture_enum.ship_external__Engine_Display), New Rectangle(0, 0, 4, Throttle), New Vector3(0, 0, 0), New Vector3(pos.x + 8, pos.y, 0), Color.White)
+                    d3d_sprite.Draw(button_texture(button_texture_enum.ship_external__Engine_Display), New Rectangle(0, 0, 8, Power), New Vector3(0, 0, 0), New Vector3(pos.x, pos.y, 0), Color.LawnGreen)
 
 
 
                     'draw_text(pipe.Value.Name, New Rectangle(pos.x, pos.y, 160, 16), DrawTextFormat.Center, Color.White, d3d_font(d3d_font_enum.SB_small))
-                    pos.x += 10
+                    pos.x += 24
                     Drawn.Add(device.Key)
                 End If
             Next
