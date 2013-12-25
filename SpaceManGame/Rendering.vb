@@ -1043,7 +1043,11 @@
         d3d_sprite.Draw(Ship_Map_Texture, Rectangle.Empty, New Vector3(0, 0, 0), New Vector3(screen_size.x - (Ship.shipsize.x + 1) * 4 - 20, 200, 0), Color.White)
 
         d3d_sprite.Transform = Matrix.Identity
-        draw_text(CInt(Distance_from).ToString, New Rectangle(0, 500, 100, 20), CType(DrawTextFormat.Center + DrawTextFormat.VerticalCenter, DrawTextFormat), Color.White, d3d_font(d3d_font_enum.SB_small))
+        draw_text(Ship_List(0).target_rotation.ToString, New Rectangle(20, 700, 160, 20), CType(DrawTextFormat.Center + DrawTextFormat.VerticalCenter, DrawTextFormat), Color.White, d3d_font(d3d_font_enum.SB_small))
+        draw_text(Ship_List(0).Turn_Point.ToString, New Rectangle(20, 720, 160, 20), CType(DrawTextFormat.Center + DrawTextFormat.VerticalCenter, DrawTextFormat), Color.White, d3d_font(d3d_font_enum.SB_small))
+        draw_text(Ship_List(0).Turn_Left.ToString, New Rectangle(20, 740, 160, 20), CType(DrawTextFormat.Center + DrawTextFormat.VerticalCenter, DrawTextFormat), Color.White, d3d_font(d3d_font_enum.SB_small))
+        'draw_text(CInt(Distance_from).ToString, New Rectangle(0, 500, 100, 20), CType(DrawTextFormat.Center + DrawTextFormat.VerticalCenter, DrawTextFormat), Color.White, d3d_font(d3d_font_enum.SB_small))
+
         d3d_sprite.End()
 
         'If Loaded_planet > -1 Then
@@ -1465,6 +1469,7 @@
 
 
             draw_text(pipe.Value.Name, New Rectangle(pos.x, pos.y, 160, 16), DrawTextFormat.Center, Color.White, d3d_font(d3d_font_enum.SB_small))
+            draw_text(pipe.Value.Supply.ToString + " / " + pipe.Value.Supply_Drain.ToString, New Rectangle(pos.x + 160, pos.y, 160, 16), DrawTextFormat.Left, Color.White, d3d_font(d3d_font_enum.SB_small))
             pos.y += 20
         Next
     End Sub
@@ -1493,9 +1498,16 @@
                     'If pipe.Value.Supply >= 0 Then Supply = Convert.ToInt32(scale * pipe.Value.Supply)
                     'If pipe.Value.Supply_Drain >= 0 Then Drain = Convert.ToInt32(scale * pipe.Value.Supply_Drain)
                     'If pipe.Value.Supply_Drain >= pipe.Value.Supply_Limit Then Drain = Convert.ToInt32(scale * pipe.Value.Supply_Limit)
-                    PipeSupply = CInt(SD.supply_efficiency * 64)
+                    Dim pipeID As Integer = -1
+                    For Each pipe In SD.pipeline
+                        If pipe.Pipeline_Connection > -1 Then
+                            If pipe.Amount < 0 Then pipeID = pipe.Pipeline_Connection
+                        End If
+                    Next
+                    If pipeID > -1 Then PipeSupply = CInt(ship.pipeline_list(pipeID).Efficiency * 64)
+
                     CrewSupply = CInt((SD.crew_efficiency * 0.8 + 0.2) * 64)
-                    
+
 
                     Throttle = CInt(SD.Throttle * 64)
                     Power = CInt((SD.Thrust_Power / Device_tech_list(SD.tech_ID).Thrust_Power) * 64)
