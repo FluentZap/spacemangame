@@ -16,12 +16,12 @@ End Class
 
     'Public Connected_Devices As HashSet(Of Integer) = New HashSet(Of Integer)
 
-    Public Supply As Integer
-    Public Supply_Limit As Integer
-    Public Supply_Drain As Integer
+    Public Supply As Double
+    Public Supply_Limit As Double
+    Public Supply_Drain As Double
     Public Efficiency As Double
 
-    Sub New(ByVal Type As Pipeline_type_enum, ByVal Supply_Limit As Integer, ByVal color As Color, ByVal Tile_Type As device_tile_type_enum, Optional ByVal Name As String = "")
+    Sub New(ByVal Type As Pipeline_type_enum, ByVal Supply_Limit As Double, ByVal color As Color, ByVal Tile_Type As device_tile_type_enum, Optional ByVal Name As String = "")
         Me.Type = Type
         Me.Supply_Limit = Supply_Limit
         Me.Color = color
@@ -30,13 +30,15 @@ End Class
     End Sub
 
 
-    Function Pipeline_efficiency() As Double
-        If Supply_Drain <= 0 Then Return 1
-        If Supply <= 0 Then Return 0
+    Sub Calculate_efficiency()
+        If Supply_Drain <= 0 Then Me.Efficiency = 1 : Exit Sub
+        If Supply <= 0 Then Me.Efficiency = 0 : Exit Sub
         Me.Efficiency = Supply / Supply_Drain
         If Me.Efficiency > 1 Then Me.Efficiency = 1
-        Return Efficiency
-    End Function
+    End Sub
+
+
+
 
 End Class
 
@@ -101,7 +103,7 @@ Public Class Ship
     Public Turn_Point As Double
     Public Turn_Left As Boolean
     Public Stop_Rotation As Boolean
-
+    Public NavControl As Boolean
 
 
     Public target_position As PointD
@@ -192,7 +194,7 @@ Public Class Ship
 
 
     Sub Process_Devices()
-
+        'Crew Efficiency calculation Start
         Dim Room_sci_points As Double
         Dim Room_eng_points As Double
 
@@ -206,10 +208,10 @@ Public Class Ship
             Next
 
             room.Value.required_crew_resources.engineering = 0
-            room.Value.required_crew_resources.science = 0
+            room.Value.required_crew_resources.science = 0            
             For Each dev In room.Value.device_list
-                room.Value.required_crew_resources.engineering += device_list(dev).required_Points.engineering
-                room.Value.required_crew_resources.science += device_list(dev).required_Points.science
+                room.Value.required_crew_resources.engineering += Device_tech_list(device_list(dev).tech_ID).required_Points.engineering
+                room.Value.required_crew_resources.science += Device_tech_list(device_list(dev).tech_ID).required_Points.science
             Next
 
             If room.Value.required_crew_resources.engineering > 0 Then room.Value.efficiency.engineering = Room_eng_points / room.Value.required_crew_resources.engineering
@@ -218,9 +220,10 @@ Public Class Ship
             If room.Value.efficiency.science > 1 Then room.Value.efficiency.science = 1
 
             For Each dev In room.Value.device_list
+                Dim Tech As device_data = Device_tech_list(device_list(dev).tech_ID)
 
                 'Crew Efficiency calculation
-                If device_list(dev).required_Points.engineering > 0 AndAlso device_list(dev).required_Points.science > 0 Then
+                If Tech.required_Points.engineering > 0 AndAlso Tech.required_Points.science > 0 Then
                     'Both
                     If room.Value.efficiency.engineering > room.Value.efficiency.science Then
                         device_list(dev).crew_efficiency = room.Value.efficiency.science
@@ -228,20 +231,22 @@ Public Class Ship
                         device_list(dev).crew_efficiency = room.Value.efficiency.engineering
                     End If
 
-                ElseIf device_list(dev).required_Points.engineering > 0 Then
+                ElseIf Tech.required_Points.engineering > 0 Then
                     'eng
                     device_list(dev).crew_efficiency = room.Value.efficiency.engineering
-                ElseIf device_list(dev).required_Points.science > 0 Then
+                ElseIf Tech.required_Points.science > 0 Then
                     'sci
                     device_list(dev).crew_efficiency = room.Value.efficiency.science
                 Else
                     'No requirements
-                    device_list(dev).crew_efficiency = 100
+                    device_list(dev).crew_efficiency = 1
                 End If
-
 
             Next
         Next
+
+        'Crew Efficiency calculation End
+
 
 
         For Each pipeline In pipeline_list
@@ -250,10 +255,12 @@ Public Class Ship
         Next
 
         'Pipeline Efficiency
-        Dim Pipeline_Drain As Integer = 0
-        Dim Pipeline_Supply As Integer = 0
+        Dim Pipeline_Drain As Double = 0
+        Dim Pipeline_Supply As Double = 0
 
         'Do Device Logic
+
+        'Add supply and drain for efficiency
         For Each Device In device_list
             If Device.Value.pipeline.Count > 0 Then
                 For Each pipeline In Device.Value.pipeline
@@ -268,29 +275,32 @@ Public Class Ship
                                     Dim crew_ef = (Device.Value.crew_efficiency * 0.8 + 0.2)
                                     Dim supply_ef = Device.Value.supply_efficiency
                                     Dim device_max = pipeline.Amount
-                                    Pipeline_Supply += Convert.ToInt32(crew_ef * device_max * supply_ef)
+                                    Pipeline_Supply += (crew_ef * device_max * supply_ef)
                                 Else
                                     'Add to drain
-                                    Pipeline_Drain += -Convert.ToInt32(Device.Value.crew_efficiency * pipeline.Amount)
+                                    Pipeline_Drain += -(Device.Value.crew_efficiency * pipeline.Amount)
                                 End If
 
                             Case device_type_enum.engine
                                 Dim crew_ef = (Device.Value.crew_efficiency * 0.8 + 0.2)
-                                Dim supply_ef = Device.Value.supply_efficiency
+                                Dim supply_ef = pipeline_list(pipeline.Pipeline_Connection).Efficiency
                                 Dim device_max = pipeline.Amount
                                 'Add to drain
                                 'Pipeline_Drain += Convert.ToInt32(device_list(con_device).crew_efficiency * 0.01 * device_list(con_device).pipeline(pipeline.Value.Type))
                                 'Throttled_Engine
 
-                                Pipeline_Drain += -Convert.ToInt32(crew_ef * device_max)
+                                'Pipeline_Drain += -Convert.ToInt32(crew_ef * device_max)
+                                'Pipeline_Drain += -(crew_ef * device_max * Device.Value.Throttle)
                                 Device.Value.Thrust_Max = Device_tech_list(Device.Value.tech_ID).Thrust_Power * crew_ef * supply_ef
-
+                                Pipeline_Drain += -(crew_ef * device_max * If(Device.Value.Thrust_Max <> 0, Device.Value.Thrust_Power / Device_tech_list(Device.Value.tech_ID).Thrust_Power, 0))
 
                             Case device_type_enum.thruster
-                                Dim supply_ef = Device.Value.supply_efficiency
+                                Dim supply_ef = pipeline_list(pipeline.Pipeline_Connection).Efficiency
                                 'Add to drain                        
-                                Pipeline_Drain += -Convert.ToInt32(pipeline.Amount)
+                                'Pipeline_Drain += -Convert.ToInt32(pipeline.Amount)                                
+                                'Pipeline_Drain += -(pipeline.Amount * Device.Value.Throttle)
                                 Device.Value.Thrust_Max = Device_tech_list(Device.Value.tech_ID).Thrust_Power * supply_ef
+                                Pipeline_Drain += -(pipeline.Amount * If(Device.Value.Thrust_Max <> 0, Device.Value.Thrust_Power / Device_tech_list(Device.Value.tech_ID).Thrust_Power, 0))
                         End Select
 
 
@@ -302,20 +312,19 @@ Public Class Ship
 
 
                         'If devices recieve from pipeline, set efficiency
-                        If pipeline.Amount < 0 Then Device.Value.supply_efficiency = pipeline_list(pipeline.Pipeline_Connection).Efficiency
+                        'If pipeline.Amount < 0 Then Device.Value.supply_efficiency = pipeline_list(pipeline.Pipeline_Connection).Efficiency
                         Pipeline_Drain = 0
                         Pipeline_Supply = 0
 
                     End If
                 Next
-            
             End If
         Next
 
 
         For Each pipeline In pipeline_list
             'Calculate efficiency
-            pipeline.Value.Pipeline_efficiency()            
+            pipeline.Value.Calculate_efficiency()
         Next
 
     End Sub
@@ -827,7 +836,9 @@ Public Class Ship
     End Sub
 
     Sub Update_Locataion()
-        'Nav_Computer()
+        If NavControl = True Then
+            Nav_Computer()
+        End If
         'Move Ship
 
         location.x += vector_velocity.x * 50
@@ -836,11 +847,12 @@ Public Class Ship
         If rotation < 0 Then rotation += PI * 2
         If rotation > PI * 2 Then rotation -= PI * 2
 
+        'FRICTION
         angular_velocity -= angular_velocity / 100
         vector_velocity.x -= vector_velocity.x / 100
         vector_velocity.y -= vector_velocity.y / 100
 
-        If orbiting > -1 Then            
+        If orbiting > -1 Then
             Dim planetPos As PointD
             Dim planetPosNext As PointD
             planetPos = Get_Planet_Location(orbiting)
@@ -945,23 +957,23 @@ Public Class Ship
                 If Turn_Left = True Then
                     If rotation > Turn_Point Then
                         For Each engine In Engine_Coltrol_Group(Direction_Enum.RotateL)
-                            Fire_Engine(engine.Key, 1)
+                            Set_Engine_Throttle(engine.Key, 1)
                         Next
                     End If
 
                     If rotation < Turn_Point Then
-                        Stop_Rotation = True
+                        Stop_Rotation = True                        
                     End If
 
                 Else
                     If rotation < Turn_Point Then
                         For Each engine In Engine_Coltrol_Group(Direction_Enum.RotateR)
-                            Fire_Engine(engine.Key, 1)
+                            Set_Engine_Throttle(engine.Key, 1)
                         Next
                     End If
 
                     If rotation > Turn_Point Then
-                        Stop_Rotation = True
+                        Stop_Rotation = True                        
                     End If
 
                 End If
@@ -972,17 +984,33 @@ Public Class Ship
             If angular_velocity > 0 Then
                 If angular_velocity + LeftR < 0 Then
                     angular_velocity = 0
+                    NavControl = False
+                    For Each engine In Engine_Coltrol_Group(Direction_Enum.RotateL)
+                        Set_Engine_Throttle(engine.Key, 0)
+                    Next
                 Else
                     For Each engine In Engine_Coltrol_Group(Direction_Enum.RotateL)
-                        Fire_Engine(engine.Key, 1)
+                        Set_Engine_Throttle(engine.Key, 1)
+                    Next
+                    For Each engine In Engine_Coltrol_Group(Direction_Enum.RotateR)
+                        Set_Engine_Throttle(engine.Key, 0)
                     Next
                 End If
-            ElseIf angular_velocity < 0 Then
+            End If
+
+            If angular_velocity < 0 Then
                 If angular_velocity + RightR > 0 Then
                     angular_velocity = 0
-                Else
+                    NavControl = False
                     For Each engine In Engine_Coltrol_Group(Direction_Enum.RotateR)
-                        Fire_Engine(engine.Key, 1)
+                        Set_Engine_Throttle(engine.Key, 0)
+                    Next
+                Else
+                    For Each engine In Engine_Coltrol_Group(Direction_Enum.RotateL)
+                        Set_Engine_Throttle(engine.Key, 0)
+                    Next
+                    For Each engine In Engine_Coltrol_Group(Direction_Enum.RotateR)
+                        Set_Engine_Throttle(engine.Key, 1)
                     Next
                 End If
             End If
@@ -1023,14 +1051,14 @@ Public Class Ship
         If tar < rot Then left = rot - tar
 
         If left > right Then
-            Dim ratio As Double = Math.Abs(LeftR / RightR)
+            Dim ratio As Double = Math.Abs(LeftR) / Math.Abs(RightR)
             Turn_Point = (rotation + right * (ratio / 2)) + If(LeftR <> 0, angular_velocity / LeftR, 0)
             Turn_Left = False
         End If
 
 
         If left < right Then
-            Dim ratio As Double = Math.Abs(LeftR / RightR)
+            Dim ratio As Double = Math.Abs(LeftR) / Math.Abs(RightR)
             Turn_Point = (rotation - left * (ratio / 2)) + If(RightR <> 0, angular_velocity / RightR, 0)
             Turn_Left = True
         End If
@@ -1045,21 +1073,17 @@ Public Class Ship
         vector_velocity.y += x
     End Sub
 
-    Sub Fire_Engine(ByVal DeviceID As Integer, ByVal percent As Double)
-        'Me.Apply_Force(device_list(DeviceID).Thrust_Power * percent, device_list(DeviceID).Active_Point.ToPointD, device_list(DeviceID).Thrust_Direction)
+    Sub Set_Engine_Throttle(ByVal DeviceID As Integer, ByVal percent As Double, Optional ByVal Add As Boolean = False)
+        If Add = True Then
+            Me.device_list(DeviceID).Throttle += percent
+        Else
+            Me.device_list(DeviceID).Throttle = percent
+        End If
 
-        'For Each Device In Me.device_list
-        'If Device.Value.type = device_type_enum.engine OrElse Device.Value.type = device_type_enum.thruster Then
-        'Device.Value.Throttle = 0
-        'End If
-        'Next
-
-        Me.device_list(DeviceID).Throttle += percent
         If Me.device_list(DeviceID).Throttle > 1 Then Me.device_list(DeviceID).Throttle = 1
         If Me.device_list(DeviceID).Throttle < 0 Then Me.device_list(DeviceID).Throttle = 0
-        'Me.Apply_Force(device_list(DeviceID).Thrust_Power * percent, device_list(DeviceID).Active_Point.ToPointD, device_list(DeviceID).Thrust_Direction)
-
     End Sub
+
 
     Sub Fire_Weapon(ByVal DeviceID As Integer)        
         Dim Fire_Point As PointD
