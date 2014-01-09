@@ -1044,8 +1044,10 @@
 
         d3d_sprite.Transform = Matrix.Identity
         draw_text(Ship_List(0).target_rotation.ToString, New Rectangle(20, 700, 160, 20), CType(DrawTextFormat.Center + DrawTextFormat.VerticalCenter, DrawTextFormat), Color.White, d3d_font(d3d_font_enum.SB_small))
-        draw_text(Ship_List(0).Turn_Point.ToString, New Rectangle(20, 720, 160, 20), CType(DrawTextFormat.Center + DrawTextFormat.VerticalCenter, DrawTextFormat), Color.White, d3d_font(d3d_font_enum.SB_small))
-        draw_text(Ship_List(0).Turn_Left.ToString, New Rectangle(20, 740, 160, 20), CType(DrawTextFormat.Center + DrawTextFormat.VerticalCenter, DrawTextFormat), Color.White, d3d_font(d3d_font_enum.SB_small))
+        draw_text("Turn point: " + Ship_List(0).Turn_Point.ToString, New Rectangle(20, 720, 160, 20), CType(DrawTextFormat.Center + DrawTextFormat.VerticalCenter, DrawTextFormat), Color.White, d3d_font(d3d_font_enum.SB_small))
+        draw_text("Turn Left: " + Ship_List(0).Turn_Left.ToString, New Rectangle(20, 740, 160, 20), CType(DrawTextFormat.Center + DrawTextFormat.VerticalCenter, DrawTextFormat), Color.White, d3d_font(d3d_font_enum.SB_small))
+        draw_text("Stop Rot: " + Ship_List(0).Stop_Rotation.ToString, New Rectangle(20, 760, 160, 20), CType(DrawTextFormat.Center + DrawTextFormat.VerticalCenter, DrawTextFormat), Color.White, d3d_font(d3d_font_enum.SB_small))
+        draw_text("AV: " + Ship_List(0).angular_velocity.ToString, New Rectangle(20, 780, 160, 20), CType(DrawTextFormat.Center + DrawTextFormat.VerticalCenter, DrawTextFormat), Color.White, d3d_font(d3d_font_enum.SB_small))
         'draw_text(CInt(Distance_from).ToString, New Rectangle(0, 500, 100, 20), CType(DrawTextFormat.Center + DrawTextFormat.VerticalCenter, DrawTextFormat), Color.White, d3d_font(d3d_font_enum.SB_small))
 
         d3d_sprite.End()
