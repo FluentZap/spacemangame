@@ -717,10 +717,14 @@
                 MiniMap_Scale = 6
                 shipsize.x = 30
                 shipsize.y = 30
-            Case ship_class_enum.fighter
+            Case ship_class_enum.fighterT
                 MiniMap_Scale = 12
                 shipsize.x = 10
                 shipsize.y = 15
+            Case ship_class_enum.fighterW
+                MiniMap_Scale = 12
+                shipsize.x = 20
+                shipsize.y = 10
             Case ship_class_enum.frigate
                 MiniMap_Scale = 4
                 shipsize.x = 40
@@ -755,7 +759,9 @@
         Select Case Build_ship.shipclass
             Case ship_class_enum.corvette
                 MiniMap_Scale = 6
-            Case ship_class_enum.fighter
+            Case ship_class_enum.fighterW
+                MiniMap_Scale = 12
+            Case ship_class_enum.fighterT
                 MiniMap_Scale = 12
             Case ship_class_enum.frigate
                 MiniMap_Scale = 4
@@ -2633,7 +2639,7 @@
 
     Function New_ship_options_menu() As ship_class_enum
 
-        Dim Descriptions(7) As String
+        Dim Descriptions(8) As String
         Descriptions(0) = "The corvette class is a highly maneuverable all purpose warship. Most corvettes are used as mid range support vessels. The highly adaptable nature of the class allows the corvette to be used for a wide range of missions from escort to cargo transport. Due to it’s relatively small size it is normally lightly armored. The corvette is considered a more basic vessel, although if outfitted with advanced technology the corvette could take on any mission."
         Descriptions(1) = "Because of it’s small size the fighter is a very versatile class. The fighter is commonly launched from a larger vessel which makes it particularly useful for jobs as a short range strike craft, scout ship, short range transport or for any other scenario where a small quick ship is key to success."
         Descriptions(2) = "The Other class is a highly maneuverable all purpose warship. Most corvettes are used as mid range support vessels. The highly adaptable nature of the class allows the corvette to be used for a wide range of missions from escort to cargo transport. Due to it’s relatively small size it is normally lightly armored. The corvette is considered a more basic vessel, although if outfitted with advanced technology the corvette could take on any mission."
@@ -2642,6 +2648,7 @@
         Descriptions(5) = "The corvette class is a highly maneuverable all purpose warship. Most corvettes are used as mid range support vessels. The highly adaptable nature of the class allows the corvette to be used for a wide range of missions from escort to cargo transport. Due to it’s relatively small size it is normally lightly armored. The corvette is considered a more basic vessel, although if outfitted with advanced technology the corvette could take on any mission."
         Descriptions(6) = "The corvette class is a highly maneuverable all purpose warship. Most corvettes are used as mid range support vessels. The highly adaptable nature of the class allows the corvette to be used for a wide range of missions from escort to cargo transport. Due to it’s relatively small size it is normally lightly armored. The corvette is considered a more basic vessel, although if outfitted with advanced technology the corvette could take on any mission."
         Descriptions(7) = "The corvette class is a highly maneuverable all purpose warship. Most corvettes are used as mid range support vessels. The highly adaptable nature of the class allows the corvette to be used for a wide range of missions from escort to cargo transport. Due to it’s relatively small size it is normally lightly armored. The corvette is considered a more basic vessel, although if outfitted with advanced technology the corvette could take on any mission."
+        Descriptions(8) = "The corvette class is a highly maneuverable all purpose warship. Most corvettes are used as mid range support vessels. The highly adaptable nature of the class allows the corvette to be used for a wide range of missions from escort to cargo transport. Due to it’s relatively small size it is normally lightly armored. The corvette is considered a more basic vessel, although if outfitted with advanced technology the corvette could take on any mission."
         Dim pressedkeys As New HashSet(Of Keys)
         Dim mouse_info As New MainForm.mouse_info_type
         MainForm.getUI(pressedkeys, mouse_info)
@@ -2652,24 +2659,26 @@
 
         Dim type As ship_class_enum
 
-        Dim menu_item(9) As Menu_button
+        Dim menu_item(10) As Menu_button
         'menu_item(0) = New Menu_button(button_texture_enum.ship_build__options_button, New Rectangle(Convert.ToInt32(screen_size.x / 2 - 375), Convert.ToInt32(screen_size.y / 2 - 200), 250, 40), button_style.Both, Color.White, "Carbon Fiber", Color.White, d3d_font_enum.Big_Button)
         'menu_item(1) = New Menu_button(button_texture_enum.ship_build__options_button, New Rectangle(Convert.ToInt32(screen_size.x / 2 - 125), Convert.ToInt32(screen_size.y / 2 - 200), 250, 40), button_style.Both, Color.White, "Biological", Color.White, d3d_font_enum.Big_Button)
         'menu_item(2) = New Menu_button(button_texture_enum.ship_build__options_button, New Rectangle(Convert.ToInt32(screen_size.x / 2 + 125), Convert.ToInt32(screen_size.y / 2 - 200), 250, 40), button_style.Both, Color.White, "Energy", Color.White, d3d_font_enum.Big_Button)
+        Dim pos As New PointI(CInt(screen_size.x / 2 - 280), CInt(screen_size.y / 2 - 280))
 
-        menu_item(0) = New Menu_button(button_texture_enum.ship_build__options_button, New Rectangle(Convert.ToInt32(screen_size.x / 2 - 280), Convert.ToInt32(screen_size.y / 2 - 240), 250, 40), button_style.Both, Color.White, "Corvette", Color.White, d3d_font_enum.Big_Button)
-        menu_item(1) = New Menu_button(button_texture_enum.ship_build__options_button, New Rectangle(Convert.ToInt32(screen_size.x / 2 - 280), Convert.ToInt32(screen_size.y / 2 - 180), 250, 40), button_style.Both, Color.White, "Fighter", Color.White, d3d_font_enum.Big_Button)
-        menu_item(2) = New Menu_button(button_texture_enum.ship_build__options_button, New Rectangle(Convert.ToInt32(screen_size.x / 2 - 280), Convert.ToInt32(screen_size.y / 2 - 120), 250, 40), button_style.Both, Color.White, "Frigate", Color.White, d3d_font_enum.Big_Button)
-        menu_item(3) = New Menu_button(button_texture_enum.ship_build__options_button, New Rectangle(Convert.ToInt32(screen_size.x / 2 - 280), Convert.ToInt32(screen_size.y / 2 - 60), 250, 40), button_style.Both, Color.White, "Destroyer", Color.White, d3d_font_enum.Big_Button)
+        menu_item(0) = New Menu_button(button_texture_enum.ship_build__options_button, New Rectangle(pos.x, pos.y, 250, 40), button_style.Both, Color.White, "Fighter Wide", Color.White, d3d_font_enum.Big_Button) : pos.y += 60
+        menu_item(1) = New Menu_button(button_texture_enum.ship_build__options_button, New Rectangle(pos.x, pos.y, 250, 40), button_style.Both, Color.White, "Fighter Tall", Color.White, d3d_font_enum.Big_Button) : pos.y += 60
+        menu_item(2) = New Menu_button(button_texture_enum.ship_build__options_button, New Rectangle(pos.x, pos.y, 250, 40), button_style.Both, Color.White, "Corvette", Color.White, d3d_font_enum.Big_Button) : pos.y += 60
+        menu_item(3) = New Menu_button(button_texture_enum.ship_build__options_button, New Rectangle(pos.x, pos.y, 250, 40), button_style.Both, Color.White, "Frigate", Color.White, d3d_font_enum.Big_Button) : pos.y += 60
+        menu_item(4) = New Menu_button(button_texture_enum.ship_build__options_button, New Rectangle(pos.x, pos.y, 250, 40), button_style.Both, Color.White, "Destroyer", Color.White, d3d_font_enum.Big_Button) : pos.y += 60
 
-        menu_item(4) = New Menu_button(button_texture_enum.ship_build__options_button, New Rectangle(Convert.ToInt32(screen_size.x / 2 - 280), Convert.ToInt32(screen_size.y / 2 - 0), 250, 40), button_style.Both, Color.White, "Cruiser", Color.White, d3d_font_enum.Big_Button)
-        menu_item(5) = New Menu_button(button_texture_enum.ship_build__options_button, New Rectangle(Convert.ToInt32(screen_size.x / 2 - 280), Convert.ToInt32(screen_size.y / 2 + 60), 250, 40), button_style.Both, Color.White, "Battle Cruiser", Color.White, d3d_font_enum.Big_Button)
-        menu_item(6) = New Menu_button(button_texture_enum.ship_build__options_button, New Rectangle(Convert.ToInt32(screen_size.x / 2 - 280), Convert.ToInt32(screen_size.y / 2 + 120), 250, 40), button_style.Both, Color.White, "Battleship", Color.White, d3d_font_enum.Big_Button)
-        menu_item(7) = New Menu_button(button_texture_enum.ship_build__options_button, New Rectangle(Convert.ToInt32(screen_size.x / 2 - 280), Convert.ToInt32(screen_size.y / 2 + 180), 250, 40), button_style.Both, Color.White, "Carrier", Color.White, d3d_font_enum.Big_Button)
+        menu_item(5) = New Menu_button(button_texture_enum.ship_build__options_button, New Rectangle(pos.x, pos.y, 250, 40), button_style.Both, Color.White, "Cruiser", Color.White, d3d_font_enum.Big_Button) : pos.y += 60
+        menu_item(6) = New Menu_button(button_texture_enum.ship_build__options_button, New Rectangle(pos.x, pos.y, 250, 40), button_style.Both, Color.White, "Battle Cruiser", Color.White, d3d_font_enum.Big_Button) : pos.y += 60
+        menu_item(7) = New Menu_button(button_texture_enum.ship_build__options_button, New Rectangle(pos.x, pos.y, 250, 40), button_style.Both, Color.White, "Battleship", Color.White, d3d_font_enum.Big_Button) : pos.y += 60
+        menu_item(8) = New Menu_button(button_texture_enum.ship_build__options_button, New Rectangle(pos.x, pos.y, 250, 40), button_style.Both, Color.White, "Carrier", Color.White, d3d_font_enum.Big_Button) : pos.y += 60
 
-        menu_item(8) = New Menu_button(button_texture_enum.ship_build__options_button, New Rectangle(Convert.ToInt32(screen_size.x / 2 - 125), Convert.ToInt32(screen_size.y / 2 + 260), 250, 40), button_style.Both, Color.White, "Ok", Color.White, d3d_font_enum.Big_Button)
+        menu_item(9) = New Menu_button(button_texture_enum.ship_build__options_button, New Rectangle(pos.x, pos.y, 250, 40), button_style.Both, Color.White, "Ok", Color.White, d3d_font_enum.Big_Button)
 
-        menu_item(9) = New Menu_button(button_texture_enum.ship_build__description_panel, New Rectangle(Convert.ToInt32(screen_size.x / 2 + 20), Convert.ToInt32(screen_size.y / 2 - 260), 300, 500), button_style.DisplayOnly, Color.White, Descriptions(0), Color.White, d3d_font_enum.SB_small, True, DrawTextFormat.Center + DrawTextFormat.WordBreak)
+        menu_item(10) = New Menu_button(button_texture_enum.ship_build__description_panel, New Rectangle(Convert.ToInt32(screen_size.x / 2 + 20), Convert.ToInt32(screen_size.y / 2 - 260), 300, 500), button_style.DisplayOnly, Color.White, Descriptions(0), Color.White, d3d_font_enum.SB_small, True, DrawTextFormat.Center + DrawTextFormat.WordBreak)
         Dim left_down_point As PointI = Nothing
         Dim left_release_point As PointI = Nothing
         Dim choice As Integer = 0
@@ -2714,25 +2723,27 @@
 
             Select Case choice
                 Case 0
-                    type = ship_class_enum.corvette
+                    type = ship_class_enum.fighterW
                 Case 1
-                    type = ship_class_enum.fighter
+                    type = ship_class_enum.fighterT
                 Case 2
-                    type = ship_class_enum.frigate
+                    type = ship_class_enum.corvette
                 Case 3
-                    type = ship_class_enum.destroyer
+                    type = ship_class_enum.frigate
                 Case 4
-                    type = ship_class_enum.cruiser
+                    type = ship_class_enum.destroyer
                 Case 5
-                    type = ship_class_enum.battle_cruiser
+                    type = ship_class_enum.cruiser
                 Case 6
-                    type = ship_class_enum.battle_ship
+                    type = ship_class_enum.battle_cruiser
                 Case 7
-                    type = ship_class_enum.carrier
+                    type = ship_class_enum.battle_ship
                 Case 8
+                    type = ship_class_enum.carrier
+                Case 9
                     If type > -1 Then Exit Do
             End Select
-            If choice >= 0 AndAlso choice <= 7 Then shipclass = choice : menu_item(9).text = Descriptions(choice)
+            If choice >= 0 AndAlso choice <= 7 Then shipclass = choice : menu_item(10).text = Descriptions(choice)
             If shipclass >= 0 Then menu_item(shipclass).press()
 
             render_new_ship_options(menu_item)

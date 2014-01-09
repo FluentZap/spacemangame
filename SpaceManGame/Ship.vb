@@ -285,22 +285,16 @@ Public Class Ship
                                 Dim crew_ef = (Device.Value.crew_efficiency * 0.8 + 0.2)
                                 Dim supply_ef = pipeline_list(pipeline.Pipeline_Connection).Efficiency
                                 Dim device_max = pipeline.Amount
-                                'Add to drain
-                                'Pipeline_Drain += Convert.ToInt32(device_list(con_device).crew_efficiency * 0.01 * device_list(con_device).pipeline(pipeline.Value.Type))
+                                'Add to drain                                
                                 'Throttled_Engine
-
-                                'Pipeline_Drain += -Convert.ToInt32(crew_ef * device_max)
-                                'Pipeline_Drain += -(crew_ef * device_max * Device.Value.Throttle)
-                                Device.Value.Thrust_Max = Device_tech_list(Device.Value.tech_ID).Thrust_Power * crew_ef * supply_ef
-                                Pipeline_Drain += -(crew_ef * device_max * If(Device.Value.Thrust_Max <> 0, Device.Value.Thrust_Power / Device_tech_list(Device.Value.tech_ID).Thrust_Power, 0))
+                                Device.Value.Thrust_Max = Device_tech_list(Device.Value.tech_ID).Thrust_Power * crew_ef * supply_ef                                
+                                Pipeline_Drain += -device_max
 
                             Case device_type_enum.thruster
                                 Dim supply_ef = pipeline_list(pipeline.Pipeline_Connection).Efficiency
-                                'Add to drain                        
-                                'Pipeline_Drain += -Convert.ToInt32(pipeline.Amount)                                
-                                'Pipeline_Drain += -(pipeline.Amount * Device.Value.Throttle)
+                                'Add to drain
                                 Device.Value.Thrust_Max = Device_tech_list(Device.Value.tech_ID).Thrust_Power * supply_ef
-                                Pipeline_Drain += -(pipeline.Amount * If(Device.Value.Thrust_Max <> 0, Device.Value.Thrust_Power / Device_tech_list(Device.Value.tech_ID).Thrust_Power, 0))
+                                Pipeline_Drain += -pipeline.Amount
                         End Select
 
 
@@ -841,16 +835,43 @@ Public Class Ship
         End If
         'Move Ship
 
-        location.x += vector_velocity.x * 50
-        location.y += vector_velocity.y * 50
+        location.x += vector_velocity.x
+        location.y += vector_velocity.y
         rotation += angular_velocity
+
+        'vector_velocity.x = 0
+        'vector_velocity.y = 0
+        'angular_velocity = 0
         If rotation < 0 Then rotation += PI * 2
         If rotation > PI * 2 Then rotation -= PI * 2
 
         'FRICTION
-        angular_velocity -= angular_velocity / 100
-        vector_velocity.x -= vector_velocity.x / 100
-        vector_velocity.y -= vector_velocity.y / 100
+        vector_velocity.x -= vector_velocity.x * Drag
+        vector_velocity.y -= vector_velocity.y * Drag
+        angular_velocity -= angular_velocity * Drag
+
+        Exit Sub
+
+        If vector_velocity.x < 0 Then
+            'If vector_velocity.x + Friction > 0 Then vector_velocity.x = 0 Else vector_velocity.x += Friction
+        Else
+            'If vector_velocity.x - Friction < 0 Then vector_velocity.x = 0 Else vector_velocity.x -= Friction
+        End If
+
+        If vector_velocity.y < 0 Then
+            'If vector_velocity.y + Friction > 0 Then vector_velocity.y = 0 Else vector_velocity.y += Friction
+        Else
+            'If vector_velocity.y - Friction < 0 Then vector_velocity.y = 0 Else vector_velocity.y -= Friction
+        End If
+
+
+        If angular_velocity < 0 Then
+            'If angular_velocity + Friction > 0 Then angular_velocity = 0 Else angular_velocity += Friction
+        Else
+            'If angular_velocity - Friction < 0 Then angular_velocity = 0 Else angular_velocity -= Friction
+        End If
+
+
 
         If orbiting > -1 Then
             Dim planetPos As PointD
@@ -936,10 +957,15 @@ Public Class Ship
         Dim RightR As Double
 
         For Each engine In Engine_Coltrol_Group(Direction_Enum.RotateL)
-            LeftR += engine.Value.r
+            If device_list(engine.Key).type = device_type_enum.thruster Then
+                LeftR += engine.Value.r
+            End If
         Next
+
         For Each engine In Engine_Coltrol_Group(Direction_Enum.RotateR)
-            RightR += engine.Value.r
+            If device_list(engine.Key).type = device_type_enum.thruster Then
+                RightR += engine.Value.r
+            End If
         Next
 
         'Check rotaion direction
@@ -962,7 +988,12 @@ Public Class Ship
                     End If
 
                     If rotation < Turn_Point Then
-                        Stop_Rotation = True                        
+                        Stop_Rotation = True
+                        For Each group In Engine_Coltrol_Group
+                            For Each engine In group.Value
+                                Set_Engine_Throttle(engine.Key, 0)
+                            Next
+                        Next
                     End If
 
                 Else
@@ -973,12 +1004,23 @@ Public Class Ship
                     End If
 
                     If rotation > Turn_Point Then
-                        Stop_Rotation = True                        
+                        Stop_Rotation = True
+                        For Each group In Engine_Coltrol_Group
+                            For Each engine In group.Value
+                                Set_Engine_Throttle(engine.Key, 0)
+                            Next
+                        Next
                     End If
 
                 End If
             End If
         End If
+
+
+
+
+
+        Exit Sub
 
         If Stop_Rotation = True Then
             If angular_velocity > 0 Then
@@ -1039,6 +1081,8 @@ Public Class Ship
 
         Dim distance As Double = target_rotation - rotation
 
+        'Vel Final = initial(1-drag)^time
+
         'Check rotaion direction        
         Dim tar As Double = target_rotation
         Dim rot As Double = rotation
@@ -1050,10 +1094,18 @@ Public Class Ship
         If tar > rot Then left = (PI * 2 + rot) - tar
         If tar < rot Then left = rot - tar
 
+
         If left > right Then
             Dim ratio As Double = Math.Abs(LeftR) / Math.Abs(RightR)
             Turn_Point = (rotation + right * (ratio / 2)) + If(LeftR <> 0, angular_velocity / LeftR, 0)
             Turn_Left = False
+
+            '(RightR*100)
+
+            't = log(Vf * V0) / log(1 - d)
+
+            Dim t As Double = Math.Log(0.00001 / angular_velocity) / Math.Log(1 - 0.01)
+
         End If
 
 
@@ -1064,6 +1116,7 @@ Public Class Ship
         End If
 
     End Sub
+
 
     Sub accelerate(ByVal speed As Double)
         speed = speed / Mass
@@ -1124,7 +1177,8 @@ Public Class Ship
 
 
         rnd = random(50, 100) / 100
-        u.Projectiles.Add(New Projectile(Fire_Point, Vector, rotate, CInt(100 * rnd), 1000))
+        'u.Projectiles.Add(New Projectile(Fire_Point, Vector, rotate, CInt(100 * rnd), 1000))
+        u.Projectiles.Add(New Projectile(Fire_Point, Vector, rotate, 1000))
 
     End Sub
 

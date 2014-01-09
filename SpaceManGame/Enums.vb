@@ -216,7 +216,8 @@
         remove_room
     End Enum
     Enum ship_class_enum As Byte
-        fighter
+        fighterW
+        fighterT
         corvette
         frigate
         destroyer
