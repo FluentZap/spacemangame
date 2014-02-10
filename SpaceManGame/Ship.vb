@@ -482,7 +482,6 @@ Public Class Ship
             item.Value.Update_Sprite()
         Next
 
-
         For Each item In Crew_list
             item.Value.Update_Sprite()
         Next
@@ -1073,17 +1072,27 @@ Public Class Ship
         Dim RightR As Double
 
         For Each engine In Engine_Coltrol_Group(Direction_Enum.RotateL)
-            LeftR += engine.Value.r
+            If device_list(engine.Key).type = device_type_enum.thruster Then LeftR += engine.Value.r
         Next
         For Each engine In Engine_Coltrol_Group(Direction_Enum.RotateR)
-            RightR += engine.Value.r
+            If device_list(engine.Key).type = device_type_enum.thruster Then RightR += engine.Value.r
         Next
+
+
+        'Cycles to stop at max velocity
+        'Cycles to get to max velocity
+
+
+
+
+
+
 
         Dim distance As Double = target_rotation - rotation
 
         'Vel Final = initial(1-drag)^time
 
-        'Check rotaion direction        
+        'Check rotaion direction
         Dim tar As Double = target_rotation
         Dim rot As Double = rotation
         Dim left As Double

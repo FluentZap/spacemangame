@@ -290,7 +290,7 @@
 
     Enum Projectile_Tile_Type_Enum
         Energy1
-
+        Fire1
     End Enum
 
 

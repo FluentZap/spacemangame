@@ -143,7 +143,7 @@
 
         'Projectile Sprites
         projectile_tile_texture(Projectile_Tile_Type_Enum.Energy1) = Direct3D.TextureLoader.FromFile(d3d_device, Application.StartupPath + "\Data\Textures\Projectiles\Energy1.png", 32, 32, 0, Direct3D.Usage.None, Texture_Format, Direct3D.Pool.Managed, Filter, MipFilter, Color.FromArgb(255, 0, 255, 0).ToArgb)
-
+        projectile_tile_texture(Projectile_Tile_Type_Enum.Fire1) = Direct3D.TextureLoader.FromFile(d3d_device, Application.StartupPath + "\Data\Textures\Projectiles\Fire1.png", 32, 32, 0, Direct3D.Usage.None, Texture_Format, Direct3D.Pool.Managed, Filter, MipFilter, Color.FromArgb(255, 0, 255, 0).ToArgb)
 
         effect_texture(0) = Direct3D.TextureLoader.FromFile(d3d_device, Application.StartupPath + "\Data\Textures\Tiles\Cloud1.png", 512, 512, 0, Direct3D.Usage.None, Texture_Format, Direct3D.Pool.Managed, Filter, MipFilter, 0)
         effect_texture(1) = Direct3D.TextureLoader.FromFile(d3d_device, Application.StartupPath + "\Data\Textures\Tiles\Cloud2.png", 512, 512, 0, Direct3D.Usage.None, Texture_Format, Direct3D.Pool.Managed, Filter, MipFilter, 0)

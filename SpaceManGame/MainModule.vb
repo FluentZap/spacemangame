@@ -227,7 +227,7 @@
     Public view_location_planet As PointI
     Public view_location_star_map As PointI
 
-    Public Rview_location_personal As PointD
+    'Public Rview_location_personal As PointD
     Public view_location_personal As PointD
 
     Public view_location_weapon_control As PointD
@@ -332,9 +332,9 @@
         Random_Seed = DateAndTime.Timer
         Randomize(Random_Seed)
         sb_zoom = 1
-        internal_zoom = 1
-        external_zoom = 1
-        personal_zoom = 1
+        internal_zoom = 2
+        external_zoom = 2
+        personal_zoom = 2
 
         Near_planet = -1
         Loaded_planet = -1
@@ -752,7 +752,7 @@
         u.planets.Remove(0)
         u.planets.Add(0, planet1)
 
-        Add_Officer(0, New Officer(0, "Captian", Officer_location_enum.Ship, 0, pos, 1, 0.2, New Officer.sprite_list(character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head)))
+        Add_Officer(0, New Officer(0, "Captian", Officer_location_enum.Planet, 0, pos, 1, 0.2, New Officer.sprite_list(character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head)))
 
         Officer_List(0).Officer_Classes.Add(New Officer_Class(Class_List_Enum.Mage, 0, 1))
         Officer_List(0).Officer_Classes.Add(New Officer_Class(Class_List_Enum.SpellSword, 0, 1))
@@ -814,7 +814,7 @@
         Dim FPS_start, loops As Long        
         render_time = Current_Time()
         'Logic_Time = render_time
-
+        Dim Rendered As Boolean = False
 
 
         Do Until terminate
@@ -822,8 +822,7 @@
             MainForm.getUI(pressedkeys, mouse_info)
             Ship_List(1).angular_velocity = 0.001
             'Logic
-
-            QueryPerformanceCounter(time_current)
+            'QueryPerformanceCounter(time_current)
             If Logic_Time > Logic_Ratio Then
                 Logic_Time -= 1
 
@@ -834,6 +833,9 @@
                         Personal_UI(1)
                         For Each ship In Ship_List.Values
                             ship.DoEvents()
+                        Next
+                        For Each Planet In Planet_List.Values
+                            Planet.DoEvents()
                         Next
                         update_Planet_Movements()
                         check_near_planet(current_selected_ship_view)
@@ -865,15 +867,15 @@
                         Personal_Level_UI()
                 End Select
                 'System.Threading.Thread.Sleep(60)
+                Logic_Time += Logic_Ratio
             End If
             Logic_Duration = Current_Time() - time_current
-
 
 
             'Render
             QueryPerformanceCounter(time_current)
             If render_end + refresh_rate <= time_current + render_duration + Logic_Duration Then
-                If render_end + render_duration < time_current Then
+                If render_end + render_duration <= time_current Then
                     QueryPerformanceCounter(render_start)
 
                     Select Case current_view
@@ -892,15 +894,13 @@
                         Case Is = current_view_enum.personal_level_screen
                             render_personal_level()
                     End Select
-                    'System.Threading.Thread.Sleep(60)
-
+                    'System.Threading.Thread.Sleep(60)                    
                     QueryPerformanceCounter(render_end)
                     render_duration = render_end - render_start
                     loops += 1
-                    Logic_Time += Logic_Ratio
                 End If
             End If
-
+            QueryPerformanceCounter(time_current)
             If pressedkeys.Contains(Keys.Escape) Then terminate = True
             If pressedkeys.Contains(Keys.F10) Then pressedkeys.Remove(Keys.F10) : lock_screen()
 
@@ -1034,16 +1034,25 @@
         Select Case Ability
             Case Is = Ability_List_Enum.Mage__Fireball
                 Dim start_Point As PointD = Officer_List(player).GetLocationD
+                Dim Vector_Velocity As PointD
+                Dim Rotation As Double
                 start_Point.x += 15 : start_Point.y += 15
                 Select Case Officer_List(player).input_flages.Facing
                     Case Is = Move_Direction.Up
-                        Ship_List(Officer_List(player).Location_ID).Projectiles.Add(New Projectile(start_Point, New PointD(0, -12), 0, 500))
+                        Vector_Velocity = New PointD(0, -12) : Rotation = 0
                     Case Is = Move_Direction.Down
-                        Ship_List(Officer_List(player).Location_ID).Projectiles.Add(New Projectile(start_Point, New PointD(0, 12), PI, 500))
+                        Vector_Velocity = New PointD(0, 12) : Rotation = PI
                     Case Is = Move_Direction.Left
-                        Ship_List(Officer_List(player).Location_ID).Projectiles.Add(New Projectile(start_Point, New PointD(-12, 0), PI * 1.5, 500))
+                        Vector_Velocity = New PointD(-12, 0) : Rotation = PI * 1.5
                     Case Is = Move_Direction.Right
+                        Vector_Velocity = New PointD(12, 0) : Rotation = PI * 0.5
+                End Select
+                Select Case Officer_List(player).region
+                    Case Is = Officer_location_enum.Planet
+                        Planet_List(Officer_List(player).Location_ID).Projectiles.Add(New Projectile(start_Point, Vector_Velocity, Rotation, 500))
+                    Case Is = Officer_location_enum.Ship
                         Ship_List(Officer_List(player).Location_ID).Projectiles.Add(New Projectile(start_Point, New PointD(12, 0), PI * 0.5, 500))
+                    Case Is = Officer_location_enum.Enemy_Ship                        
                 End Select
 
 
@@ -1061,12 +1070,13 @@
         If pressedkeys.Contains(Keys.Z) Then personal_zoom = personal_zoom + 1 : pressedkeys.Remove(Keys.Z)
 
         If pressedkeys.Contains(Keys.Space) Then
-            Dim pos As PointD = New PointD(Ship_List(0).center_point.x * 32, Ship_List(0).center_point.y * 32)
+            'Dim pos As PointD = New PointD(Ship_List(0).center_point.x * 32, Ship_List(0).center_point.y * 32)
+            Dim pos As New PointD(16 * 32, 16 * 32)
             Dim id As Integer
             For id = 0 To 500
                 If Not Crew_List.ContainsKey(id) Then Exit For
             Next
-            Add_Crew(id, New Crew(0, pos, 0, Officer_location_enum.Ship, 1, character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head, New crew_resource_type(10, 10)))
+            Add_Crew(id, New Crew(1, pos, 0, Officer_location_enum.Planet, 1, character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head, New crew_resource_type(10, 10)))
             'Ship_List(0).Crew_list.Add(id, New Crew(0, pos, 1, character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head, New crew_resource_type(10, 10)))
             'ship1.Crew_list.Add(0, New Crew(pos, 1, 100, character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head, New crew_resource_type(10, 10)))
             pressedkeys.Remove(Keys.Space)
@@ -1135,10 +1145,11 @@
 
         If Officer_List(current_player).region = Officer_location_enum.Planet Then
             'have to be separate
-            If pressedkeys.Contains(Keys.W) Then Planet_List(Officer_List(current_player).Location_ID).MoveOfficer(0, New PointD(0, -amount * rate))
-            If pressedkeys.Contains(Keys.S) Then Planet_List(Officer_List(current_player).Location_ID).MoveOfficer(0, New PointD(0, amount * rate))
-            If pressedkeys.Contains(Keys.A) Then Planet_List(Officer_List(current_player).Location_ID).MoveOfficer(0, New PointD(-amount * rate, 0))
-            If pressedkeys.Contains(Keys.D) Then Planet_List(Officer_List(current_player).Location_ID).MoveOfficer(0, New PointD(amount * rate, 0))
+
+            'If pressedkeys.Contains(Keys.W) Then Planet_List(Officer_List(current_player).Location_ID).MoveOfficer(0, New PointD(0, -amount * rate))
+            'If pressedkeys.Contains(Keys.S) Then Planet_List(Officer_List(current_player).Location_ID).MoveOfficer(0, New PointD(0, amount * rate))
+            'If pressedkeys.Contains(Keys.A) Then Planet_List(Officer_List(current_player).Location_ID).MoveOfficer(0, New PointD(-amount * rate, 0))
+            'If pressedkeys.Contains(Keys.D) Then Planet_List(Officer_List(current_player).Location_ID).MoveOfficer(0, New PointD(amount * rate, 0))
 
             'Planet_List(Officer_List(current_player).Location_ID).MoveOfficer(0, New PointD(amount * rate, 0))
             'Planet_List(Officer_List(1).Location_ID).MoveOfficer(1, New PointD(amount, 0))
@@ -1418,7 +1429,7 @@
             If pressedkeys.Contains(Keys.X) Then
                 For Each group In Ship_List(current_selected_ship_view).Engine_Coltrol_Group
                     For Each Device In group.Value
-                        Ship_List(current_selected_ship_view).Set_Engine_Throttle(Device.Key, 1)
+                        Ship_List(current_selected_ship_view).Set_Engine_Throttle(Device.Key, 0)
                     Next
                 Next
             End If
