@@ -141,7 +141,8 @@
 
         d3d_sprite.Transform = Matrix.Identity
         draw_text("FPS " + FPS.ToString, New Rectangle(0, 0, 100, 20), CType(DrawTextFormat.Center + DrawTextFormat.VerticalCenter, DrawTextFormat), Color.White, d3d_font(d3d_font_enum.SB_small))
-
+        draw_text("Logic  " + Logic_Duration.ToString, New Rectangle(0, 50, 100, 20), CType(DrawTextFormat.Center + DrawTextFormat.VerticalCenter, DrawTextFormat), Color.White, d3d_font(d3d_font_enum.SB_small))
+        draw_text("Render " + render_duration.ToString, New Rectangle(0, 100, 100, 20), CType(DrawTextFormat.Center + DrawTextFormat.VerticalCenter, DrawTextFormat), Color.White, d3d_font(d3d_font_enum.SB_small))
         render_personal_health_overlay(New PointI(256, screen_size.y - 96), Officer_List(current_player).Health)
 
         If Crew_List.ContainsKey(Mouse_Target) Then
@@ -253,6 +254,16 @@
             End If
 
         Next
+
+        Dim x1 As Single
+        Dim y1 As Single
+        For Each pro In planet.Projectiles
+            x1 = CSng(pro.Location.x - view_location_personal.x - 16)
+            y1 = CSng(pro.Location.y - view_location_personal.y - 16)
+            d3d_sprite.Transform = Matrix.Transformation2D(New Vector2(0, 0), 0, New Vector2(scale, scale), New Vector2(16 * scale, 16 * scale), CSng(pro.Rotation), New Vector2(x1 * scale, y1 * scale))
+            d3d_sprite.Draw(projectile_tile_texture(Projectile_Tile_Type_Enum.Fire1), Rectangle.Empty, Vector3.Empty, New Vector3(0, 0, 0), Color.White)
+        Next
+
 
     End Sub
 

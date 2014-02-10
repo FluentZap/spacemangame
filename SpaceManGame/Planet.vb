@@ -29,6 +29,8 @@
     Public officer_list As Dictionary(Of Integer, Officer) = New Dictionary(Of Integer, Officer)
 
 
+    Public Projectiles As HashSet(Of Projectile) = New HashSet(Of Projectile)
+
     Sub New(ByVal type As planet_type_enum, ByVal size As PointI, ByVal orbit_point As Integer, ByVal orbit_distance As Integer, ByVal orbits_planet As Boolean, ByVal theta_offset As Double)
         Me.type = type
         ReDim Me.tile_map(size.x, size.y)
@@ -95,18 +97,27 @@
     End Sub
 
 
-
-
-
-
     Public Sub DoEvents()
 
         Update_Officers()
 
+        Handle_Projectiles()
 
+        Run_animations()
 
     End Sub
 
+
+    Sub Run_animations()
+        For Each item In officer_list
+            item.Value.Update_Sprite()
+        Next
+
+        For Each item In crew_list
+            item.Value.Update_Sprite()
+        Next
+
+    End Sub
 
     Sub Update_Officers()
         For Each item In Officer_List
@@ -139,6 +150,69 @@
 
 
         Next
+    End Sub
+
+
+    Sub Handle_Projectiles()
+        Dim remove_List As List(Of Projectile) = New List(Of Projectile)
+        For Each item In Me.Projectiles
+            item.Location.x += item.vector_velocity.x
+            item.Location.y += item.vector_velocity.y
+            item.Life -= 1
+            If item.Life <= 0 Then
+                If item.Second_Stage_Life <= 0 Then
+                    remove_List.Add(item)
+                Else
+                    item.Life = item.Second_Stage_Life
+                    item.Second_Stage_Life = 0
+                    Dim vec As PointD
+
+                    vec.x = Math.Cos(item.Rotation - 1.57079633)
+                    vec.y = Math.Sin(item.Rotation - 1.57079633)
+
+                    item.vector_velocity.x += vec.x * 20
+                    item.vector_velocity.y += vec.y * 20
+                End If
+            End If
+
+
+            Dim tile As PointI = New PointI(item.Location.intX \ 32, item.Location.intY \ 32)
+            If tile.x >= 0 AndAlso tile.x <= size.x AndAlso tile.y >= 0 AndAlso tile.y <= size.y Then
+                If (Not tile_map(tile.x, tile.y).walkable = walkable_type_enum.Walkable) AndAlso (Not tile_map(tile.x, tile.y).walkable = walkable_type_enum.OpenDoor) Then
+                    Detonate_Local_Projectile(item)
+                    remove_List.Add(item)
+                End If
+            End If
+
+        Next
+
+        For Each item In remove_List
+            Me.Projectiles.Remove(item)
+        Next
+
+    End Sub
+
+
+    Sub Detonate_Local_Projectile(ByVal Pro As Projectile)
+        Dim contact_Point As PointI = New PointI(Pro.Location.intX \ 32, Pro.Location.intY \ 32)
+        'tile_map(contact_Point.x, contact_Point.y).color = Color.Red
+
+        For y = contact_Point.y - 2 To contact_Point.y + 2
+            For x = contact_Point.x - 2 To contact_Point.x + 2
+                If x >= 0 AndAlso x <= size.x AndAlso y >= 0 AndAlso y <= size.y Then
+                    'tile_map(x, y).color = Color.Red
+
+                    For Each Crew In crew_list
+                        If Crew.Value.find_tile = New PointI(x, y) Then
+                            Crew.Value.Health.Damage_All_Limbs(3)
+                        End If
+
+                    Next
+
+                End If
+            Next
+        Next
+
     End Sub
 
 
