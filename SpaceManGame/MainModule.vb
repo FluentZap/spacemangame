@@ -866,8 +866,7 @@
                     Case Is = current_view_enum.personal_level_screen
                         Personal_Level_UI()
                 End Select
-                'System.Threading.Thread.Sleep(60)
-                Logic_Time += Logic_Ratio
+                'System.Threading.Thread.Sleep(60)                
             End If
             Logic_Duration = Current_Time() - time_current
 
@@ -898,6 +897,7 @@
                     QueryPerformanceCounter(render_end)
                     render_duration = render_end - render_start
                     loops += 1
+                    Logic_Time += Logic_Ratio
                 End If
             End If
             QueryPerformanceCounter(time_current)
