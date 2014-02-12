@@ -81,6 +81,7 @@
     Public FuelMax As Integer
     Public Energy As Integer
     Public EnergyMax As Integer
+    Public Perception As Integer
 
     Public Ani_Index As Integer
     Public Ani_Step As Integer
