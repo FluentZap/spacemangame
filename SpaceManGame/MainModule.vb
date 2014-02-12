@@ -48,8 +48,7 @@
     Public planet_tile_texture(100) As Texture
     Public projectile_tile_texture(100) As Texture
 
-    Public effect_texture(100) As Texture
-
+    Public effect_texture(100) As Texture    
 
     Public device_tile_texture(100) As Texture
     Public character_texture(100) As Texture
@@ -235,6 +234,7 @@
 
     Public view_location_personal_Last As PointD
 
+    Public view_personal_Ambient As Color = Color.FromArgb(255, 200, 200, 200)
 
     'Public view_personal_menu_items As Dictionary(Of Internal_menu_items_Enum, Menu_button) = New Dictionary(Of Internal_menu_items_Enum, Menu_button)
     'Public view_external_menu_items As Dictionary(Of External_menu_items_Enum, Menu_button) = New Dictionary(Of External_menu_items_Enum, Menu_button)
@@ -282,6 +282,8 @@
 
     Public Loaded_Officer_Textures As Dictionary(Of Integer, Texture) = New Dictionary(Of Integer, Texture)
 
+
+    Public OffscreenLightMap As Texture
 
     'External View
     Public External_Menu_Open As Boolean    
@@ -484,6 +486,8 @@
         For a = 0 To 15
             external_planet_texture(a) = New Texture(d3d_device, 2048, 2048, 0, Usage.RenderTarget, Format.X8R8G8B8, Pool.Default)
         Next
+
+        OffscreenLightMap = New Texture(d3d_device, screen_size.x, screen_size.y, 0, Usage.RenderTarget, Format.X8R8G8B8, Pool.Default)
     End Sub
 
     Sub Clean_Up()

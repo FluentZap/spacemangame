@@ -1,5 +1,19 @@
 ﻿Module Rendering
 
+    Class Lights_Type
+        'Dim Type as
+        Public Location As PointD
+        Public LightColor As Color
+
+        Sub New(ByVal Location As PointD, ByVal LightColor As Color)
+            Me.Location = Location
+            Me.LightColor = LightColor
+        End Sub
+    End Class
+
+
+    Private Lights As HashSet(Of Lights_Type) = New HashSet(Of Lights_Type)
+
     Public shipexternal_redraw As Boolean
 
     Sub Draw_Ship_Tile(ByVal TileSet As Integer, ByVal Tile As Integer, ByVal Position As PointD, ByVal Color As Color)
@@ -91,10 +105,11 @@
         'Rview_location_personal = view_location_personal
         Dim atsize As Integer = Convert.ToInt32(32 * personal_zoom)
         Dim scale As Single = CSng(personal_zoom)
-
         Dim pos As PointD
+
+
         d3d_device.BeginScene()
-        d3d_device.Clear(ClearFlags.Target, Color.Blue, 1, 0)
+        d3d_device.Clear(ClearFlags.Target, Color.FromArgb(255, 0, 0, 0), 1, 0)
         d3d_sprite.Begin(SpriteFlags.AlphaBlend)
         d3d_device.SetSamplerState(0, SamplerStageStates.MinFilter, TextureFilter.Linear)
         d3d_device.SetSamplerState(0, SamplerStageStates.MagFilter, TextureFilter.None)
@@ -115,7 +130,7 @@
             For Each crew In ship.Crew_list
                 pos.x = crew.Value.location.x - view_location_personal.x
                 pos.y = crew.Value.location.y - view_location_personal.y
-                Draw_Crew(crew.Value.SpriteSet, crew.Value.Get_Sprite, pos, Color.White)
+                Draw_Crew(crew.Value.SpriteSet, crew.Value.Get_Sprite, pos, Color.White)                
             Next
         End If
 
@@ -136,8 +151,18 @@
                 pos.x = crew.Value.location.x - view_location_personal.x
                 pos.y = crew.Value.location.y - view_location_personal.y
                 Draw_Crew(crew.Value.SpriteSet, crew.Value.Get_Sprite, pos, Color.White)
+                'Lights.Add(New Lights_Type(New PointD(crew.Value.location.x - 112, crew.Value.location.x - 112), Color.Green))
             Next
         End If
+
+
+        For Each Pro In Planet_List(Officer_List(player).Location_ID).Projectiles
+            Lights.Add(New Lights_Type(New PointD(Pro.Location.x - 128, Pro.Location.y - 128), Color.Red))
+        Next
+
+
+        Render_Personal_Lighting()
+
 
         d3d_sprite.Transform = Matrix.Identity
         draw_text("FPS " + FPS.ToString, New Rectangle(0, 0, 100, 20), CType(DrawTextFormat.Center + DrawTextFormat.VerticalCenter, DrawTextFormat), Color.White, d3d_font(d3d_font_enum.SB_small))
@@ -148,8 +173,8 @@
         If Crew_List.ContainsKey(Mouse_Target) Then
             render_personal_health_overlay(New PointI(128, screen_size.y - 96), Crew_List(Mouse_Target).Health)
         End If
-
         d3d_sprite.End()
+
         d3d_device.EndScene()
         Try
             'd3d_device.GetSwapChain(0).Present(Present.DoNotWait)
@@ -222,6 +247,9 @@
                         Else
                             Draw_Planet_Tile(TileMap(x, y).type, TileMap(x, y).sprite, pos, Color.FromArgb(255, 255, 255, 255))
                         End If
+
+
+                        'If TileMap(x, y).sprite = 2 Then Lights.Add(New Lights_Type(New PointD(x * 32 - 112, y * 32 - 112), Color.White))
 
                         'If TileMap(x, y).device_tile IsNot Nothing Then Draw_Device_Tile(TileMap(x, y).device_tile.type, TileMap(x, y).device_tile.sprite, pos, TileMap(x, y).device_tile.rotate, TileMap(x, y).device_tile.flip, scale, Color.White)
                     End If
@@ -321,6 +349,53 @@
 
         Next
 
+    End Sub
+
+
+    Sub Render_Personal_Lighting()
+        Dim scale As Single = CSng(personal_zoom)
+
+        d3d_sprite.End()
+        Dim BB As Surface
+        BB = d3d_device.GetRenderTarget(0)
+        'Change to offscreen target
+        d3d_device.SetRenderTarget(0, OffscreenLightMap.GetSurfaceLevel(0))
+        d3d_device.Clear(ClearFlags.Target, view_personal_Ambient, 1, 0)
+        d3d_sprite.Begin(SpriteFlags.AlphaBlend)
+        'Add smoooth sprites
+        d3d_device.RenderState.SourceBlend = Blend.SourceColor
+        d3d_device.RenderState.DestinationBlend = Blend.SourceAlpha
+        d3d_device.RenderState.BlendOperation = BlendOperation.Add
+        d3d_sprite.Transform = Matrix.Transformation2D(New Vector2(0, 0), 0, New Vector2(scale, scale), New Vector2(0, 0), 0, New Vector2(0, 0))
+
+        'Draw offscreen light mask
+        Dim pos As PointD
+        Lights.Add(New Lights_Type(New PointD(0, 0), Color.Blue))
+        For Each Light In Lights
+            pos.x = Light.Location.x - view_location_personal.x
+            pos.y = Light.Location.y - view_location_personal.y
+            d3d_sprite.Draw(effect_texture(Effects_Texture_Enum.Spot_256), Rectangle.Empty, New Vector3(0, 0, 0), New Vector3(pos.sngX, pos.sngY, 0), Light.LightColor)
+        Next       
+        Lights.Clear()
+
+
+        d3d_sprite.End()
+        d3d_device.SetRenderTarget(0, BB)
+
+
+        'Draw light mask
+        d3d_sprite.Begin(SpriteFlags.AlphaBlend)
+        d3d_device.RenderState.SourceBlend = Blend.Zero
+        d3d_device.RenderState.DestinationBlend = Blend.SourceColor
+        d3d_device.RenderState.BlendOperation = BlendOperation.Add
+        d3d_sprite.Transform = Matrix.Identity
+        d3d_sprite.Draw(OffscreenLightMap, Rectangle.Empty, New Vector3(0, 0, 0), New Vector3(0, 0, 0), Color.White)
+        d3d_sprite.End()
+
+        d3d_sprite.Begin(SpriteFlags.AlphaBlend)
+        d3d_device.SetSamplerState(0, SamplerStageStates.MinFilter, TextureFilter.Linear)
+        d3d_device.SetSamplerState(0, SamplerStageStates.MagFilter, TextureFilter.None)
+        d3d_sprite.Transform = Matrix.Transformation2D(New Vector2(0, 0), 0, New Vector2(scale, scale), New Vector2(0, 0), 0, New Vector2(0, 0))
     End Sub
 
 #End Region
