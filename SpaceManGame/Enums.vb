@@ -669,6 +669,13 @@
 
 
 
+    Enum Effects_Texture_Enum
+
+        Spot_256
+
+    End Enum
+
+
 
 
 
