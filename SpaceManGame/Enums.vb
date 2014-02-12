@@ -22,18 +22,18 @@
         End Function
 
         Function sngX() As Single
-            Return CSng(x)
+            Return CSng(x - 0.005)
         End Function
 
         Function sngY() As Single
-            Return CSng(y)
+            Return CSng(y - 0.005)
         End Function
 
 
         Function PointI() As PointI
 
             'Return New PointI(CInt(x), CInt(y))
-            Return New PointI(CInt(Math.Round(x)), CInt(Math.Round(y)))
+            Return New PointI(CInt(x), CInt(y))
         End Function
 
     End Structure

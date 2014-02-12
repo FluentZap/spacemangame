@@ -189,6 +189,7 @@
 
     'Temp varables
     Public FPS As Double
+    Public LPS As Double
     Public Distance_from As Double
 
     Public Logic_Time As Double
@@ -350,9 +351,9 @@
         'refresh_rate = CLng(Math.Round(cps / (d3d_device.GetSwapChain(0).DisplayMode.RefreshRate)))
 
 
-        refresh_rate = CLng(Math.Round(cps / 60))
+        refresh_rate = CLng(cps / 60)
 
-        Logic_Ratio = refresh_rate / (cps / 120)
+        Logic_Ratio = CSng(refresh_rate / (cps / 120))
 
     End Sub
 
@@ -811,7 +812,7 @@
 
         'Reload_Officer_Textures()
 
-        Dim FPS_start, loops As Long        
+        Dim FPS_start, loops, Logic_loops As Long
         render_time = Current_Time()
         'Logic_Time = render_time
         Dim Rendered As Boolean = False
@@ -824,12 +825,11 @@
             'Logic
             'QueryPerformanceCounter(time_current)
             If Logic_Time > Logic_Ratio Then
-                Logic_Time -= 1
-
+                Logic_Time -= 1                
                 Select Case current_view
                     Case Is = current_view_enum.ship_internal
                         test_ui()
-                    Case Is = current_view_enum.personal
+                    Case Is = current_view_enum.personal                        
                         Personal_UI(1)
                         For Each ship In Ship_List.Values
                             ship.DoEvents()
@@ -866,7 +866,8 @@
                     Case Is = current_view_enum.personal_level_screen
                         Personal_Level_UI()
                 End Select
-                'System.Threading.Thread.Sleep(60)                
+                'System.Threading.Thread.Sleep(60) 
+                Logic_loops += 1
             End If
             Logic_Duration = Current_Time() - time_current
 
@@ -910,8 +911,10 @@
             QueryPerformanceCounter(time_current)
             If FPS_start + cps <= time_current Then
                 FPS = loops
+                LPS = Logic_loops
                 QueryPerformanceCounter(FPS_start)
                 loops = 0
+                Logic_loops = 0
                 'If FPS > 60 Then refresh_rate -= CLng(60 / FPS) * cps
                 'If FPS < 60 Then refresh_rate += CLng(60 / FPS) * cps
             End If
@@ -1036,22 +1039,24 @@
                 Dim start_Point As PointD = Officer_List(player).GetLocationD
                 Dim Vector_Velocity As PointD
                 Dim Rotation As Double
+                Dim velocity As Double = 5
                 start_Point.x += 15 : start_Point.y += 15
+
                 Select Case Officer_List(player).input_flages.Facing
                     Case Is = Move_Direction.Up
-                        Vector_Velocity = New PointD(0, -12) : Rotation = 0
+                        Vector_Velocity = New PointD(0, -1 * velocity) : Rotation = 0
                     Case Is = Move_Direction.Down
-                        Vector_Velocity = New PointD(0, 12) : Rotation = PI
+                        Vector_Velocity = New PointD(0, 1 * velocity) : Rotation = PI
                     Case Is = Move_Direction.Left
-                        Vector_Velocity = New PointD(-12, 0) : Rotation = PI * 1.5
+                        Vector_Velocity = New PointD(-1 * velocity, 0) : Rotation = PI * 1.5
                     Case Is = Move_Direction.Right
-                        Vector_Velocity = New PointD(12, 0) : Rotation = PI * 0.5
+                        Vector_Velocity = New PointD(1 * velocity, 0) : Rotation = PI * 0.5
                 End Select
                 Select Case Officer_List(player).region
                     Case Is = Officer_location_enum.Planet
-                        Planet_List(Officer_List(player).Location_ID).Projectiles.Add(New Projectile(start_Point, Vector_Velocity, Rotation, 500))
+                        Planet_List(Officer_List(player).Location_ID).Projectiles.Add(New Projectile(start_Point, Vector_Velocity, Rotation, 100))
                     Case Is = Officer_location_enum.Ship
-                        Ship_List(Officer_List(player).Location_ID).Projectiles.Add(New Projectile(start_Point, New PointD(12, 0), PI * 0.5, 500))
+                        Ship_List(Officer_List(player).Location_ID).Projectiles.Add(New Projectile(start_Point, Vector_Velocity, Rotation, 500))
                     Case Is = Officer_location_enum.Enemy_Ship                        
                 End Select
 
@@ -1083,9 +1088,9 @@
         End If
 
 
-        If pressedkeys.Contains(Keys.ControlKey) Then
+        If pressedkeys.Contains(Keys.OemQuestion) Then
             Activate_Ability(current_player, Ability_List_Enum.Mage__Fireball)
-            pressedkeys.Remove(Keys.ControlKey)
+            pressedkeys.Remove(Keys.OemQuestion)
         End If
 
 

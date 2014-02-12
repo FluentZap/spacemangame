@@ -127,8 +127,8 @@
             'Next a
             d3d_sprite.Transform = Matrix.Transformation2D(New Vector2(0, 0), 0, New Vector2(scale, scale), New Vector2(0, 0), 0, New Vector2(0, 0))
             For Each officer In planet.officer_list
-                pos.x = officer.Value.GetLocationD.x - view_location_personal.x
-                pos.y = officer.Value.GetLocationD.y - view_location_personal.y
+                pos.x = officer.Value.GetLocation.x - view_location_personal.x
+                pos.y = officer.Value.GetLocation.y - view_location_personal.y
                 Draw_Officer(Get_Officer_Texture(officer.Key), officer.Value.Get_Sprite, pos, Color.White)
             Next
 
@@ -141,7 +141,7 @@
 
         d3d_sprite.Transform = Matrix.Identity
         draw_text("FPS " + FPS.ToString, New Rectangle(0, 0, 100, 20), CType(DrawTextFormat.Center + DrawTextFormat.VerticalCenter, DrawTextFormat), Color.White, d3d_font(d3d_font_enum.SB_small))
-        draw_text("Logic  " + Logic_Duration.ToString, New Rectangle(0, 50, 100, 20), CType(DrawTextFormat.Center + DrawTextFormat.VerticalCenter, DrawTextFormat), Color.White, d3d_font(d3d_font_enum.SB_small))
+        draw_text("Logic  " + LPS.ToString, New Rectangle(0, 50, 100, 20), CType(DrawTextFormat.Center + DrawTextFormat.VerticalCenter, DrawTextFormat), Color.White, d3d_font(d3d_font_enum.SB_small))
         draw_text("Render " + render_duration.ToString, New Rectangle(0, 100, 100, 20), CType(DrawTextFormat.Center + DrawTextFormat.VerticalCenter, DrawTextFormat), Color.White, d3d_font(d3d_font_enum.SB_small))
         render_personal_health_overlay(New PointI(256, screen_size.y - 96), Officer_List(current_player).Health)
 
@@ -199,6 +199,7 @@
         Dim TileMap(,) As Planet_tile
         TileMap = planet.tile_map
         Dim pos As PointD
+        'Sprite rectangle (tile map value)
         Dim viewRect As Rectangle = New Rectangle(CInt(view_location_personal.x * personal_zoom) \ atsize, CInt(view_location_personal.y * personal_zoom) \ atsize, (screen_size.x \ atsize) + 1, (screen_size.y \ atsize) + 1)
         'For x = (CInt(view_location_personal.intX * personal_zoom) \ atsize) - 1 To (CInt(view_location_personal.x * personal_zoom) \ atsize) + (screen_size.x \ atsize) + 1
         'For y = (CInt(view_location_personal.intY * personal_zoom) \ atsize) - 1 To (CInt(view_location_personal.y * personal_zoom) \ atsize) + (screen_size.y \ atsize) + 1
