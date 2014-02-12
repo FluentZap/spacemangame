@@ -866,7 +866,7 @@
                     Case Is = current_view_enum.personal_level_screen
                         Personal_Level_UI()
                 End Select
-                'System.Threading.Thread.Sleep(60) 
+                'System.Threading.Thread.Sleep(60)
                 Logic_loops += 1
             End If
             Logic_Duration = Current_Time() - time_current
@@ -894,7 +894,7 @@
                         Case Is = current_view_enum.personal_level_screen
                             render_personal_level()
                     End Select
-                    'System.Threading.Thread.Sleep(60)                    
+                    'System.Threading.Thread.Sleep(60)
                     QueryPerformanceCounter(render_end)
                     render_duration = render_end - render_start
                     loops += 1
@@ -1146,6 +1146,13 @@
 
             If view_location_personal.y < -(screen_size.y / 2) Then view_location_personal.y = -(screen_size.y \ 2)
             If view_location_personal.y > Ship_List.Item(current_selected_ship_view).GetShipSize.y * 32 * personal_zoom - screen_size.y / 2 Then view_location_personal.y = CInt(Ship_List.Item(current_selected_ship_view).GetShipSize.y * 32 * personal_zoom) - screen_size.y / 2
+
+            Mouse_Target = -1
+            For Each Crew In Ship_List(current_selected_ship_view).Crew_list
+                Dim adj_mouse As PointI = New PointI(mouse_info.position.x / personal_zoom + view_location_personal.x, mouse_info.position.y / personal_zoom + view_location_personal.y)
+                If Crew.Value.find_rect.Contains(adj_mouse.ToPoint) Then Mouse_Target = Crew.Key
+            Next
+
         End If
 
         If Officer_List(current_player).region = Officer_location_enum.Planet Then
@@ -1168,15 +1175,16 @@
 
             view_location_personal.x = Officer_List(current_player).GetLocationD.x + 16 - CInt((screen_size.x / 2) / personal_zoom)
             view_location_personal.y = Officer_List(current_player).GetLocationD.y + 16 - CInt((screen_size.y / 2) / personal_zoom)
+            Mouse_Target = -1
+            For Each Crew In Planet_List(current_selected_planet_view).crew_list
+                Dim adj_mouse As PointI = New PointI(mouse_info.position.x / personal_zoom + view_location_personal.x, mouse_info.position.y / personal_zoom + view_location_personal.y)
+                If Crew.Value.find_rect.Contains(adj_mouse.ToPoint) Then Mouse_Target = Crew.Key
+            Next
+
         End If
 
         If pressedkeys.Contains(Keys.Tab) Then current_view = current_view_enum.ship_external : pressedkeys.Remove(Keys.Tab)
-        Mouse_Target = -1
-        For Each Crew In Ship_List(current_selected_ship_view).Crew_list
-            Dim adj_mouse As PointI = New PointI(mouse_info.position.x / personal_zoom + view_location_personal.x, mouse_info.position.y / personal_zoom + view_location_personal.y)
-            If Crew.Value.find_rect.Contains(adj_mouse.ToPoint) Then Mouse_Target = Crew.Key
-        Next
-
+        
     End Sub
 
     Sub test_ui()
