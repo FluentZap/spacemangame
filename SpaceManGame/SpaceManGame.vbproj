@@ -101,6 +101,7 @@
     <Compile Include="MainMenu.vb" />
     <Compile Include="pathfinder.vb" />
     <Compile Include="Planet.vb" />
+    <Compile Include="PlanetGenerator.vb" />
     <Compile Include="Planet_Building.vb" />
     <Compile Include="Projectile.vb" />
     <Compile Include="Rendering.vb" />
