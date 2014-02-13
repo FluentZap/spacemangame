@@ -136,6 +136,8 @@
 
         'Render on planet
         If Officer_List(player).region = Officer_location_enum.Planet Then
+            view_location_personal.x = Officer_List(current_player).GetLocationD.x + 16 - CInt((screen_size.x / 2) / personal_zoom)
+            view_location_personal.y = Officer_List(current_player).GetLocationD.y + 16 - CInt((screen_size.y / 2) / personal_zoom)
             Dim planet As Planet = Planet_List(Officer_List(player).Location_ID)
             'For a = 0 To 100
             render_personal_planet(player)
@@ -249,7 +251,7 @@
                         End If
 
 
-                        'If TileMap(x, y).sprite = 2 Then Lights.Add(New Lights_Type(New PointD(x * 32 - 112, y * 32 - 112), Color.White))
+                        If TileMap(x, y).sprite = 2 Then Lights.Add(New Lights_Type(New PointD(x * 32 - 112, y * 32 - 112), Set_Brighness(Color.Green, planet.Animation_Glow)))
 
                         'If TileMap(x, y).device_tile IsNot Nothing Then Draw_Device_Tile(TileMap(x, y).device_tile.type, TileMap(x, y).device_tile.sprite, pos, TileMap(x, y).device_tile.rotate, TileMap(x, y).device_tile.flip, scale, Color.White)
                     End If

@@ -234,7 +234,7 @@
 
     Public view_location_personal_Last As PointD
 
-    Public view_personal_Ambient As Color = Color.FromArgb(255, 200, 200, 200)
+    Public view_personal_Ambient As Color = Color.FromArgb(255, 20, 20, 40) 'Color.FromArgb(255, 20, 20, 40)
 
     'Public view_personal_menu_items As Dictionary(Of Internal_menu_items_Enum, Menu_button) = New Dictionary(Of Internal_menu_items_Enum, Menu_button)
     'Public view_external_menu_items As Dictionary(Of External_menu_items_Enum, Menu_button) = New Dictionary(Of External_menu_items_Enum, Menu_button)
@@ -750,14 +750,15 @@
 
 
 
-        Dim planet1 As Planet = New Planet(planet_type_enum.Forest, New PointI(512, 512), 0, 50000, False, 0.5)
+        Dim planet1 As Planet = New Planet(planet_type_enum.Desert, New PointI(512, 512), 0, 50000, False, 0.5)
         planet1.populate()
-        planet1.landed_ships.Add(0, New PointI(0, 0))
+        'planet1.landed_ships.Add(0, New PointI(0, 0))
         Planet_List = u.planets
         u.planets.Remove(0)
         u.planets.Add(0, planet1)
 
-        Add_Officer(0, New Officer(0, "Captian", Officer_location_enum.Planet, 0, pos, 1, 0.2, New Officer.sprite_list(character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head)))
+        'Fix movement
+        Add_Officer(0, New Officer(0, "Captian", Officer_location_enum.Planet, 0, pos, 30, 0.2, New Officer.sprite_list(character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head)))
 
         Officer_List(0).Officer_Classes.Add(New Officer_Class(Class_List_Enum.Mage, 0, 1))
         Officer_List(0).Officer_Classes.Add(New Officer_Class(Class_List_Enum.SpellSword, 0, 1))
@@ -842,6 +843,7 @@
                             Planet.DoEvents()
                         Next
                         update_Planet_Movements()
+
                         check_near_planet(current_selected_ship_view)
 
 
@@ -1177,8 +1179,6 @@
 
             view_location_personal_Last = view_location_personal
 
-            view_location_personal.x = Officer_List(current_player).GetLocationD.x + 16 - CInt((screen_size.x / 2) / personal_zoom)
-            view_location_personal.y = Officer_List(current_player).GetLocationD.y + 16 - CInt((screen_size.y / 2) / personal_zoom)
             Mouse_Target = -1
             For Each Crew In Planet_List(current_selected_planet_view).crew_list
                 Dim adj_mouse As PointI = New PointI(mouse_info.position.x / personal_zoom + view_location_personal.x, mouse_info.position.y / personal_zoom + view_location_personal.y)

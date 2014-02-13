@@ -1,4 +1,5 @@
-﻿Public Class Planet
+﻿Public Class Planet    
+
     Public orbits_planet As Boolean
     Public orbit_point As Integer
     Public orbit_distance As Integer
@@ -8,6 +9,8 @@
     Public size As PointI
     Public landed_ships As Dictionary(Of Integer, PointI) = New Dictionary(Of Integer, PointI)
 
+    Public Animation_Glow As Single
+    Public Animation_Glow_subtract As Boolean
     Public Block_Map As HashSet(Of PointI) = New HashSet(Of PointI)
     Public Resource_Points As HashSet(Of PointI) = New HashSet(Of PointI)
     Public Building_List As Dictionary(Of Integer, Planet_Building) = New Dictionary(Of Integer, Planet_Building)
@@ -46,8 +49,8 @@
 
     Sub MoveOfficer(ByVal Id As Integer, ByRef vector As PointD)
         Dim Pos(3) As PointD
-        vector.x *= Officer_List(Id).speed
-        vector.y *= Officer_List(Id).speed
+        vector.x *= officer_list(Id).speed
+        vector.y *= officer_list(Id).speed
 
         '0:7,1
         '0:24,1
@@ -55,17 +58,17 @@
         '0:24,31
 
         'top left
-        Pos(0).x = Math.Floor((Officer_List(Id).GetLocation.x + 8 + vector.x) * 0.03125)
-        Pos(0).y = Math.Floor((Officer_List(Id).GetLocation.y + 27 + vector.y) * 0.03125)
+        Pos(0).x = Math.Floor((officer_list(Id).GetLocation.x + 8 + vector.x) * 0.03125)
+        Pos(0).y = Math.Floor((officer_list(Id).GetLocation.y + 27 + vector.y) * 0.03125)
         'top right
-        Pos(1).x = Math.Floor((Officer_List(Id).GetLocation.x + 23 + vector.x) * 0.03125)
-        Pos(1).y = Math.Floor((Officer_List(Id).GetLocation.y + 27 + vector.y) * 0.03125)
+        Pos(1).x = Math.Floor((officer_list(Id).GetLocation.x + 23 + vector.x) * 0.03125)
+        Pos(1).y = Math.Floor((officer_list(Id).GetLocation.y + 27 + vector.y) * 0.03125)
         'bottom left
-        Pos(2).x = Math.Floor((Officer_List(Id).GetLocation.x + 8 + vector.x) * 0.03125)
-        Pos(2).y = Math.Floor((Officer_List(Id).GetLocation.y + 31 + vector.y) * 0.03125)
+        Pos(2).x = Math.Floor((officer_list(Id).GetLocation.x + 8 + vector.x) * 0.03125)
+        Pos(2).y = Math.Floor((officer_list(Id).GetLocation.y + 31 + vector.y) * 0.03125)
         'bottom right
-        Pos(3).x = Math.Floor((Officer_List(Id).GetLocation.x + 23 + vector.x) * 0.03125)
-        Pos(3).y = Math.Floor((Officer_List(Id).GetLocation.y + 31 + vector.y) * 0.03125)
+        Pos(3).x = Math.Floor((officer_list(Id).GetLocation.x + 23 + vector.x) * 0.03125)
+        Pos(3).y = Math.Floor((officer_list(Id).GetLocation.y + 31 + vector.y) * 0.03125)
 
         Dim b As Integer = 0
         For a = 0 To 3
@@ -76,7 +79,7 @@
             End If
         Next
         If b = 4 Then
-            Officer_List(Id).Move(vector)
+            officer_list(Id).Move(vector)
         ElseIf Not b = 0 Then
             If vector.x < 0 Then officer_list(Id).SetLocation(New PointD(Convert.ToInt32(Pos(0).x * 32 + 32 - 8), officer_list(Id).GetLocation.y))
             If vector.x > 0 Then officer_list(Id).SetLocation(New PointD(Convert.ToInt32(Pos(1).x * 32 - 32 + 8), officer_list(Id).GetLocation.y))
@@ -88,11 +91,7 @@
 
 
     Sub populate()
-        If type = planet_type_enum.Forest Then populate_forest()
-
-
-
-
+        populate_planet(Me)
 
     End Sub
 
@@ -117,10 +116,19 @@
             item.Value.Update_Sprite()
         Next
 
+        If Animation_Glow_subtract = True Then
+            Animation_Glow -= 0.001F
+        Else
+            Animation_Glow += 0.001F
+        End If
+
+        If Animation_Glow >= 1 Then Animation_Glow = 1 : Animation_Glow_subtract = True
+        If Animation_Glow <= 0.8 Then Animation_Glow = 0.8 : Animation_Glow_subtract = False
+
     End Sub
 
     Sub Update_Officers()
-        For Each item In Officer_List
+        For Each item In officer_list
             If item.Value.input_flages.walking = True Then
                 Select Case item.Value.input_flages.Facing
 
@@ -216,318 +224,6 @@
     End Sub
 
 
-    Private Sub populate_forest()
-        'Set base
-        For x = 0 To size.x
-            For y = 0 To size.y
-                Me.tile_map(x, y) = New Planet_tile(planet_tile_type_enum.Forest_Planet, planet_sprite_enum.Grass, walkable_type_enum.Walkable)
-            Next
-        Next
-
-        For a = 1 To random(2, 4)
-            Resource_Points.Add(New PointI(random(1, 14), random(1, 14)))
-        Next
-
-
-        Create_City()
-
-
-
-    End Sub
-
-
-    Sub Draw_Street(ByVal Pos As PointI, ByVal Size As PointI)
-
-        For x = Pos.x To Pos.x + Size.x
-            For y = Pos.y To Pos.y + 1
-                If x >= 0 AndAlso x <= Me.size.x AndAlso y >= 0 AndAlso y <= Me.size.y Then
-                    Me.tile_map(x, y) = New Planet_tile(planet_tile_type_enum.Forest_Planet, planet_sprite_enum.Wood, walkable_type_enum.Walkable)
-                End If
-            Next
-        Next
-
-        For x = Pos.x To Pos.x + Size.x
-            For y = Pos.y + Size.y To Pos.y + Size.y - 1 Step -1
-                If x >= 0 AndAlso x <= Me.size.x AndAlso y >= 0 AndAlso y <= Me.size.y Then
-                    Me.tile_map(x, y) = New Planet_tile(planet_tile_type_enum.Forest_Planet, planet_sprite_enum.Wood, walkable_type_enum.Walkable)
-                End If
-            Next
-        Next
-
-        For x = Pos.x To Pos.x + 1
-            For y = Pos.y To Pos.y + Size.y
-                If x >= 0 AndAlso x <= Me.size.x AndAlso y >= 0 AndAlso y <= Me.size.y Then
-                    Me.tile_map(x, y) = New Planet_tile(planet_tile_type_enum.Forest_Planet, planet_sprite_enum.Wood, walkable_type_enum.Walkable)
-                End If
-            Next
-        Next
-
-        For x = Pos.x + Size.x To Pos.x + Size.x - 1 Step -1
-            For y = Pos.y To Pos.y + Size.y
-                If x >= 0 AndAlso x <= Me.size.x AndAlso y >= 0 AndAlso y <= Me.size.y Then
-                    Me.tile_map(x, y) = New Planet_tile(planet_tile_type_enum.Forest_Planet, planet_sprite_enum.Wood, walkable_type_enum.Walkable)
-                End If
-            Next
-        Next
-    End Sub
-
-
-    Enum Block_Type_enum
-        Big
-        Quad
-        DoubleH
-        DoubleV
-        Three1
-        Three2
-        Three3
-        Three4
-    End Enum
-
-    Enum building_size_enum
-        Big
-        Small
-        WideH
-        WideV
-    End Enum
-
-
-    
-
-
-    Sub Create_City()
-        population = random(0, 256)
-        Dim Capital As PointI
-        Dim ShipyardCount As Integer = random(0, 1)
-        Dim LargeShipyardCount As Integer = -1
-
-        Capital = New PointI(random(2, 12), random(2, 12))
-        'Capital = New PointI(2, 2)
-        If population >= 4 Then ShipyardCount += 1
-        If population >= 8 Then ShipyardCount += 1 : LargeShipyardCount += 1
-        If population >= 12 Then ShipyardCount += 1 : LargeShipyardCount += 1
-
-
-
-        Draw_Street(New PointI(Capital.x * 32, Capital.y * 32), New PointI(32, 32))
-        Block_Map.Add(Capital)
-
-        For Each item In Resource_Points
-            For x = item.x * 32 To item.x * 32 + 32
-                For y = item.y * 32 To item.y * 32 + 32
-                    'If random(0, 1) = 1 Then
-                    Me.tile_map(x, y) = New Planet_tile(planet_tile_type_enum.Forest_Planet, planet_sprite_enum.Water, walkable_type_enum.Impassable)
-                    'End If
-                Next
-            Next
-        Next
-
-        'Build_Item(planet_sprite_enum.Tree1, New PointI(2, 3), New PointI(0, 0))
-
-        Build_Blocks(Capital, 9)
-
-        For a = 0 To 10
-            Dim blocks(Block_Map.Count - 1) As PointI
-            Block_Map.CopyTo(blocks, 0)
-
-            For Each item In blocks
-                Build_Blocks(item, 9)
-            Next
-        Next
-
-        Draw_Street(New PointI(0, 0), New PointI(16, 16))
-        Build_Building(New PointI(0, 0), building_type_enum.House)
-
-        'Fighter/Corvette facility 30x30
-        'Smallest Block size 32,32
-        'Frigate facility 40x60
-        'Shipyard_Rect.X = random(10, 60) + City_Rect.X
-        'Shipyard_Rect.Y = random(10, 60) + City_Rect.Y
-
-
-
-
-
-
-
-        'Set city rect
-
-    End Sub
-
-
-    Sub Build_Blocks(ByVal Pos As PointI, ByVal BuildMax As Integer)
-        Dim Built As Integer
-        Dim block_Type As Block_Type_enum
-        For x = Pos.x - 1 To Pos.x + 1
-            For y = Pos.y - 1 To Pos.y + 1
-                If x >= 0 AndAlso x < size.x \ 32 AndAlso y >= 0 AndAlso y < size.y \ 32 Then
-                    If Not Block_Map.Contains(New PointI(x, y)) AndAlso Not Resource_Points.Contains(New PointI(x, y)) Then
-                        block_Type = CType(random(0, 7), Block_Type_enum)
-
-                        Select Case block_Type
-                            Case Is = Block_Type_enum.Big
-                                Draw_Street(New PointI(x * 32, y * 32), New PointI(32, 32))
-                            Case Is = Block_Type_enum.DoubleH
-                                Draw_Street(New PointI(x * 32, y * 32), New PointI(32, 16))
-                                Draw_Street(New PointI(x * 32, y * 32 + 16), New PointI(32, 16))
-                            Case Is = Block_Type_enum.DoubleV
-                                Draw_Street(New PointI(x * 32, y * 32), New PointI(16, 32))
-                                Draw_Street(New PointI(x * 32 + 16, y * 32), New PointI(16, 32))
-                            Case Is = Block_Type_enum.Quad
-                                Draw_Street(New PointI(x * 32, y * 32), New PointI(16, 16))
-                                Draw_Street(New PointI(x * 32 + 16, y * 32), New PointI(16, 16))
-                                Draw_Street(New PointI(x * 32, y * 32 + 16), New PointI(16, 16))
-                                Draw_Street(New PointI(x * 32 + 16, y * 32 + 16), New PointI(16, 16))
-
-                                Build_Building(New PointI(x * 32, y * 32), building_type_enum.House)
-                                Build_Building(New PointI(x * 32 + 16, y * 32), building_type_enum.House)
-                                Build_Building(New PointI(x * 32, y * 32 + 16), building_type_enum.House)
-                                Build_Building(New PointI(x * 32 + 16, y * 32 + 16), building_type_enum.House)
-
-                            Case Is = Block_Type_enum.Three1
-                                Draw_Street(New PointI(x * 32, y * 32), New PointI(16, 32))
-                                Draw_Street(New PointI(x * 32 + 16, y * 32), New PointI(16, 16))
-                                Draw_Street(New PointI(x * 32 + 16, y * 32 + 16), New PointI(16, 16))
-
-                                Build_Building(New PointI(x * 32 + 16, y * 32), building_type_enum.House)
-                                Build_Building(New PointI(x * 32 + 16, y * 32 + 16), building_type_enum.House)
-                            Case Is = Block_Type_enum.Three2
-                                Draw_Street(New PointI(x * 32, y * 32), New PointI(32, 16))
-                                Draw_Street(New PointI(x * 32, y * 32 + 16), New PointI(16, 16))
-                                Draw_Street(New PointI(x * 32 + 16, y * 32 + 16), New PointI(16, 16))
-
-                                Build_Building(New PointI(x * 32, y * 32 + 16), building_type_enum.House)
-                                Build_Building(New PointI(x * 32 + 16, y * 32 + 16), building_type_enum.House)
-                            Case Is = Block_Type_enum.Three3
-                                Draw_Street(New PointI(x * 32 + 16, y * 32), New PointI(16, 32))
-                                Draw_Street(New PointI(x * 32, y * 32), New PointI(16, 16))
-                                Draw_Street(New PointI(x * 32, y * 32 + 16), New PointI(16, 16))
-
-                                Build_Building(New PointI(x * 32, y * 32), building_type_enum.House)
-                                Build_Building(New PointI(x * 32, y * 32 + 16), building_type_enum.House)
-                            Case Is = Block_Type_enum.Three4
-                                Draw_Street(New PointI(x * 32, y * 32 + 16), New PointI(32, 16))
-                                Draw_Street(New PointI(x * 32, y * 32), New PointI(16, 16))
-                                Draw_Street(New PointI(x * 32 + 16, y * 32), New PointI(16, 16))
-
-                                Build_Building(New PointI(x * 32, y * 32), building_type_enum.House)
-                                Build_Building(New PointI(x * 32 + 16, y * 32), building_type_enum.House)
-                        End Select
-
-
-                        Block_Map.Add(New PointI(x, y))
-                        Built += 1
-                        If Built >= BuildMax Then Exit Sub
-                    End If
-                End If
-            Next
-        Next
-
-    End Sub
-
-
-
-    Sub Build_Building(ByVal Pos As PointI, ByVal Type As building_type_enum)
-        Dim ID As Integer
-        For a = 0 To 100000
-            If Not Building_List.ContainsKey(a) Then ID = a : Exit For
-        Next
-
-
-        If Type = building_type_enum.House Then
-            'external
-            For y = 2 To 14
-                For x = 2 To 14
-                    Me.tile_map(Pos.x + x, Pos.y + y).type = planet_tile_type_enum.House
-                    Me.tile_map(Pos.x + x, Pos.y + y).sprite = 4
-                    Me.tile_map(Pos.x + x, Pos.y + y).walkable = walkable_type_enum.Impassable
-                Next
-            Next
-
-            Me.tile_map(Pos.x + 2, Pos.y + 2).sprite = 5
-            Me.tile_map(Pos.x + 14, Pos.y + 2).sprite = 6
-
-            For x = 3 To 13
-                Me.tile_map(Pos.x + x, Pos.y + 2).sprite = 7
-            Next
-
-            For x = 2 To 14
-                Me.tile_map(Pos.x + x, Pos.y + 12).sprite = 1
-            Next
-
-            For x = 2 To 14
-                Me.tile_map(Pos.x + x, Pos.y + 13).sprite = 0
-            Next
-
-            For x = 2 To 14
-                Me.tile_map(Pos.x + x, Pos.y + 14).sprite = 0
-            Next
-
-            For y = 3 To 11
-                Me.tile_map(Pos.x + 2, Pos.y + y).sprite = 8
-            Next
-
-            For y = 3 To 11
-                Me.tile_map(Pos.x + 14, Pos.y + y).sprite = 9
-            Next
-
-            Me.tile_map(Pos.x + 8, Pos.y + 13).sprite = 3
-            Me.tile_map(Pos.x + 8, Pos.y + 14).sprite = 2
-            For y = Pos.y + 3 To Pos.y + 13
-                For x = Pos.x + 3 To Pos.x + 13
-                    Me.tile_map(x, y).walkable = walkable_type_enum.Walkable
-                Next
-            Next
-            Me.tile_map(Pos.x + 8, Pos.y + 14).walkable = walkable_type_enum.Walkable
-            'internal
-            For y = 2 To 13
-                For x = 2 To 13
-                    Me.tile_map(Pos.x + x, Pos.y + y).sprite2 = 4
-                Next
-            Next
-
-            Me.tile_map(Pos.x + 2, Pos.y + 2).sprite2 = 10
-            Me.tile_map(Pos.x + 14, Pos.y + 2).sprite2 = 11
-
-            Me.tile_map(Pos.x + 2, Pos.y + 14).sprite2 = 12
-            Me.tile_map(Pos.x + 14, Pos.y + 14).sprite2 = 13
-
-            For x = 3 To 13
-                Me.tile_map(Pos.x + x, Pos.y + 2).sprite2 = 14
-            Next
-
-            For x = 3 To 13
-                Me.tile_map(Pos.x + x, Pos.y + 14).sprite2 = 14
-            Next
-
-            For y = 3 To 13
-                Me.tile_map(Pos.x + 2, Pos.y + y).sprite2 = 15
-            Next
-
-            For y = 3 To 13
-                Me.tile_map(Pos.x + 14, Pos.y + y).sprite2 = 16
-            Next
-
-            Me.tile_map(Pos.x + 8, Pos.y + 14).sprite2 = 17
-
-
-            Building_List.Add(ID, New Planet_Building(0, New Rectangle(Pos.x + 2, Pos.y + 2, 13, 13), building_type_enum.House))
-        End If
-
-        
-
-
-
-    End Sub
-
-
-    Sub Build_Item(ByVal StartIndex As Integer, ByVal Size As PointI, ByVal Position As PointI)
-        For y = 0 To Size.y
-            For x = 0 To Size.x
-                Me.tile_map(x + Position.x, y + Position.y) = New Planet_tile(planet_tile_type_enum.Forest_Planet, CType(StartIndex + x + y * (Size.x + 1), planet_sprite_enum), walkable_type_enum.Impassable)
-            Next
-        Next
-
-    End Sub
 
 
     Function GetOfficer() As Dictionary(Of Integer, Officer)

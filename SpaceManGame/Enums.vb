@@ -279,6 +279,7 @@
 
     Enum planet_tile_type_enum As Byte
         Forest_Planet
+        Desert_Planet
         Road
         Shipyard
         House

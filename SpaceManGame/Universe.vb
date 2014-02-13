@@ -226,5 +226,4 @@
     Function randomD(ByVal min As Double, ByVal range As Double) As Double
         Return (Rnd() * range) + min
     End Function
-
 End Module
