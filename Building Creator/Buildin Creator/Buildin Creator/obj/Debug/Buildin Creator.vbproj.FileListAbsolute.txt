@@ -1,0 +1,20 @@
+C:\Users\Toad\AppData\Local\Temporary Projects\Buildin Creator\bin\Debug\Buildin Creator.exe
+C:\Users\Toad\AppData\Local\Temporary Projects\Buildin Creator\bin\Debug\Buildin Creator.pdb
+C:\Users\Toad\AppData\Local\Temporary Projects\Buildin Creator\bin\Debug\Buildin Creator.xml
+C:\Users\Toad\AppData\Local\Temporary Projects\Buildin Creator\obj\Debug\ResolveAssemblyReference.cache
+C:\Users\Toad\AppData\Local\Temporary Projects\Buildin Creator\obj\Debug\Buildin_Creator.Form1.resources
+C:\Users\Toad\AppData\Local\Temporary Projects\Buildin Creator\obj\Debug\Buildin_Creator.Resources.resources
+C:\Users\Toad\AppData\Local\Temporary Projects\Buildin Creator\obj\Debug\Buildin Creator.vbproj.GenerateResource.Cache
+C:\Users\Toad\AppData\Local\Temporary Projects\Buildin Creator\obj\Debug\Buildin Creator.exe
+C:\Users\Toad\AppData\Local\Temporary Projects\Buildin Creator\obj\Debug\Buildin Creator.xml
+C:\Users\Toad\AppData\Local\Temporary Projects\Buildin Creator\obj\Debug\Buildin Creator.pdb
+C:\Users\Toad\Documents\Visual Studio 2008\Projects\SpaceManGame\Building Creator\Buildin Creator\Buildin Creator\obj\Debug\Buildin Creator.exe
+C:\Users\Toad\Documents\Visual Studio 2008\Projects\SpaceManGame\Building Creator\Buildin Creator\Buildin Creator\obj\Debug\Buildin Creator.xml
+C:\Users\Toad\Documents\Visual Studio 2008\Projects\SpaceManGame\Building Creator\Buildin Creator\Buildin Creator\obj\Debug\Buildin Creator.pdb
+C:\Users\Toad\Documents\Visual Studio 2008\Projects\SpaceManGame\Building Creator\Buildin Creator\Buildin Creator\bin\Debug\Buildin Creator.exe
+C:\Users\Toad\Documents\Visual Studio 2008\Projects\SpaceManGame\Building Creator\Buildin Creator\Buildin Creator\bin\Debug\Buildin Creator.pdb
+C:\Users\Toad\Documents\Visual Studio 2008\Projects\SpaceManGame\Building Creator\Buildin Creator\Buildin Creator\bin\Debug\Buildin Creator.xml
+C:\Users\Toad\Documents\Visual Studio 2008\Projects\SpaceManGame\Building Creator\Buildin Creator\Buildin Creator\obj\Debug\ResolveAssemblyReference.cache
+C:\Users\Toad\Documents\Visual Studio 2008\Projects\SpaceManGame\Building Creator\Buildin Creator\Buildin Creator\obj\Debug\Buildin_Creator.Form1.resources
+C:\Users\Toad\Documents\Visual Studio 2008\Projects\SpaceManGame\Building Creator\Buildin Creator\Buildin Creator\obj\Debug\Buildin_Creator.Resources.resources
+C:\Users\Toad\Documents\Visual Studio 2008\Projects\SpaceManGame\Building Creator\Buildin Creator\Buildin Creator\obj\Debug\Buildin Creator.vbproj.GenerateResource.Cache
