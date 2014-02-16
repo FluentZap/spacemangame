@@ -96,6 +96,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Animation.vb" />
+    <Compile Include="BuildingLoader.vb" />
     <Compile Include="Crew.vb" />
     <Compile Include="LoadSave.vb" />
     <Compile Include="MainMenu.vb" />

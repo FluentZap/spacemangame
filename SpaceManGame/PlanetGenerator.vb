@@ -15,10 +15,10 @@
         For x = 0 To P.size.x
             For y = 0 To P.size.y
                 If random(0, 20) = 20 Then
-                    P.tile_map(x, y) = New Planet_tile(planet_tile_type_enum.Desert_Planet, planet_sprite_enum.Wood, walkable_type_enum.Walkable)
+                    P.tile_map(x, y) = New Planet_tile(planet_tile_type_enum.Desert_Planet, desert_planet_sprite_enum.Pond, walkable_type_enum.Walkable)
                 Else
-                    'If random(0, 1) = 1 Then
-                    P.tile_map(x, y) = New Planet_tile(planet_tile_type_enum.Desert_Planet, planet_sprite_enum.Grass, walkable_type_enum.Walkable)
+                    'if random(0, 1) = 1 Then
+                    P.tile_map(x, y) = New Planet_tile(planet_tile_type_enum.Desert_Planet, desert_planet_sprite_enum.Rough, walkable_type_enum.Walkable)
                     'Else
                     'P.tile_map(x, y) = New Planet_tile(planet_tile_type_enum.Desert_Planet, planet_sprite_enum.Tree1, walkable_type_enum.Walkable)
                     'End If
@@ -34,12 +34,66 @@
 
         Create_Resource_Points()
 
-
+        'Build_Mine(New PointI(P.Resource_Points.First.x * 32, P.Resource_Points.First.y * 32))
+        Build_Mine(New PointI(0, 0))
+        Build_AppartmentH(New PointI(32, 0))
         'Create_City()
 
 
 
     End Sub
+
+
+    Sub Build_Mine(ByVal pos As PointI)
+        Dim Building_tiles As HashSet(Of Build_Tiles)
+
+        Building_tiles = Load_Building("Desert_Mine.bld")
+
+        For Each t In Building_tiles
+            P.tile_map(t.X + pos.x, t.Y + pos.y).sprite = t.Sprite
+            P.tile_map(t.X + pos.x, t.Y + pos.y).sprite2 = t.Sprite2
+            P.tile_map(t.X + pos.x, t.Y + pos.y).type = CType(t.Type, planet_tile_type_enum)
+            P.tile_map(t.X + pos.x, t.Y + pos.y).walkable = CType(t.Walkable, walkable_type_enum)
+        Next
+
+
+
+        Dim ID As Integer
+        For a = 0 To 100000
+            If Not P.Building_List.ContainsKey(a) Then ID = a : Exit For
+        Next
+
+        P.Building_List.Add(ID, New Planet_Building(0, New Rectangle(pos.x + 7, pos.y + 18, 10, 6), building_type_enum.Mine))
+
+
+    End Sub
+
+
+    Sub Build_AppartmentH(ByVal pos As PointI)
+        Dim Building_tiles As HashSet(Of Build_Tiles)
+
+        Building_tiles = Load_Building("Desert_AppartmentH.bld")
+
+        For Each t In Building_tiles
+            P.tile_map(t.X + pos.x, t.Y + pos.y).sprite = t.Sprite
+            P.tile_map(t.X + pos.x, t.Y + pos.y).sprite2 = t.Sprite2
+            P.tile_map(t.X + pos.x, t.Y + pos.y).type = CType(t.Type, planet_tile_type_enum)
+            P.tile_map(t.X + pos.x, t.Y + pos.y).walkable = CType(t.Walkable, walkable_type_enum)
+        Next
+
+
+
+        Dim ID As Integer
+        For a = 0 To 100000
+            If Not P.Building_List.ContainsKey(a) Then ID = a : Exit For
+        Next
+
+        P.Building_List.Add(ID, New Planet_Building(0, New Rectangle(pos.x + 3, pos.y + 3, 26, 10), building_type_enum.Apartment))
+
+
+    End Sub
+
+
 
 
     Sub Create_Resource_Points()
@@ -53,7 +107,7 @@
             'Next
             'Next
             For a = 0 To 100
-                P.tile_map(random(item.x * 32, 32), random(item.y * 32, 32)) = New Planet_tile(planet_tile_type_enum.Desert_Planet, planet_sprite_enum.Water, walkable_type_enum.Impassable)
+                P.tile_map(random(item.x * 32, 32), random(item.y * 32, 32)) = New Planet_tile(planet_tile_type_enum.Desert_Planet, desert_planet_sprite_enum.Crystal, walkable_type_enum.Impassable)
             Next
 
         Next
@@ -67,7 +121,7 @@
         For x = Pos.x To Pos.x + Size.x
             For y = Pos.y To Pos.y + 1
                 If x >= 0 AndAlso x <= P.size.x AndAlso y >= 0 AndAlso y <= P.size.y Then
-                    P.tile_map(x, y) = New Planet_tile(planet_tile_type_enum.Forest_Planet, planet_sprite_enum.Wood, walkable_type_enum.Walkable)
+                    'P.tile_map(x, y) = New Planet_tile(planet_tile_type_enum.Forest_Planet, planet_sprite_enum.Wood, walkable_type_enum.Walkable)
                 End If
             Next
         Next
@@ -75,7 +129,7 @@
         For x = Pos.x To Pos.x + Size.x
             For y = Pos.y + Size.y To Pos.y + Size.y - 1 Step -1
                 If x >= 0 AndAlso x <= P.size.x AndAlso y >= 0 AndAlso y <= P.size.y Then
-                    P.tile_map(x, y) = New Planet_tile(planet_tile_type_enum.Forest_Planet, planet_sprite_enum.Wood, walkable_type_enum.Walkable)
+                    'P.tile_map(x, y) = New Planet_tile(planet_tile_type_enum.Forest_Planet, planet_sprite_enum.Wood, walkable_type_enum.Walkable)
                 End If
             Next
         Next
@@ -83,7 +137,7 @@
         For x = Pos.x To Pos.x + 1
             For y = Pos.y To Pos.y + Size.y
                 If x >= 0 AndAlso x <= P.size.x AndAlso y >= 0 AndAlso y <= P.size.y Then
-                    P.tile_map(x, y) = New Planet_tile(planet_tile_type_enum.Forest_Planet, planet_sprite_enum.Wood, walkable_type_enum.Walkable)
+                    'P.tile_map(x, y) = New Planet_tile(planet_tile_type_enum.Forest_Planet, planet_sprite_enum.Wood, walkable_type_enum.Walkable)
                 End If
             Next
         Next
@@ -91,7 +145,7 @@
         For x = Pos.x + Size.x To Pos.x + Size.x - 1 Step -1
             For y = Pos.y To Pos.y + Size.y
                 If x >= 0 AndAlso x <= P.size.x AndAlso y >= 0 AndAlso y <= P.size.y Then
-                    P.tile_map(x, y) = New Planet_tile(planet_tile_type_enum.Forest_Planet, planet_sprite_enum.Wood, walkable_type_enum.Walkable)
+                    'P.tile_map(x, y) = New Planet_tile(planet_tile_type_enum.Forest_Planet, planet_sprite_enum.Wood, walkable_type_enum.Walkable)
                 End If
             Next
         Next
@@ -142,7 +196,7 @@
             For x = item.x * 32 To item.x * 32 + 32
                 For y = item.y * 32 To item.y * 32 + 32
                     'If random(0, 1) = 1 Then
-                    P.tile_map(x, y) = New Planet_tile(planet_tile_type_enum.Forest_Planet, planet_sprite_enum.Water, walkable_type_enum.Impassable)
+                    'P.tile_map(x, y) = New Planet_tile(planet_tile_type_enum.Forest_Planet, planet_sprite_enum.Water, walkable_type_enum.Impassable)
                     'End If
                 Next
             Next
@@ -350,7 +404,7 @@
     Sub Build_Item(ByVal StartIndex As Integer, ByVal Size As PointI, ByVal Position As PointI)
         For y = 0 To Size.y
             For x = 0 To Size.x
-                P.tile_map(x + Position.x, y + Position.y) = New Planet_tile(planet_tile_type_enum.Forest_Planet, CType(StartIndex + x + y * (Size.x + 1), planet_sprite_enum), walkable_type_enum.Impassable)
+                'P.tile_map(x + Position.x, y + Position.y) = New Planet_tile(planet_tile_type_enum.Forest_Planet, CType(StartIndex + x + y * (Size.x + 1), planet_sprite_enum), walkable_type_enum.Impassable)
             Next
         Next
 

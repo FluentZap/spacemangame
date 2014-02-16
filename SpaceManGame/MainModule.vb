@@ -234,7 +234,8 @@
 
     Public view_location_personal_Last As PointD
 
-    Public view_personal_Ambient As Color = Color.FromArgb(255, 20, 20, 40) 'Color.FromArgb(255, 20, 20, 40)
+    'Public view_personal_Ambient As Color = Color.FromArgb(255, 200, 200, 150) 'Color.FromArgb(255, 20, 20, 40)
+    Public view_personal_Ambient As Color = Color.FromArgb(255, 255, 255, 255) 'Color.FromArgb(255, 20, 20, 40)
 
     'Public view_personal_menu_items As Dictionary(Of Internal_menu_items_Enum, Menu_button) = New Dictionary(Of Internal_menu_items_Enum, Menu_button)
     'Public view_external_menu_items As Dictionary(Of External_menu_items_Enum, Menu_button) = New Dictionary(Of External_menu_items_Enum, Menu_button)
@@ -758,7 +759,7 @@
         u.planets.Add(0, planet1)
 
         'Fix movement
-        Add_Officer(0, New Officer(0, "Captian", Officer_location_enum.Planet, 0, pos, 30, 0.2, New Officer.sprite_list(character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head)))
+        Add_Officer(0, New Officer(0, "Captian", Officer_location_enum.Planet, 0, pos, 1, 0.2, New Officer.sprite_list(character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head)))
 
         Officer_List(0).Officer_Classes.Add(New Officer_Class(Class_List_Enum.Mage, 0, 1))
         Officer_List(0).Officer_Classes.Add(New Officer_Class(Class_List_Enum.SpellSword, 0, 1))

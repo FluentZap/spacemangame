@@ -278,8 +278,9 @@
 
 
     Enum planet_tile_type_enum As Byte
-        Forest_Planet
-        Desert_Planet
+        Forest_Planet = 0
+        Desert_Planet = 1
+        Desert_Mine = 2
         Road
         Shipyard
         House
@@ -462,22 +463,39 @@
     End Enum
 
 
-    Enum planet_sprite_enum As Byte
-        Grass
-        Wood
-        Water
-        Tree1
-        Tree2
-        Tree3
-        Tree4
-        Tree5
-        Tree6
-        Tree7
-        Tree8
-        Tree9
-        Tree10
-        Tree11
-        Tree12
+    Enum desert_planet_sprite_enum As Byte
+        Rough
+        Pond
+        Crystal
+        Barren
+        PathV
+        PathH
+        PathTDown
+        PathTUp
+        PathSquare
+        PathTLeft
+        PathTRight
+        PathELeft
+        PathERight
+        PathEUp
+        PathEDown
+        WallTop
+        WallLeft
+        WallRight
+        WallCornerTL
+        WallCornerTR
+        WallCornerBL
+        WallCornerBR
+        WallEndB
+        WallEndT
+        WallEndR
+        WallEndL
+        MetalPad
+        CrystalDrill1
+        CrystalDrill2
+        CrystalDrill3
+
+
     End Enum
 
     Enum building_type_enum
