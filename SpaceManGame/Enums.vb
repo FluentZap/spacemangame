@@ -537,6 +537,14 @@
         Both
     End Enum
 
+
+    Enum Worker_Type_Enum
+        Worker
+        Transporter
+        Gaurd        
+    End Enum
+
+
     Enum Pipeline_sprite_enum As Byte
         vertical
         horizontal

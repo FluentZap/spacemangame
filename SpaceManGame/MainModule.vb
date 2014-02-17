@@ -277,7 +277,8 @@
     Public Drag As Double = 0.02
     Public Near_planet As Integer
     Public Loaded_planet As Integer
-
+    Public GST As Integer = 275
+    Public GSTFrequency As Integer
 
     Public external_planet_texture(15) As Texture
 
@@ -752,14 +753,16 @@
 
 
         Dim planet1 As Planet = New Planet(planet_type_enum.Desert, New PointI(512, 512), 0, 50000, False, 0.5)
-        planet1.populate()
-        'planet1.landed_ships.Add(0, New PointI(0, 0))
         Planet_List = u.planets
         u.planets.Remove(0)
         u.planets.Add(0, planet1)
 
+        planet1.populate()
+        'planet1.landed_ships.Add(0, New PointI(0, 0))
+        
         'Fix movement
         Add_Officer(0, New Officer(0, "Captian", Officer_location_enum.Planet, 0, pos, 1, 0.2, New Officer.sprite_list(character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head)))
+
 
         Officer_List(0).Officer_Classes.Add(New Officer_Class(Class_List_Enum.Mage, 0, 1))
         Officer_List(0).Officer_Classes.Add(New Officer_Class(Class_List_Enum.SpellSword, 0, 1))
@@ -831,7 +834,8 @@
             'Logic
             'QueryPerformanceCounter(time_current)
             If Logic_Time > Logic_Ratio Then
-                Logic_Time -= 1                
+                Logic_Time -= 1
+                UpdateGST()
                 Select Case current_view
                     Case Is = current_view_enum.ship_internal
                         test_ui()
@@ -844,7 +848,6 @@
                             Planet.DoEvents()
                         Next
                         update_Planet_Movements()
-
                         check_near_planet(current_selected_ship_view)
 
 
@@ -861,7 +864,7 @@
 
                     Case Is = current_view_enum.planet
                         For Each ship In Ship_List.Values
-                            ship.run_crew_scrips()
+                            run_crew_scrips(ship.Crew_list)
                             ship.Process_Devices()
                         Next
                         Planet_UI()
@@ -1867,7 +1870,16 @@
         planet_cloud_theta += 0.0001
     End Sub
 
+    Sub UpdateGST()
 
+
+        GSTFrequency += 1
+        If GSTFrequency = 120 Then
+            GSTFrequency = 0
+            GST += 1
+            If GST > 300 Then GST = 0
+        End If
+    End Sub
 
 
 

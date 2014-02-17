@@ -98,6 +98,7 @@
     <Compile Include="Animation.vb" />
     <Compile Include="BuildingLoader.vb" />
     <Compile Include="Crew.vb" />
+    <Compile Include="Crew_Scripts.vb" />
     <Compile Include="LoadSave.vb" />
     <Compile Include="MainMenu.vb" />
     <Compile Include="pathfinder.vb" />

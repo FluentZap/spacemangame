@@ -1,6 +1,10 @@
-﻿<Serializable()> Public Class Crew
+﻿Public Enum Work_Shift_Enum As Byte
+    Morning
+    Mid
+    Night
+End Enum
 
-
+<Serializable()> Public Class Crew
 
 #Region "Crew Script Classes"
     <Serializable()> Public MustInherit Class Crew_Command_script
@@ -57,19 +61,35 @@
 
 #End Region
 
-    Public Faction As Integer
+
+
+
+    Public Faction As Integer 'Civilian is 0 Player faction is 1
     Public location As PointD
     Public Sprite As Integer
     Public SpriteSet As character_sprite_set_enum
     Public buffs As buffs_enum
     Public speed As Double
-    Public no_ship_duty As Boolean
-    Public working As Boolean
 
     Public region As Officer_location_enum
     Public Location_ID As Integer
 
+
+    'Ship
+    Public no_ship_duty As Boolean
+    Public working As Boolean
     Dim Points As crew_resource_type
+
+    'Planet
+    Public HomeBuilding As Integer = -1
+    Public HomeSpace As Integer
+    Public WorkBuilding As Integer = -1
+    Public WorkShift As Work_Shift_Enum
+    Public Worker_Type As Worker_Type_Enum
+    Public BankBuilding As Integer
+    Public PubBuilding As Integer
+    Public Wealth As Integer
+
 
     'Public command_Queue As New LinkedList(Of crew_command_script)
 
