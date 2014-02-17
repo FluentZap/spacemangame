@@ -167,9 +167,10 @@
 
 
         d3d_sprite.Transform = Matrix.Identity
-        draw_text("FPS " + FPS.ToString, New Rectangle(0, 0, 100, 20), CType(DrawTextFormat.Center + DrawTextFormat.VerticalCenter, DrawTextFormat), Color.White, d3d_font(d3d_font_enum.SB_small))
-        draw_text("Logic  " + LPS.ToString, New Rectangle(0, 50, 100, 20), CType(DrawTextFormat.Center + DrawTextFormat.VerticalCenter, DrawTextFormat), Color.White, d3d_font(d3d_font_enum.SB_small))
-        draw_text("Render " + render_duration.ToString, New Rectangle(0, 100, 100, 20), CType(DrawTextFormat.Center + DrawTextFormat.VerticalCenter, DrawTextFormat), Color.White, d3d_font(d3d_font_enum.SB_small))
+        draw_text("GST " + GST.ToString, New Rectangle(0, 0, 100, 20), CType(DrawTextFormat.Center + DrawTextFormat.VerticalCenter, DrawTextFormat), Color.White, d3d_font(d3d_font_enum.SB_small))
+        draw_text("FPS " + FPS.ToString, New Rectangle(0, 50, 100, 20), CType(DrawTextFormat.Center + DrawTextFormat.VerticalCenter, DrawTextFormat), Color.White, d3d_font(d3d_font_enum.SB_small))
+        draw_text("Logic  " + LPS.ToString, New Rectangle(0, 100, 100, 20), CType(DrawTextFormat.Center + DrawTextFormat.VerticalCenter, DrawTextFormat), Color.White, d3d_font(d3d_font_enum.SB_small))
+        draw_text("Render " + render_duration.ToString, New Rectangle(0, 150, 100, 20), CType(DrawTextFormat.Center + DrawTextFormat.VerticalCenter, DrawTextFormat), Color.White, d3d_font(d3d_font_enum.SB_small))
         render_personal_health_overlay(New PointI(256, screen_size.y - 96), Officer_List(current_player).Health)
 
         If Crew_List.ContainsKey(Mouse_Target) Then
@@ -230,11 +231,13 @@
         Dim viewRect As Rectangle = New Rectangle(CInt(view_location_personal.x * personal_zoom) \ atsize, CInt(view_location_personal.y * personal_zoom) \ atsize, (screen_size.x \ atsize) + 1, (screen_size.y \ atsize) + 1)
         'For x = (CInt(view_location_personal.intX * personal_zoom) \ atsize) - 1 To (CInt(view_location_personal.x * personal_zoom) \ atsize) + (screen_size.x \ atsize) + 1
         'For y = (CInt(view_location_personal.intY * personal_zoom) \ atsize) - 1 To (CInt(view_location_personal.y * personal_zoom) \ atsize) + (screen_size.y \ atsize) + 1
-        Dim InBuilding As Integer = -1
+        Dim InBuilding As Rectangle = Rectangle.Empty
 
         For Each item In planet.Building_List
-            Dim rect As New Rectangle(item.Value.Rect.X * 32, item.Value.Rect.Y * 32, item.Value.Rect.Width * 32, item.Value.Rect.Height * 32)
-            If rect.Contains(Officer_List(current_player).find_rect) Then InBuilding = item.Key : Exit For
+            For Each building In item.Value.BuildingRect
+                Dim rect As New Rectangle(building.X * 32, building.Y * 32, building.Width * 32, building.Height * 32)
+                If rect.Contains(Officer_List(current_player).find_rect) Then InBuilding = building : Exit For
+            Next
         Next
 
         For x = viewRect.X To viewRect.Right
@@ -244,7 +247,7 @@
                 If x >= 0 AndAlso x <= planet.size.x AndAlso y >= 0 AndAlso y <= planet.size.y Then
                     If TileMap(x, y).type < planet_tile_type_enum.empty Then
 
-                        If InBuilding > -1 AndAlso planet.Building_List(InBuilding).Rect.Contains(New Point(x, y)) Then
+                        If Not InBuilding = Rectangle.Empty AndAlso InBuilding.Contains(New Point(x, y)) Then
                             Draw_Planet_Tile(TileMap(x, y).type, TileMap(x, y).sprite2, pos, Color.FromArgb(255, 255, 255, 255))
                         Else
                             Draw_Planet_Tile(TileMap(x, y).type, TileMap(x, y).sprite, pos, Color.FromArgb(255, 255, 255, 255))

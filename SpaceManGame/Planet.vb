@@ -1,4 +1,4 @@
-﻿Public Class Planet    
+﻿Public Class Planet
 
     Public orbits_planet As Boolean
     Public orbit_point As Integer
@@ -12,8 +12,10 @@
     Public Animation_Glow As Single
     Public Animation_Glow_subtract As Boolean
     Public Block_Map As HashSet(Of PointI) = New HashSet(Of PointI)
-    Public Resource_Points As HashSet(Of PointI) = New HashSet(Of PointI)
+    Public Resource_Points As Dictionary(Of PointI, Boolean) = New Dictionary(Of PointI, Boolean) 'Is true is resource point is taken
     Public Building_List As Dictionary(Of Integer, Planet_Building) = New Dictionary(Of Integer, Planet_Building)
+
+    Private path_find As A_star
 
     'trade route
     'available resources
@@ -41,7 +43,7 @@
         Me.orbit_point = orbit_point
         Me.orbit_distance = orbit_distance
         Me.orbits_planet = orbits_planet
-        Me.theta = theta_offset
+        Me.theta = theta_offset        
     End Sub
 
 
@@ -92,19 +94,97 @@
 
     Sub populate()
         populate_planet(Me)
-
+        Load_Pathfinding()
     End Sub
 
 
     Public Sub DoEvents()
+        Process_crew()
+
 
         Update_Officers()
 
         Handle_Projectiles()
-
+        run_crew_scrips(crew_list)
         Run_animations()
 
     End Sub
+
+
+    Sub Process_crew()
+
+        If GST = 280 Then
+            Send_Crew_ToWork(Work_Shift_Enum.Morning)
+        ElseIf GST = 80 Then
+            Send_Crew_ToWork(Work_Shift_Enum.Mid)
+        ElseIf GST = 180 Then
+            Send_Crew_ToWork(Work_Shift_Enum.Night)
+        End If
+
+
+    End Sub
+
+
+    Sub Send_Crew_ToWork(ByVal WorkShift As Work_Shift_Enum)
+        Dim work_Point As PointI
+        Dim Found_AP As Boolean = False
+
+        For Each Crew In crew_list
+            If Crew.Value.WorkBuilding > -1 Then
+
+                If Crew.Value.WorkShift = WorkShift Then
+                    'Find AP in building
+                    For Each AP In Building_List(Crew.Value.WorkBuilding).access_point
+                        If AP.Value = False Then
+                            work_Point = AP.Key
+                            Found_AP = True
+                            Exit For
+                        End If
+                    Next
+                    'If Open access point is found send crew to work
+                    If Found_AP = True Then
+                        'Set AP To Manned
+                        Building_List(Crew.Value.WorkBuilding).access_point(work_Point) = True
+                        'Pathfind
+                        If Not tile_map(Crew.Value.find_tile.x, Crew.Value.find_tile.y).walkable = walkable_type_enum.Walkable Then Exit For
+
+                        path_find.set_start_end(Crew.Value.find_tile, work_Point)
+                        path_find.find_path()
+
+                        If path_find.get_status = pf_status.path_found Then
+                            If Crew.Value.command_queue.Any Then
+                                Crew.Value.command_queue.Clear()
+                            End If
+                            Building_List(Crew.Value.WorkBuilding).Assigned_crew_list.Add(Crew.Key)
+                            Dim list As LinkedList(Of PointI)
+                            list = path_find.get_path
+
+
+                            For Each dest In list
+                                Crew.Value.command_queue.Enqueue(New Crew.Command_move(New PointD(dest.x * 32, dest.y * 32)))
+                            Next
+                            'crew_list(Crew).command_queue.Enqueue(New Crew.Command_set_room())
+
+                        End If
+
+                    End If
+                End If
+            End If
+        Next
+
+    End Sub
+
+
+
+    Sub Load_Pathfinding()
+        path_find = New A_star
+        path_find.set_map(tile_map, size)
+
+    End Sub
+
+
+    
+
 
 
     Sub Run_animations()
