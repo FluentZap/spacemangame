@@ -212,8 +212,13 @@
         open_door
         use
         hold
+        'Ship
         set_room
         remove_room
+        'Planet
+
+
+
     End Enum
     Enum ship_class_enum As Byte
         fighterW

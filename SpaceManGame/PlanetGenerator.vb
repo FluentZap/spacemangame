@@ -37,41 +37,43 @@
 
         Create_Resource_Points()
 
-        'Build_Mine(New PointI(P.Resource_Points.First.x * 32, P.Resource_Points.First.y * 32))
         'P.Resource_Points(New PointI(0, 0)) = True
 
         Build_AppartmentH(New PointI(32, 0))
-        Build_Mine(New PointI(0, 0))
+        Build_Mine(New PointI(P.Resource_Points.First.Key.x * 32, P.Resource_Points.First.Key.y * 32))
+        'Build_Mine(New PointI(0, 0))
 
         'Create_City()
 
         Add_Crew(0, New Crew(0, New PointD(1184, 256), 0, Officer_location_enum.Planet, 1, character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head, New crew_resource_type(0, 0)))
         P.crew_list(0).Worker_Type = Worker_Type_Enum.Worker
         P.crew_list(0).HomeBuilding = 0
-        P.crew_list(0).HomeSpace = 0
+        P.crew_list(0).HomeSpace = 1
         P.crew_list(0).WorkBuilding = 1
-        P.crew_list(0).WorkShift = Work_Shift_Enum.Morning
+        P.crew_list(0).WorkShift = Work_Shift_Enum.Mid
 
-        'Add_Crew(1, New Crew(0, New PointD(1376, 256), 0, Officer_location_enum.Planet, 1, character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head, New crew_resource_type(0, 0)))
-        'P.crew_list(1).Worker_Type = Worker_Type_Enum.Worker
-        'P.crew_list(1).HomeBuilding = 0
-        'P.crew_list(1).HomeSpace = 1
-        'P.crew_list(1).WorkBuilding = 1
-        'P.crew_list(1).WorkShift = Work_Shift_Enum.Morning
+
+        Add_Crew(1, New Crew(0, New PointD(1376, 256), 0, Officer_location_enum.Planet, 1, character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head, New crew_resource_type(0, 0)))
+        P.crew_list(1).Worker_Type = Worker_Type_Enum.Worker
+        P.crew_list(1).HomeBuilding = 0
+        P.crew_list(1).HomeSpace = 1
+        P.crew_list(1).WorkBuilding = 1
+        P.crew_list(1).WorkShift = Work_Shift_Enum.Mid
 
         Add_Crew(2, New Crew(0, New PointD(1568, 256), 0, Officer_location_enum.Planet, 1, character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head, New crew_resource_type(0, 0)))
         P.crew_list(2).Worker_Type = Worker_Type_Enum.Worker
         P.crew_list(2).HomeBuilding = 0
         P.crew_list(2).HomeSpace = 2
         P.crew_list(2).WorkBuilding = 1
-        P.crew_list(2).WorkShift = Work_Shift_Enum.Morning
+        P.crew_list(2).WorkShift = Work_Shift_Enum.Mid
 
-        'Add_Crew(3, New Crew(0, New PointD(1760, 256), 0, Officer_location_enum.Planet, 1, character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head, New crew_resource_type(0, 0)))
-        'P.crew_list(3).Worker_Type = Worker_Type_Enum.Worker
-        ''P.crew_list(3).HomeBuilding = 0
-        'P.crew_list(3).HomeSpace = 3
-        'P.crew_list(3).WorkBuilding = 1
-        'P.crew_list(3).WorkShift = Work_Shift_Enum.Morning
+        Add_Crew(3, New Crew(0, New PointD(1760, 256), 0, Officer_location_enum.Planet, 1, character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head, New crew_resource_type(0, 0)))
+        P.crew_list(3).Worker_Type = Worker_Type_Enum.Worker
+        P.crew_list(3).HomeBuilding = 0
+        P.crew_list(3).HomeSpace = 3
+        P.crew_list(3).WorkBuilding = 1
+        P.crew_list(3).WorkShift = Work_Shift_Enum.Mid
+        
     End Sub
 
 
@@ -97,10 +99,10 @@
         P.Building_List.Add(ID, New Planet_Building(0, New Rectangle(pos.x, pos.y, 32, 32), building_type_enum.Mine))
         P.Building_List(ID).BuildingRect.Add(New Rectangle(pos.x + 7, pos.y + 18, 10, 6))
 
-        P.Building_List(ID).access_point.Add(New PointI(1, 9), False)
-        P.Building_List(ID).access_point.Add(New PointI(5, 9), False)
-        P.Building_List(ID).access_point.Add(New PointI(9, 9), False)
-        P.Building_List(ID).access_point.Add(New PointI(13, 9), False)
+        P.Building_List(ID).access_point.Add(New PointI(pos.x + 3, pos.y + 9), False)
+        P.Building_List(ID).access_point.Add(New PointI(pos.x + 8, pos.y + 9), False)
+        P.Building_List(ID).access_point.Add(New PointI(pos.x + 13, pos.y + 9), False)
+        P.Building_List(ID).access_point.Add(New PointI(pos.x + 18, pos.y + 9), False)
 
 
     End Sub

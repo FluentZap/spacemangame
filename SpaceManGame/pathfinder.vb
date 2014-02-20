@@ -479,10 +479,10 @@
             If Not use_d_star Then
                 set_h() ' now that we know the goal, we can set all the vertice's h-values
             End If
-
             start = adj_list(set_start.x, set_start.y)
-            start.g = 0
+            start.g = 0            
             start.f = start.h
+            start.parent = Nothing
             open_list.clear()
             open_list.add(start)
             closed_list.Clear()
@@ -520,7 +520,7 @@
             Dim current As Vertex = goal ' start at the goal
             Do Until current Is Nothing
                 path.AddFirst(New PointI(current.x, current.y)) ' add to the front so it comes out in order
-                current = current.parent
+                current = current.parent                
             Loop
         End Sub
 

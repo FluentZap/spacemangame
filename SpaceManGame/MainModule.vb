@@ -234,7 +234,7 @@
 
     Public view_location_personal_Last As PointD
 
-    'Public view_personal_Ambient As Color = Color.FromArgb(255, 200, 200, 150) 'Color.FromArgb(255, 20, 20, 40)
+    'Public view_personal_Ambient As Color = Color.FromArgb(255, 200, 200, 220) 'Color.FromArgb(255, 20, 20, 40)
     Public view_personal_Ambient As Color = Color.FromArgb(255, 255, 255, 255) 'Color.FromArgb(255, 20, 20, 40)
 
     'Public view_personal_menu_items As Dictionary(Of Internal_menu_items_Enum, Menu_button) = New Dictionary(Of Internal_menu_items_Enum, Menu_button)
@@ -277,7 +277,7 @@
     Public Drag As Double = 0.02
     Public Near_planet As Integer
     Public Loaded_planet As Integer
-    Public GST As Integer = 275
+    Public GST As Integer = 1795
     Public GSTFrequency As Integer
 
     Public external_planet_texture(15) As Texture
@@ -400,10 +400,10 @@
         D3D_PP.BackBufferFormat = Format.X8R8G8B8
         D3D_PP.BackBufferWidth = screen_size.x
         D3D_PP.BackBufferHeight = screen_size.y
-        D3D_PP.Windowed = windowed
+        D3D_PP.Windowed = False
         D3D_PP.SwapEffect = SwapEffect.Discard
-        D3D_PP.BackBufferCount = 1
-        D3D_PP.PresentationInterval = PresentInterval.Immediate
+        D3D_PP.BackBufferCount = 2
+        D3D_PP.PresentationInterval = PresentInterval.One
         'Create D3D Device
         d3d_device = New Device(monitor, DeviceType.Hardware, MainForm.Handle, CreateFlags.MixedVertexProcessing, D3D_PP)
         'd3d_chain = New SwapChain(d3d_device, D3D_PP)
@@ -490,6 +490,14 @@
         Next
 
         OffscreenLightMap = New Texture(d3d_device, screen_size.x, screen_size.y, 0, Usage.RenderTarget, Format.X8R8G8B8, Pool.Default)
+
+
+
+
+        'D3D_PP = Nothing
+
+
+
     End Sub
 
     Sub Clean_Up()
@@ -761,7 +769,7 @@
         'planet1.landed_ships.Add(0, New PointI(0, 0))
         
         'Fix movement
-        Add_Officer(0, New Officer(0, "Captian", Officer_location_enum.Planet, 0, pos, 1, 0.2, New Officer.sprite_list(character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head)))
+        Add_Officer(0, New Officer(0, "Captian", Officer_location_enum.Planet, 0, pos, 3, 0.2, New Officer.sprite_list(character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head)))
 
 
         Officer_List(0).Officer_Classes.Add(New Officer_Class(Class_List_Enum.Mage, 0, 1))
@@ -832,14 +840,14 @@
             MainForm.getUI(pressedkeys, mouse_info)
             Ship_List(1).angular_velocity = 0.001
             'Logic
-            'QueryPerformanceCounter(time_current)
-            If Logic_Time > Logic_Ratio Then
+            QueryPerformanceCounter(time_current)
+            If Logic_Time >= Logic_Ratio Then
                 Logic_Time -= 1
                 UpdateGST()
                 Select Case current_view
                     Case Is = current_view_enum.ship_internal
                         test_ui()
-                    Case Is = current_view_enum.personal                        
+                    Case Is = current_view_enum.personal
                         Personal_UI(1)
                         For Each ship In Ship_List.Values
                             ship.DoEvents()
@@ -876,7 +884,7 @@
                     Case Is = current_view_enum.personal_level_screen
                         Personal_Level_UI()
                 End Select
-                'System.Threading.Thread.Sleep(60)
+                'System.Threading.Thread.Sleep(random(0, 32))
                 Logic_loops += 1
             End If
             Logic_Duration = Current_Time() - time_current
@@ -884,32 +892,36 @@
 
             'Render
             QueryPerformanceCounter(time_current)
-            If render_end + refresh_rate <= time_current + render_duration + Logic_Duration Then
-                If render_end + render_duration <= time_current Then
-                    QueryPerformanceCounter(render_start)
+            'If render_end + refresh_rate <= time_current + render_duration + Logic_Duration Then
+            'If render_end + render_duration <= time_current Then
 
-                    Select Case current_view
-                        Case Is = current_view_enum.ship_internal
-                            test_ui()
-                        Case Is = current_view_enum.personal
-                            render_personal(current_player)
-                        Case Is = current_view_enum.ship_external
-                            render_ship_external_new(Ship_List.Item(current_selected_ship_view))
-                        Case Is = current_view_enum.planet
-                            render_planetoid(u.planets(current_selected_planet_view))
-                        Case Is = current_view_enum.star_map
-                            render_starmap()
-                        Case Is = current_view_enum.Weapon_control
-                            render_Weapon_Control()
-                        Case Is = current_view_enum.personal_level_screen
-                            render_personal_level()
-                    End Select
-                    'System.Threading.Thread.Sleep(60)
-                    QueryPerformanceCounter(render_end)
-                    render_duration = render_end - render_start
-                    loops += 1
-                    Logic_Time += Logic_Ratio
-                End If
+            If render_end + refresh_rate <= time_current + render_duration + Logic_Duration Then
+
+                QueryPerformanceCounter(render_start)
+
+                Select Case current_view
+                    Case Is = current_view_enum.ship_internal
+                        test_ui()
+                    Case Is = current_view_enum.personal
+                        render_personal(current_player)
+                    Case Is = current_view_enum.ship_external
+                        render_ship_external_new(Ship_List.Item(current_selected_ship_view))
+                    Case Is = current_view_enum.planet
+                        render_planetoid(u.planets(current_selected_planet_view))
+                    Case Is = current_view_enum.star_map
+                        render_starmap()
+                    Case Is = current_view_enum.Weapon_control
+                        render_Weapon_Control()
+                    Case Is = current_view_enum.personal_level_screen
+                        render_personal_level()
+                End Select                
+
+                'System.Threading.Thread.Sleep(random(0, 32))
+                QueryPerformanceCounter(render_end)
+                render_duration = render_end - render_start
+                loops += 1
+                Logic_Time += Logic_Ratio
+
             End If
             QueryPerformanceCounter(time_current)
             If pressedkeys.Contains(Keys.Escape) Then terminate = True
@@ -1871,14 +1883,38 @@
     End Sub
 
     Sub UpdateGST()
+        '15 to 30 day
+        '0 to 15 night
+        '10 to 15 is sunrise 
+        ' 25 to 30 is sunset        
 
+        Dim ALP As Double
+        'Sunrise
+        ALP = (GST - 1000) / 500
+        If GST >= 1000 AndAlso GST < 1500 Then view_personal_Ambient = Color.FromArgb(255, CInt(240 * ALP), CInt(240 * ALP), CInt(220 * ALP))
+        'Sunset
+        ALP = 1 - (GST - 2500) / 500
+        If GST >= 2500 AndAlso GST < 3000 Then view_personal_Ambient = Color.FromArgb(255, CInt(220 * ALP), CInt(220 * ALP), CInt(240 * ALP))
+
+        'Day
+        If GST >= 1500 AndAlso GST < 2500 Then view_personal_Ambient = Color.FromArgb(255, 240, 240, 220)
+        'Night
+        If GST >= 0 AndAlso GST < 1000 Then view_personal_Ambient = Color.FromArgb(255, 0, 0, 5)
+
+
+        'If GST > 0 AndAlso GST < 1500 Then view_personal_Ambient = Color.FromArgb(0, 0, 0, 0)
+        'If GST > 0 AndAlso GST < 1500 Then view_personal_Ambient = Color.FromArgb(0, 0, 0, 0)
+        '0 to 1500
+
+        'view_personal_Ambient=color.FromArgb(
 
         GSTFrequency += 1
         If GSTFrequency = 120 Then
             GSTFrequency = 0
             GST += 1
-            If GST > 300 Then GST = 0
+            If GST > 3000 Then GST = 0
         End If
+
     End Sub
 
 

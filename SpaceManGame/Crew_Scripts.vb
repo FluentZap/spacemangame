@@ -19,6 +19,11 @@
 
                     Case crew_script_enum.open_door : crew_script_open_door(Crew_List(key))
 
+
+
+                    Case crew_script_enum.open_door : crew_script_open_door(Crew_List(key))
+
+
                 End Select
                 If Crew_List(key).command_queue.First.status = script_status_enum.complete Then Crew_List(key).command_queue.Dequeue()
             End If
