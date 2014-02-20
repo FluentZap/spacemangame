@@ -148,7 +148,4 @@
         Me.mouse_info.wheel = e.Delta
     End Sub
 
-    Private Sub MainForm_Paint(ByVal sender As Object, ByVal e As System.Windows.Forms.PaintEventArgs) Handles Me.Paint
-
-    End Sub
 End Class

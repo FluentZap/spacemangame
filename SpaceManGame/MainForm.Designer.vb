@@ -31,6 +31,7 @@ Partial Class MainForm
         Me.BackColor = System.Drawing.SystemColors.Control
         Me.ClientSize = New System.Drawing.Size(284, 262)
         Me.Cursor = System.Windows.Forms.Cursors.Default
+        Me.DoubleBuffered = True
         Me.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None
         Me.Name = "MainForm"
         Me.Text = "SpaceManGame"

@@ -113,11 +113,11 @@
 
     Sub Process_crew()
 
-        If GST = 280 Then
+        If GST = 800 Then
             Send_Crew_ToWork(Work_Shift_Enum.Morning)
-        ElseIf GST = 80 Then
+        ElseIf GST = 1800 Then
             Send_Crew_ToWork(Work_Shift_Enum.Mid)
-        ElseIf GST = 180 Then
+        ElseIf GST = 2800 Then
             Send_Crew_ToWork(Work_Shift_Enum.Night)
         End If
 
@@ -147,8 +147,9 @@
                         Building_List(Crew.Value.WorkBuilding).access_point(work_Point) = True
                         'Pathfind
                         If Not tile_map(Crew.Value.find_tile.x, Crew.Value.find_tile.y).walkable = walkable_type_enum.Walkable Then Exit For
+                        Dim tile As PointI = Crew.Value.find_tile
 
-                        path_find.set_start_end(Crew.Value.find_tile, work_Point)
+                        path_find.set_start_end(tile, work_Point)
                         path_find.find_path()
 
                         If path_find.get_status = pf_status.path_found Then

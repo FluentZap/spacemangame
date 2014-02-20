@@ -512,7 +512,7 @@ Public Class Ship
                         If Crew_list(Crew).Get_points.engineering > 0 AndAlso Me.Faction = Crew_list(Crew).Faction Then
                             send_crew_towork(Crew, room.Key)
                             idle_list.Remove(Crew)
-                            Exit For
+                            'Exit For
                         End If
                     Next
                 End If
@@ -522,7 +522,7 @@ Public Class Ship
                         If Crew_list(Crew).Get_points.science > 0 AndAlso Me.Faction = Crew_list(Crew).Faction Then
                             send_crew_towork(Crew, room.Key)
                             idle_list.Remove(Crew)
-                            Exit For
+                            'Exit For
                         End If
                     Next
                 End If
