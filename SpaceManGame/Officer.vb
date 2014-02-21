@@ -14,7 +14,7 @@
 
     Dim faction As Integer
     Public name As String
-    Dim location As PointD
+    Public location As PointD
 
     Dim center_point As PointI
 

@@ -68,10 +68,6 @@
     Private mouse_info As New mouse_info_type
 
 
-    Private Sub MainForm_CursorChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.CursorChanged
-
-    End Sub
-
     Private Sub MainForm_KeyDown(ByVal sender As Object, ByVal e As System.Windows.Forms.KeyEventArgs) Handles Me.KeyDown
         If pressedkeys.Contains(e.KeyCode) Then
         Else

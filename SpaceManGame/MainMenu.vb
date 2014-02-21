@@ -28,41 +28,43 @@
 
         MainForm.getUI(pressedkeys, mouse_info)
 
-        Dim time_start, time_current, cps, rate As Long
-        QueryPerformanceFrequency(cps)
-        rate = Convert.ToInt64(cps / 60)
+        Dim time_current As Long
+        QueryPerformanceCounter(time_current)
+        Do Until terminate = True
+            If Logic_Time >= 1 Then
+                Logic_Time -= 1
+                ' do the selection/highliting
+                calculate_button_selection(menu_item, mouse_info)
+                ' detect a click
+                If mouse_info.get_left_click(left_down_point, left_release_point) Then
+                    For i = 0 To 6
+                        If menu_item(i).bounds.Contains(left_down_point.x, left_down_point.y) And menu_item(i).bounds.Contains(left_release_point.x, left_release_point.y) Then
+                            choice = i
+                            Exit For
+                        End If
+                    Next
+                End If
 
-        Do
-            QueryPerformanceCounter(time_start)
-            render_main_menu(menu_item)
+                If pressedkeys.Contains(Keys.Escape) Then terminate = True
+
+                If pressedkeys.Contains(Keys.F10) Then pressedkeys.Remove(Keys.F10) : lock_screen()
+            End If
+
+
+            QueryPerformanceCounter(time_current)
+            If time_current >= render_end + refresh_rate Then
+                render_main_menu(menu_item)
+                Logic_Time += Logic_Ratio
+                QueryPerformanceCounter(render_end)
+            End If
+
+            'Exit Loop
+            If choice > -1 Then Return choice
             Application.DoEvents()
 
-            ' do the selection/highliting
-            calculate_button_selection(menu_item, mouse_info)
-
-            ' detect a click
-            If mouse_info.get_left_click(left_down_point, left_release_point) Then
-                For i = 0 To 6
-                    If menu_item(i).bounds.Contains(left_down_point.x, left_down_point.y) And menu_item(i).bounds.Contains(left_release_point.x, left_release_point.y) Then
-                        choice = i
-                        Exit For
-                    End If
-                Next
-            End If
-
-            If pressedkeys.Contains(Keys.Escape) Then
-                choice = 2
-            End If
-
-            If pressedkeys.Contains(Keys.F10) Then pressedkeys.Remove(Keys.F10) : lock_screen()
-
-            Do
-                QueryPerformanceCounter(time_current)
-            Loop Until (time_current - time_start) >= rate
-
-        Loop While choice = -1
-
-        Return choice
+        Loop
+        Clean_Up()
+        End
     End Function
 
 End Module

@@ -210,7 +210,9 @@
 
     Sub Update_Officers()
         For Each item In officer_list
-            If item.Value.input_flages.walking = True Then
+            If item.Value.input_flages.walking = True Then                
+                item.Value.location.x += 0.01
+                Exit For
                 Select Case item.Value.input_flages.Facing
 
                     Case Is = Move_Direction.Left
