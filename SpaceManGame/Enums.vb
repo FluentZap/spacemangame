@@ -22,11 +22,11 @@
         End Function
 
         Function sngX() As Single
-            Return CSng(x - 0.005)
+            Return CSng(x)
         End Function
 
         Function sngY() As Single
-            Return CSng(y - 0.005)
+            Return CSng(y)
         End Function
 
 

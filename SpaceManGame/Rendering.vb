@@ -112,7 +112,7 @@
         d3d_device.Clear(ClearFlags.Target, Color.FromArgb(255, 0, 0, 0), 1, 0)
         d3d_sprite.Begin(SpriteFlags.AlphaBlend)
         d3d_device.SetSamplerState(0, SamplerStageStates.MinFilter, TextureFilter.Linear)
-        d3d_device.SetSamplerState(0, SamplerStageStates.MagFilter, TextureFilter.None)
+        d3d_device.SetSamplerState(0, SamplerStageStates.MagFilter, TextureFilter.Point)
         d3d_sprite.Transform = Matrix.Transformation2D(New Vector2(0, 0), 0, New Vector2(scale, scale), New Vector2(0, 0), 0, New Vector2(0, 0))
 
         'Render on ship
@@ -121,8 +121,8 @@
             render_personal_ship(player)
             d3d_sprite.Transform = Matrix.Transformation2D(New Vector2(0, 0), 0, New Vector2(scale, scale), New Vector2(0, 0), 0, New Vector2(0, 0))
             For Each officer In ship.Officer_List
-                pos.x = officer.Value.GetLocation.x - view_location_personal.x
-                pos.y = officer.Value.GetLocation.y - view_location_personal.y
+                pos.x = officer.Value.GetLocationD.x - view_location_personal.x
+                pos.y = officer.Value.GetLocationD.y - view_location_personal.y
                 'Draw_Crew(character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head, pos, Color.White)
                 Draw_Officer(Get_Officer_Texture(officer.Key), officer.Value.Get_Sprite, pos, Color.White)
             Next
@@ -136,17 +136,17 @@
 
         'Render on planet
         If Officer_List(player).region = Officer_location_enum.Planet Then
-            'view_location_personal.x = Officer_List(current_player).GetLocationD.x + 16 - CInt((screen_size.x / 2) / personal_zoom)
-            'view_location_personal.y = Officer_List(current_player).GetLocationD.y + 16 - CInt((screen_size.y / 2) / personal_zoom)
-            view_location_personal.x += 1
+            view_location_personal.x = Officer_List(current_player).GetLocationD.x + 16 - CInt((screen_size.x / 2) / personal_zoom)
+            view_location_personal.y = Officer_List(current_player).GetLocationD.y + 16 - CInt((screen_size.y / 2) / personal_zoom)
+            'view_location_personal.x += 1
             Dim planet As Planet = Planet_List(Officer_List(player).Location_ID)
             'For a = 0 To 100
             render_personal_planet(player)
             'Next a
             d3d_sprite.Transform = Matrix.Transformation2D(New Vector2(0, 0), 0, New Vector2(scale, scale), New Vector2(0, 0), 0, New Vector2(0, 0))
             For Each officer In planet.officer_list
-                pos.x = officer.Value.GetLocation.x - view_location_personal.x
-                pos.y = officer.Value.GetLocation.y - view_location_personal.y
+                pos.x = officer.Value.GetLocationD.x - view_location_personal.x
+                pos.y = officer.Value.GetLocationD.y - view_location_personal.y
                 Draw_Officer(Get_Officer_Texture(officer.Key), officer.Value.Get_Sprite, pos, Color.White)
             Next
 
@@ -242,9 +242,9 @@
         Next
 
         For x = viewRect.X To viewRect.Right
-            For y = viewRect.Y To viewRect.Bottom
-                pos.x = (x * 32) - CInt(view_location_personal.x)
-                pos.y = (y * 32) - CInt(view_location_personal.y)
+            For y = viewRect.Y To viewRect.Bottom                
+                pos.x = (x * 32) - view_location_personal.x
+                pos.y = (y * 32) - view_location_personal.y
                 If x >= 0 AndAlso x <= planet.size.x AndAlso y >= 0 AndAlso y <= planet.size.y Then
                     If TileMap(x, y).type < planet_tile_type_enum.empty Then
 

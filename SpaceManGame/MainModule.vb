@@ -400,10 +400,10 @@
         D3D_PP.BackBufferFormat = Format.X8R8G8B8
         D3D_PP.BackBufferWidth = screen_size.x
         D3D_PP.BackBufferHeight = screen_size.y
-        D3D_PP.Windowed = False
+        D3D_PP.Windowed = True
         D3D_PP.SwapEffect = SwapEffect.Discard
-        D3D_PP.BackBufferCount = 2
-        D3D_PP.PresentationInterval = PresentInterval.One
+        D3D_PP.BackBufferCount = 1
+        D3D_PP.PresentationInterval = PresentInterval.Immediate
         'Create D3D Device
         d3d_device = New Device(monitor, DeviceType.Hardware, MainForm.Handle, CreateFlags.MixedVertexProcessing, D3D_PP)
         'd3d_chain = New SwapChain(d3d_device, D3D_PP)
@@ -552,8 +552,12 @@
 
         Cursor.Clip = MainForm.RectangleToScreen(MainForm.ClientRectangle)
         'Cursor.Position = New Point(MainForm.Location.X + screen_size.x, screen_size.y \ 2)
+        Cursor.Show()
+
 
         d3d_device.SetCursorProperties(0, 0, Cursor1)
+        'd3d_device.SetCursorPosition(0, 0, False)
+        d3d_device.ShowCursor(True)
         generate()
 
         Select Case main_menu()
@@ -769,7 +773,7 @@
         'planet1.landed_ships.Add(0, New PointI(0, 0))
         
         'Fix movement
-        Add_Officer(0, New Officer(0, "Captian", Officer_location_enum.Planet, 0, pos, 3, 0.2, New Officer.sprite_list(character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head)))
+        Add_Officer(0, New Officer(0, "Captian", Officer_location_enum.Planet, 0, pos, 1, 0.2, New Officer.sprite_list(character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head)))
 
 
         Officer_List(0).Officer_Classes.Add(New Officer_Class(Class_List_Enum.Mage, 0, 1))
@@ -841,7 +845,7 @@
             Ship_List(1).angular_velocity = 0.001
             'Logic
             QueryPerformanceCounter(time_current)
-            If Logic_Time >= Logic_Ratio Then
+            If Logic_Time >= 1 Then
                 Logic_Time -= 1
                 UpdateGST()
                 Select Case current_view

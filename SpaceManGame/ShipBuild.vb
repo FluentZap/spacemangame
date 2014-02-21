@@ -502,14 +502,14 @@
 
 
             If mouse_info.position.x = 0 Then
-                'view_location_sb.x -= 10
+                view_location_sb.x -= 1
             ElseIf mouse_info.position.x >= screen_size.x - 1 Then
-                'view_location_sb.x += 10
+                view_location_sb.x += 1
             End If
             If mouse_info.position.y = 0 Then
-                'view_location_sb.y -= 10
+                view_location_sb.y -= 1
             ElseIf mouse_info.position.y >= screen_size.y - 1 Then
-                'view_location_sb.y += 10
+                view_location_sb.y += 1
             End If
             'view_location_sb.x = 0
             'view_location_sb.y = 0
@@ -2331,9 +2331,7 @@
         ReDim selection_tile_map(shipsize.x + 2, shipsize.y + 2)
         ReDim selection_tile_map2(shipsize.x + 2, shipsize.y + 2)
 
-        Dim time_start, time_current, cps, rate As Long
-        QueryPerformanceFrequency(cps)
-        rate = Convert.ToInt64(cps / 60)
+        Dim time_current As Long        
 
         'UI and flow control
         Add_menu_items()
@@ -2354,17 +2352,17 @@
         Build_ship.center_point.y = shipsize.y \ 2
 
 
-        Logic_Time = Current_Time()
-        render_time = Current_Time()
+        'Logic_Time = Current_Time()
+        'render_time = Current_Time()
+
         Do
-            MainForm.getUI(pressedkeys, mouse_info) 'Get Mouse/Keys
-            atsize = Convert.ToInt32(32 * sb_zoom)
-            'QueryPerformanceCounter(time_start)
+            If Logic_Time >= 1 Then
+
+                Logic_Time -= 1
 
 
-            If Logic_Time + logic_rate < Current_Time() Then
-                Logic_Time += logic_rate
-
+                MainForm.getUI(pressedkeys, mouse_info) 'Get Mouse/Keys
+                atsize = Convert.ToInt32(32 * sb_zoom)
 
                 'Check Button Selection
                 For Each button In all_menu_items_list
@@ -2410,22 +2408,24 @@
                     Validate_pipelines = False
                 End If
 
+                Build_Device_List()
+                PostUI_Update()
             End If
-            Build_Device_List()
-            PostUI_Update()
 
 
-            If render_end + refresh_rate <= Current_Time() + render_duration Then
-                If render_end + render_duration < time_current Then
-                    QueryPerformanceCounter(render_start)
-                    'Render
-                    render_ship_build()
-                    'all_menu_items_list, Build_ship, Tile_selection, Build_selection, selection_tile_map, Selection_color, selection, Room_selection, Room_selection_color, Erasing, Device_rotation, info_bars, tile_grid, Device_Flip, Pipeline_select, pipeing, Build_ship.center_point, Redraw_Minimap, Pipeline_dialog, MiniMap_Scale
-                    Redraw_Minimap = False
-                    QueryPerformanceCounter(render_end)
-                    render_duration = render_end - render_start
-                End If
+
+            QueryPerformanceCounter(time_current)
+
+            If time_current + refresh_rate >= render_end + render_duration Then
+                Logic_Time += Logic_Ratio
+                'Render
+                render_ship_build()
+                'all_menu_items_list, Build_ship, Tile_selection, Build_selection, selection_tile_map, Selection_color, selection, Room_selection, Room_selection_color, Erasing, Device_rotation, info_bars, tile_grid, Device_Flip, Pipeline_select, pipeing, Build_ship.center_point, Redraw_Minimap, Pipeline_dialog, MiniMap_Scale
+                Redraw_Minimap = False
+                QueryPerformanceCounter(render_end)
+                render_duration = render_end - time_current
             End If
+
 
 
 
@@ -2433,10 +2433,9 @@
             Application.DoEvents()
 
             If pressedkeys.Contains(Keys.F10) Then pressedkeys.Remove(Keys.F10) : lock_screen()
-            Do
-                QueryPerformanceCounter(time_current)
-            Loop Until (time_current - time_start) >= rate
         Loop While pressedkeys.Contains(Keys.Escape) = False AndAlso Exit_Ship_build = False
+        Clean_Up()
+        End
     End Sub
 
 

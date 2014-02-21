@@ -40,8 +40,8 @@
         'P.Resource_Points(New PointI(0, 0)) = True
 
         Build_AppartmentH(New PointI(32, 0))
-        Build_Mine(New PointI(P.Resource_Points.First.Key.x * 32, P.Resource_Points.First.Key.y * 32))
-        'Build_Mine(New PointI(0, 0))
+        'Build_Mine(New PointI(P.Resource_Points.First.Key.x * 32, P.Resource_Points.First.Key.y * 32))
+        Build_Mine(New PointI(0, 0))
 
         'Create_City()
 
