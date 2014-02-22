@@ -171,11 +171,11 @@
         draw_text("GST " + GST.ToString, New Rectangle(0, 0, 100, 20), CType(DrawTextFormat.Center + DrawTextFormat.VerticalCenter, DrawTextFormat), Color.White, d3d_font(d3d_font_enum.SB_small))
         draw_text("FPS " + FPS.ToString, New Rectangle(0, 50, 100, 20), CType(DrawTextFormat.Center + DrawTextFormat.VerticalCenter, DrawTextFormat), Color.White, d3d_font(d3d_font_enum.SB_small))
         draw_text("Logic  " + LPS.ToString, New Rectangle(0, 100, 100, 20), CType(DrawTextFormat.Center + DrawTextFormat.VerticalCenter, DrawTextFormat), Color.White, d3d_font(d3d_font_enum.SB_small))
-        draw_text("Render " + render_duration.ToString, New Rectangle(0, 150, 100, 20), CType(DrawTextFormat.Center + DrawTextFormat.VerticalCenter, DrawTextFormat), Color.White, d3d_font(d3d_font_enum.SB_small))
         render_personal_health_overlay(New PointI(256, screen_size.y - 96), Officer_List(current_player).Health)
 
         If Crew_List.ContainsKey(Mouse_Target) Then
             render_personal_health_overlay(New PointI(128, screen_size.y - 96), Crew_List(Mouse_Target).Health)
+            draw_text("Wealth " + Crew_List(Mouse_Target).Wealth.ToString, New Rectangle(0, 150, 100, 20), CType(DrawTextFormat.Center + DrawTextFormat.VerticalCenter, DrawTextFormat), Color.White, d3d_font(d3d_font_enum.SB_small))
         End If
         d3d_sprite.End()
 

@@ -38,41 +38,99 @@
         Create_Resource_Points()
 
         'P.Resource_Points(New PointI(0, 0)) = True
+        Build_Mine(New PointI(0, 0))
 
         Build_AppartmentH(New PointI(32, 0))
+        Build_AppartmentH(New PointI(32, 16))
+        Build_AppartmentH(New PointI(32, 32))
         'Build_Mine(New PointI(P.Resource_Points.First.Key.x * 32, P.Resource_Points.First.Key.y * 32))
-        Build_Mine(New PointI(0, 0))
+
 
         'Create_City()
 
-        Add_Crew(0, New Crew(0, New PointD(1184, 256), 0, Officer_location_enum.Planet, 6, character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head, New crew_resource_type(0, 0)))
+        Add_Crew(0, New Crew(0, New PointD(1184, 256), 0, Officer_location_enum.Planet, 8, character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head, New crew_resource_type(0, 0)))
         P.crew_list(0).Worker_Type = Worker_Type_Enum.Worker
-        P.crew_list(0).HomeBuilding = 0
+        P.crew_list(0).HomeBuilding = 1
         P.crew_list(0).HomeSpace = 0
-        P.crew_list(0).WorkBuilding = 1
-        P.crew_list(0).WorkShift = Work_Shift_Enum.Mid
+        P.crew_list(0).WorkBuilding = 0
+        P.crew_list(0).WorkShift = Work_Shift_Enum.Morning
 
-        Add_Crew(1, New Crew(0, New PointD(1376, 256), 0, Officer_location_enum.Planet, 6, character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head, New crew_resource_type(0, 0)))
+        Add_Crew(1, New Crew(0, New PointD(1376, 256), 0, Officer_location_enum.Planet, 8, character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head, New crew_resource_type(0, 0)))
         P.crew_list(1).Worker_Type = Worker_Type_Enum.Worker
-        P.crew_list(1).HomeBuilding = 0
+        P.crew_list(1).HomeBuilding = 1
         P.crew_list(1).HomeSpace = 1
-        P.crew_list(1).WorkBuilding = 1
-        P.crew_list(1).WorkShift = Work_Shift_Enum.Mid
+        P.crew_list(1).WorkBuilding = 0
+        P.crew_list(1).WorkShift = Work_Shift_Enum.Morning
 
-        Add_Crew(2, New Crew(0, New PointD(1568, 256), 0, Officer_location_enum.Planet, 6, character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head, New crew_resource_type(0, 0)))
+        Add_Crew(2, New Crew(0, New PointD(1568, 256), 0, Officer_location_enum.Planet, 8, character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head, New crew_resource_type(0, 0)))
         P.crew_list(2).Worker_Type = Worker_Type_Enum.Worker
-        P.crew_list(2).HomeBuilding = 0
+        P.crew_list(2).HomeBuilding = 1
         P.crew_list(2).HomeSpace = 2
-        P.crew_list(2).WorkBuilding = 1
-        P.crew_list(2).WorkShift = Work_Shift_Enum.Night
+        P.crew_list(2).WorkBuilding = 0
+        P.crew_list(2).WorkShift = Work_Shift_Enum.Morning
 
-        Add_Crew(3, New Crew(0, New PointD(1760, 256), 0, Officer_location_enum.Planet, 6, character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head, New crew_resource_type(0, 0)))
+        Add_Crew(3, New Crew(0, New PointD(1760, 256), 0, Officer_location_enum.Planet, 8, character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head, New crew_resource_type(0, 0)))
         P.crew_list(3).Worker_Type = Worker_Type_Enum.Worker
-        P.crew_list(3).HomeBuilding = 0
+        P.crew_list(3).HomeBuilding = 1
         P.crew_list(3).HomeSpace = 3
-        P.crew_list(3).WorkBuilding = 1
-        P.crew_list(3).WorkShift = Work_Shift_Enum.Night
-        
+        P.crew_list(3).WorkBuilding = 0
+        P.crew_list(3).WorkShift = Work_Shift_Enum.Morning
+
+        Add_Crew(4, New Crew(0, New PointD(1184, 256), 0, Officer_location_enum.Planet, 8, character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head, New crew_resource_type(0, 0)))
+        P.crew_list(4).Worker_Type = Worker_Type_Enum.Worker
+        P.crew_list(4).HomeBuilding = 2
+        P.crew_list(4).HomeSpace = 0
+        P.crew_list(4).WorkBuilding = 0
+        P.crew_list(4).WorkShift = Work_Shift_Enum.Mid
+
+        Add_Crew(5, New Crew(0, New PointD(1376, 256), 0, Officer_location_enum.Planet, 8, character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head, New crew_resource_type(0, 0)))
+        P.crew_list(5).Worker_Type = Worker_Type_Enum.Worker
+        P.crew_list(5).HomeBuilding = 2
+        P.crew_list(5).HomeSpace = 1
+        P.crew_list(5).WorkBuilding = 0
+        P.crew_list(5).WorkShift = Work_Shift_Enum.Mid
+
+        Add_Crew(6, New Crew(0, New PointD(1568, 256), 0, Officer_location_enum.Planet, 8, character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head, New crew_resource_type(0, 0)))
+        P.crew_list(6).Worker_Type = Worker_Type_Enum.Worker
+        P.crew_list(6).HomeBuilding = 2
+        P.crew_list(6).HomeSpace = 2
+        P.crew_list(6).WorkBuilding = 0
+        P.crew_list(6).WorkShift = Work_Shift_Enum.Mid
+
+        Add_Crew(7, New Crew(0, New PointD(1760, 256), 0, Officer_location_enum.Planet, 8, character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head, New crew_resource_type(0, 0)))
+        P.crew_list(7).Worker_Type = Worker_Type_Enum.Worker
+        P.crew_list(7).HomeBuilding = 2
+        P.crew_list(7).HomeSpace = 3
+        P.crew_list(7).WorkBuilding = 0
+        P.crew_list(7).WorkShift = Work_Shift_Enum.Mid
+
+        Add_Crew(8, New Crew(0, New PointD(1184, 256), 0, Officer_location_enum.Planet, 8, character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head, New crew_resource_type(0, 0)))
+        P.crew_list(8).Worker_Type = Worker_Type_Enum.Worker
+        P.crew_list(8).HomeBuilding = 3
+        P.crew_list(8).HomeSpace = 0
+        P.crew_list(8).WorkBuilding = 0
+        P.crew_list(8).WorkShift = Work_Shift_Enum.Night
+
+        Add_Crew(9, New Crew(0, New PointD(1376, 256), 0, Officer_location_enum.Planet, 8, character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head, New crew_resource_type(0, 0)))
+        P.crew_list(9).Worker_Type = Worker_Type_Enum.Worker
+        P.crew_list(9).HomeBuilding = 3
+        P.crew_list(9).HomeSpace = 1
+        P.crew_list(9).WorkBuilding = 0
+        P.crew_list(9).WorkShift = Work_Shift_Enum.Night
+
+        Add_Crew(10, New Crew(0, New PointD(1568, 256), 0, Officer_location_enum.Planet, 8, character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head, New crew_resource_type(0, 0)))
+        P.crew_list(10).Worker_Type = Worker_Type_Enum.Worker
+        P.crew_list(10).HomeBuilding = 3
+        P.crew_list(10).HomeSpace = 2
+        P.crew_list(10).WorkBuilding = 0
+        P.crew_list(10).WorkShift = Work_Shift_Enum.Night
+
+        Add_Crew(11, New Crew(0, New PointD(1760, 256), 0, Officer_location_enum.Planet, 8, character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head, New crew_resource_type(0, 0)))
+        P.crew_list(11).Worker_Type = Worker_Type_Enum.Worker
+        P.crew_list(11).HomeBuilding = 3
+        P.crew_list(11).HomeSpace = 3
+        P.crew_list(11).WorkBuilding = 0
+        P.crew_list(11).WorkShift = Work_Shift_Enum.Night
     End Sub
 
 
@@ -99,9 +157,9 @@
         P.Building_List(ID).BuildingRect.Add(0, New Rectangle(pos.x + 7, pos.y + 18, 10, 6))
 
         P.Building_List(ID).access_point.Add(New PointI(pos.x + 3, pos.y + 9), New Building_Access_Point_Type)
-        'P.Building_List(ID).access_point.Add(New PointI(pos.x + 8, pos.y + 9), New Building_Access_Point_Type)
-        'P.Building_List(ID).access_point.Add(New PointI(pos.x + 13, pos.y + 9), New Building_Access_Point_Type)
-        'P.Building_List(ID).access_point.Add(New PointI(pos.x + 18, pos.y + 9), New Building_Access_Point_Type)
+        P.Building_List(ID).access_point.Add(New PointI(pos.x + 8, pos.y + 9), New Building_Access_Point_Type)
+        P.Building_List(ID).access_point.Add(New PointI(pos.x + 13, pos.y + 9), New Building_Access_Point_Type)
+        P.Building_List(ID).access_point.Add(New PointI(pos.x + 18, pos.y + 9), New Building_Access_Point_Type)
 
 
     End Sub

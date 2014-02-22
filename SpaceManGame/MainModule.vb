@@ -1904,7 +1904,7 @@
         'Day
         If GST >= 1500 AndAlso GST < 2500 Then view_personal_Ambient = Color.FromArgb(255, 240, 240, 220)
         'Night
-        If GST >= 0 AndAlso GST < 1000 Then view_personal_Ambient = Color.FromArgb(255, 0, 0, 5)
+        If GST >= 0 AndAlso GST < 1000 Then view_personal_Ambient = Color.FromArgb(255, 30, 30, 40)
 
 
         'If GST > 0 AndAlso GST < 1500 Then view_personal_Ambient = Color.FromArgb(0, 0, 0, 0)
@@ -1914,7 +1914,7 @@
         'view_personal_Ambient=color.FromArgb(
 
         GSTFrequency += 1
-        If GSTFrequency = 120 Then
+        If GSTFrequency = 2 Then
             GSTFrequency = 0
             GST += 1
             If GST > 3000 Then GST = 0

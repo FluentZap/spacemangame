@@ -119,12 +119,6 @@
             'Send Crew home
             'al la repeto
 
-            If GST = 1800 Then Send_Crew_ToWork(Work_Shift_Enum.Mid)
-
-            If GST = 1810 Then Send_Crew_ToWork(Work_Shift_Enum.Night)
-
-            If GST = 1815 Then Send_Crew_Home(Work_Shift_Enum.Mid)
-            Exit Sub
 
             'Send to work
             If GST = 800 Then
@@ -138,12 +132,22 @@
 
             'Send crew home
             If GST = 1000 Then
-                Send_Crew_Home(Work_Shift_Enum.Morning)
-            ElseIf GST = 2000 Then
-                Send_Crew_Home(Work_Shift_Enum.Mid)
-            ElseIf GST = 3000 Then
                 Send_Crew_Home(Work_Shift_Enum.Night)
+            ElseIf GST = 2000 Then
+                Send_Crew_Home(Work_Shift_Enum.Morning)
+            ElseIf GST = 3000 Then
+                Send_Crew_Home(Work_Shift_Enum.Mid)
             End If
+
+
+
+
+            For Each buiding In Building_List
+                For Each CrewID In buiding.Value.Working_crew_list
+                    crew_list(CrewID).Wealth += 1
+                Next
+            Next
+
 
         End If
     End Sub
