@@ -216,8 +216,8 @@
         set_room
         remove_room
         'Planet
-
-
+        try_working
+        start_working
 
     End Enum
     Enum ship_class_enum As Byte

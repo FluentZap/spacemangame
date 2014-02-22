@@ -112,16 +112,40 @@
 
 
     Sub Process_crew()
+        If GSTFrequency = 0 Then
+            'Send Crew to work
+            'Send Crew to bank if needed
+            'Send Crew to Pub
+            'Send Crew home
+            'al la repeto
 
-        If GST = 800 Then
-            Send_Crew_ToWork(Work_Shift_Enum.Morning)
-        ElseIf GST = 1800 Then
-            Send_Crew_ToWork(Work_Shift_Enum.Mid)
-        ElseIf GST = 2800 Then
-            Send_Crew_ToWork(Work_Shift_Enum.Night)
+            If GST = 1800 Then Send_Crew_ToWork(Work_Shift_Enum.Mid)
+
+            If GST = 1810 Then Send_Crew_ToWork(Work_Shift_Enum.Night)
+
+            If GST = 1815 Then Send_Crew_Home(Work_Shift_Enum.Mid)
+            Exit Sub
+
+            'Send to work
+            If GST = 800 Then
+                Send_Crew_ToWork(Work_Shift_Enum.Morning)
+            ElseIf GST = 1800 Then
+                Send_Crew_ToWork(Work_Shift_Enum.Mid)
+            ElseIf GST = 2800 Then
+                Send_Crew_ToWork(Work_Shift_Enum.Night)
+            End If
+
+
+            'Send crew home
+            If GST = 1000 Then
+                Send_Crew_Home(Work_Shift_Enum.Morning)
+            ElseIf GST = 2000 Then
+                Send_Crew_Home(Work_Shift_Enum.Mid)
+            ElseIf GST = 3000 Then
+                Send_Crew_Home(Work_Shift_Enum.Night)
+            End If
+
         End If
-
-
     End Sub
 
 
@@ -130,44 +154,53 @@
         Dim Found_AP As Boolean = False
 
         For Each Crew In crew_list
-            If Crew.Value.WorkBuilding > -1 Then
+            'Not already working/going to work
+            If Not Building_List(Crew.Value.WorkBuilding).Working_crew_list.Contains(Crew.Key) AndAlso Not Building_List(Crew.Value.WorkBuilding).Assigned_crew_list.Contains(Crew.Key) Then
+                If Crew.Value.WorkBuilding > -1 Then
 
-                If Crew.Value.WorkShift = WorkShift Then
-                    'Find AP in building
-                    For Each AP In Building_List(Crew.Value.WorkBuilding).access_point
-                        If AP.Value = False Then
-                            work_Point = AP.Key
-                            Found_AP = True
-                            Exit For
-                        End If
-                    Next
-                    'If Open access point is found send crew to work
-                    If Found_AP = True Then
-                        'Set AP To Manned
-                        Building_List(Crew.Value.WorkBuilding).access_point(work_Point) = True
-                        'Pathfind
-                        If Not tile_map(Crew.Value.find_tile.x, Crew.Value.find_tile.y).walkable = walkable_type_enum.Walkable Then Exit For
-                        Dim tile As PointI = Crew.Value.find_tile
 
-                        path_find.set_start_end(tile, work_Point)
-                        path_find.find_path()
 
-                        If path_find.get_status = pf_status.path_found Then
-                            If Crew.Value.command_queue.Any Then
-                                Crew.Value.command_queue.Clear()
+                    If Crew.Value.WorkShift = WorkShift Then
+                        'Find AP in building
+                        For Each AP In Building_List(Crew.Value.WorkBuilding).access_point
+                            If AP.Value.NextUp = False Then
+                                work_Point = AP.Key
+                                Found_AP = True
+                                Exit For
                             End If
-                            Building_List(Crew.Value.WorkBuilding).Assigned_crew_list.Add(Crew.Key)
-                            Dim list As LinkedList(Of PointI)
-                            list = path_find.get_path
+                        Next
+                        'If Open access point is found send crew to work
+                        If Found_AP = True Then
+                            Found_AP = False
+                            'Set NextUp to work to true
+                            Building_List(Crew.Value.WorkBuilding).access_point(work_Point).NextUp = True
+                            'Pathfind
+                            If Not tile_map(Crew.Value.find_tile.x, Crew.Value.find_tile.y).walkable = walkable_type_enum.Walkable Then Exit For
+                            Dim tile As PointI = Crew.Value.find_tile
 
+                            path_find.set_start_end(tile, work_Point)
+                            path_find.find_path()
 
-                            For Each dest In list
-                                Crew.Value.command_queue.Enqueue(New Crew.Command_move(New PointD(dest.x * 32, dest.y * 32)))
-                            Next
-                            'crew_list(Crew).command_queue.Enqueue(New Crew.Command_set_room())
+                            If path_find.get_status = pf_status.path_found Then
+                                If Crew.Value.command_queue.Any Then
+                                    Crew.Value.command_queue.Clear()
+                                End If
+                                Building_List(Crew.Value.WorkBuilding).Assigned_crew_list.Add(Crew.Key)
+                                Dim list As LinkedList(Of PointI)
+                                list = path_find.get_path
 
+                                'Need to add wait for finish
+                                Crew.Value.command_queue.Clear()
+                                For Each dest In list
+                                    If dest = work_Point Then
+                                        Crew.Value.command_queue.Enqueue(New Crew.Command_Try_Work(work_Point))
+                                    End If
+                                    Crew.Value.command_queue.Enqueue(New Crew.Command_move(New PointD(dest.x * 32, dest.y * 32)))
+                                Next
+                                Crew.Value.command_queue.Enqueue(New Crew.Command_Start_Work(work_Point))
+
+                            End If
                         End If
-
                     End If
                 End If
             End If
@@ -176,6 +209,48 @@
     End Sub
 
 
+
+    Sub Send_Crew_Home(ByVal WorkShift As Work_Shift_Enum)
+        Dim Home_Point As PointI
+        Dim Home_rect As Rectangle
+
+        For Each Crew In crew_list
+            If Crew.Value.HomeBuilding > -1 Then
+                If Crew.Value.WorkShift = WorkShift Then
+                    Home_rect = Building_List(Crew.Value.HomeBuilding).BuildingRect(Crew.Value.HomeSpace)
+                    Home_Point.x = CInt(Home_rect.X + Home_rect.Width / 2)
+                    Home_Point.y = CInt(Home_rect.Y + Home_rect.Height / 2)
+                    'Find AP in building                    
+                    'Pathfind
+
+                    If Not tile_map(Crew.Value.find_tile.x, Crew.Value.find_tile.y).walkable = walkable_type_enum.Walkable Then Exit For
+                    Dim tile As PointI = Crew.Value.find_tile
+
+                    path_find.set_start_end(tile, Home_Point)
+                    path_find.find_path()
+
+                    If path_find.get_status = pf_status.path_found Then
+                        If Crew.Value.command_queue.Any Then
+                            Crew.Value.command_queue.Clear()
+                        End If
+                        If Building_List(Crew.Value.WorkBuilding).Working_crew_list.Contains(Crew.Key) Then Building_List(Crew.Value.WorkBuilding).Working_crew_list.Remove(Crew.Key)
+                        If Building_List(Crew.Value.WorkBuilding).access_point.ContainsKey(tile) Then Building_List(Crew.Value.WorkBuilding).access_point(tile).Used = False
+                        Dim list As LinkedList(Of PointI)
+                        list = path_find.get_path
+
+                        'Need to add sleep and stuuuuf
+                        Crew.Value.command_queue.Clear()
+                        For Each dest In list
+                            Crew.Value.command_queue.Enqueue(New Crew.Command_move(New PointD(dest.x * 32, dest.y * 32)))
+                        Next
+                    End If
+
+
+                End If
+            End If
+        Next
+
+    End Sub
 
     Sub Load_Pathfinding()
         path_find = New A_star
@@ -211,10 +286,7 @@
     Sub Update_Officers()
         For Each item In officer_list
             If item.Value.input_flages.walking = True Then                
-                item.Value.location.x += 0.01
-                Exit For
                 Select Case item.Value.input_flages.Facing
-
                     Case Is = Move_Direction.Left
                         If item.Value.input_flages.MoveX = Move_Direction.Left Then MoveOfficer(item.Key, New PointD(-1, 0))
                         If item.Value.input_flages.MoveX = Move_Direction.Right Then MoveOfficer(item.Key, New PointD(0.2, 0))

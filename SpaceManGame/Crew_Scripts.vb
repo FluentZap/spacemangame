@@ -21,8 +21,8 @@
 
 
 
-                    Case crew_script_enum.open_door : crew_script_open_door(Crew_List(key))
-
+                    Case crew_script_enum.try_working : crew_script_try_working(Crew_List(key), key)
+                    Case crew_script_enum.start_working : crew_script_start_working(Crew_List(key), key)
 
                 End Select
                 If Crew_List(key).command_queue.First.status = script_status_enum.complete Then Crew_List(key).command_queue.Dequeue()
@@ -207,6 +207,42 @@
             ship.room_list(ship.tile_map(pos.x, pos.y).roomID).working_crew_list.Remove(id)
 
             crew_member.command_queue.First.status = script_status_enum.complete
+        End If
+    End Sub
+
+
+
+    Public Sub crew_script_try_working(ByVal crew_member As Crew, ByVal id As Integer)
+        Dim command As Crew.Command_Try_Work = DirectCast(crew_member.command_queue.First, Crew.Command_Try_Work)
+        'Only programed for planets
+        Dim planet As Planet = Planet_List(crew_member.Location_ID)
+        Dim pos As PointI
+        pos.x = crew_member.find_tile.x
+        pos.y = crew_member.find_tile.y
+        If crew_member.region = Officer_location_enum.Planet Then
+            If planet.Building_List(crew_member.WorkBuilding).access_point(command.Ap).Used = False Then
+                crew_member.command_queue.First.status = script_status_enum.complete
+            End If
+        End If
+    End Sub
+
+
+
+    Public Sub crew_script_start_working(ByVal crew_member As Crew, ByVal id As Integer)
+        Dim command As Crew.Command_Start_Work = DirectCast(crew_member.command_queue.First, Crew.Command_Start_Work)
+        'Only programed for planets
+        Dim planet As Planet = Planet_List(crew_member.Location_ID)
+        Dim pos As PointI
+        pos.x = crew_member.find_tile.x
+        pos.y = crew_member.find_tile.y
+        If crew_member.region = Officer_location_enum.Planet Then
+            If planet.Building_List(crew_member.WorkBuilding).access_point(command.Ap).Used = False Then
+                planet.Building_List(crew_member.WorkBuilding).access_point(command.Ap).Used = True
+                planet.Building_List(crew_member.WorkBuilding).access_point(command.Ap).NextUp = False
+                planet.Building_List(crew_member.WorkBuilding).Working_crew_list.Add(id)
+                If planet.Building_List(crew_member.WorkBuilding).Assigned_crew_list.Contains(id) Then planet.Building_List(crew_member.WorkBuilding).Assigned_crew_list.Remove(id)
+                crew_member.command_queue.First.status = script_status_enum.complete
+            End If
         End If
     End Sub
 

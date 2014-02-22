@@ -856,9 +856,10 @@
                         For Each ship In Ship_List.Values
                             ship.DoEvents()
                         Next
-                        For Each Planet In Planet_List.Values
-                            Planet.DoEvents()
-                        Next
+                        'For Each Planet In Planet_List.Values
+                        'Planet.DoEvents()
+                        'Next
+                        Planet_List(0).DoEvents()
                         update_Planet_Movements()
                         check_near_planet(current_selected_ship_view)
 
