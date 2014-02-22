@@ -236,8 +236,8 @@
 
         For Each item In planet.Building_List
             For Each building In item.Value.BuildingRect
-                Dim rect As New Rectangle(building.X * 32, building.Y * 32, building.Width * 32, building.Height * 32)
-                If rect.Contains(Officer_List(current_player).find_rect) Then InBuilding = building : Exit For
+                Dim rect As New Rectangle(building.Value.X * 32, building.Value.Y * 32, building.Value.Width * 32, building.Value.Height * 32)
+                If rect.Contains(Officer_List(current_player).find_rect) Then InBuilding = building.Value : Exit For
             Next
         Next
 

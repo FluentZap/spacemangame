@@ -5,7 +5,7 @@
 End Enum
 
 <Serializable()> Public Class Crew
-
+    'Write New Crew Scripts class constructors here
 #Region "Crew Script Classes"
     <Serializable()> Public MustInherit Class Crew_Command_script
         Public status As script_status_enum = script_status_enum.uninvoked
@@ -58,6 +58,30 @@ End Enum
             type = crew_script_enum.open_door
         End Sub
     End Class
+
+
+
+    <Serializable()> Public Class Command_Start_Work
+        Inherits Crew_Command_script        
+        Public Ap As PointI
+
+        Sub New(ByVal Ap As PointI)
+            Me.Ap = Ap
+            type = crew_script_enum.start_working
+        End Sub
+    End Class
+
+
+    <Serializable()> Public Class Command_Try_Work
+        Inherits Crew_Command_script        
+        Public Ap As PointI
+
+        Sub New(ByVal Ap As PointI)
+            Me.Ap = Ap
+            type = crew_script_enum.try_working
+        End Sub
+    End Class
+
 
 #End Region
 
