@@ -46,6 +46,7 @@
     Public button_texture(100) As Texture
     Public tile_texture(100) As Texture
     Public planet_tile_texture(100) As Texture
+    Public Item_tile_texture(100) As Texture
     Public projectile_tile_texture(100) As Texture
 
     Public effect_texture(100) As Texture    
@@ -1912,6 +1913,8 @@
         '0 to 1500
 
         'view_personal_Ambient=color.FromArgb(
+        view_personal_Ambient = Color.FromArgb(255, 240, 240, 240)
+
 
         GSTFrequency += 1
         If GSTFrequency = 2 Then

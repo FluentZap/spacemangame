@@ -83,6 +83,31 @@ End Enum
     End Class
 
 
+    <Serializable()> Public Class Command_Pub_Start
+        Inherits Crew_Command_script
+        Public Ap As PointI
+        Public Pub_Time As Integer 'In GST
+        Public Pub_Start As Integer = -1 'In GST
+        Sub New(ByVal Ap As PointI, ByVal Pub_Time As Integer)
+            Me.Ap = Ap
+            Me.Pub_Time = Pub_Time
+            type = crew_script_enum.pub_start
+        End Sub
+    End Class
+
+
+    <Serializable()> Public Class Command_Bank_Start
+        Inherits Crew_Command_script
+        Public Ap As PointI
+        Public Pub_Time As Integer 'In GST
+        Public Pub_Start As Integer = -1 'In GST
+        Sub New(ByVal Ap As PointI, ByVal Pub_Time As Integer)
+            Me.Ap = Ap
+            Me.Pub_Time = Pub_Time
+            type = crew_script_enum.pub_start
+        End Sub
+    End Class
+
 #End Region
 
 

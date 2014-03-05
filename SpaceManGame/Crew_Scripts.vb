@@ -24,6 +24,9 @@
                     Case crew_script_enum.try_working : crew_script_try_working(Crew_List(key), key)
                     Case crew_script_enum.start_working : crew_script_start_working(Crew_List(key), key)
 
+
+                    Case crew_script_enum.pub_start : crew_script_pub_start(Crew_List(key), key)
+
                 End Select
                 If Crew_List(key).command_queue.First.status = script_status_enum.complete Then Crew_List(key).command_queue.Dequeue()
             End If
@@ -245,6 +248,40 @@
             End If
         End If
     End Sub
+
+
+
+
+    Public Sub crew_script_pub_start(ByVal crew_member As Crew, ByVal id As Integer)
+        Dim command As Crew.Command_Pub_Start = DirectCast(crew_member.command_queue.First, Crew.Command_Pub_Start)
+        Dim planet As Planet = Planet_List(crew_member.Location_ID)
+        Dim pos As PointI
+        pos.x = crew_member.find_tile.x
+        pos.y = crew_member.find_tile.y
+
+        If crew_member.region = Officer_location_enum.Planet Then
+            If planet.Building_List(crew_member.PubBuilding).Assigned_crew_list.Contains(id) Then
+                planet.Building_List(crew_member.PubBuilding).Assigned_crew_list.Remove(id)
+                planet.Building_List(crew_member.PubBuilding).Working_crew_list.Add(id)
+            End If
+
+            If command.Pub_Start = -1 Then
+                command.Pub_Start = GST + command.Pub_Time
+                If command.Pub_Start > 3000 Then command.Pub_Start -= 3000
+            End If
+
+
+            If Math.Abs(GST - command.Pub_Start) < 1500 Then
+                If GST > command.Pub_Start Then
+                    planet.Building_List(crew_member.PubBuilding).Working_crew_list.Remove(id)
+                    planet.Building_List(crew_member.PubBuilding).access_point(command.Ap).Used = False
+                    crew_member.command_queue.First.status = script_status_enum.complete
+                End If
+            End If
+
+        End If
+    End Sub
+
 
 #End Region
 

@@ -1,5 +1,22 @@
-﻿Public Class Planet
+﻿Public Class Item_Point_Type
+    Public Amount As Integer
+    Public Item As Item_Enum
+    Public Base_Building As Integer = -1
 
+    Sub New(ByVal Amount As Integer, ByVal item As Item_Enum)
+        Me.Amount = Amount
+        Me.Item = item
+    End Sub
+
+    Sub New(ByVal Base_Building As Integer)
+        Me.Base_Building = Base_Building
+    End Sub
+
+    Sub New()
+    End Sub
+End Class
+
+Public Class Planet
     Public orbits_planet As Boolean
     Public orbit_point As Integer
     Public orbit_distance As Integer
@@ -14,6 +31,8 @@
     Public Block_Map As HashSet(Of PointI) = New HashSet(Of PointI)
     Public Resource_Points As Dictionary(Of PointI, Boolean) = New Dictionary(Of PointI, Boolean) 'Is true is resource point is taken
     Public Building_List As Dictionary(Of Integer, Planet_Building) = New Dictionary(Of Integer, Planet_Building)
+
+    Public Item_Point As Dictionary(Of PointI, Item_Point_Type) = New Dictionary(Of PointI, Item_Point_Type)
 
     Private path_find As A_star
 
@@ -43,7 +62,7 @@
         Me.orbit_point = orbit_point
         Me.orbit_distance = orbit_distance
         Me.orbits_planet = orbits_planet
-        Me.theta = theta_offset        
+        Me.theta = theta_offset
     End Sub
 
 
@@ -100,7 +119,7 @@
 
     Public Sub DoEvents()
         Process_crew()
-
+        Process_Work()
 
         Update_Officers()
 
@@ -108,6 +127,37 @@
         run_crew_scrips(crew_list)
         Run_animations()
 
+    End Sub
+
+
+    Sub Process_Work()
+        If GSTFrequency = 0 Then
+            If GST Mod 10 = 0 Then
+                For Each buiding In Building_List
+                    If buiding.Value.Type = building_type_enum.Mine Then
+                        For Each CrewID In buiding.Value.Working_crew_list
+                            crew_list(CrewID).Wealth += 1
+                        Next
+
+                        For a = 1 To buiding.Value.Working_crew_list.Count
+                            For Each ipoint In Item_Point
+                                If (ipoint.Value.Item = Item_Enum.None OrElse ipoint.Value.Item = Item_Enum.Crystal) AndAlso ipoint.Value.Base_Building = buiding.Key Then
+                                    If ipoint.Value.Amount < 100 Then
+                                        ipoint.Value.Item = Item_Enum.Crystal
+                                        ipoint.Value.Amount += 1
+                                        Exit For
+                                    End If
+                                End If
+                            Next
+                        Next
+
+                    End If
+                Next
+
+            End If
+
+
+        End If
     End Sub
 
 
@@ -130,6 +180,7 @@
             End If
 
 
+
             'Send crew home
             If GST = 1000 Then
                 Send_Crew_Home(Work_Shift_Enum.Night)
@@ -138,15 +189,6 @@
             ElseIf GST = 3000 Then
                 Send_Crew_Home(Work_Shift_Enum.Mid)
             End If
-
-
-
-
-            For Each buiding In Building_List
-                For Each CrewID In buiding.Value.Working_crew_list
-                    crew_list(CrewID).Wealth += 1
-                Next
-            Next
 
 
         End If
@@ -230,20 +272,22 @@
                     If Not tile_map(Crew.Value.find_tile.x, Crew.Value.find_tile.y).walkable = walkable_type_enum.Walkable Then Exit For
                     Dim tile As PointI = Crew.Value.find_tile
 
-                    path_find.set_start_end(tile, Home_Point)
+                    Crew.Value.command_queue.Clear()
+                    Dim End_Point As PointI
+                    End_Point = Send_Crew_Errands(Crew.Value, Crew.Key)
+
+                    path_find.set_start_end(End_Point, Home_Point)
                     path_find.find_path()
 
                     If path_find.get_status = pf_status.path_found Then
-                        If Crew.Value.command_queue.Any Then
-                            Crew.Value.command_queue.Clear()
-                        End If
                         If Building_List(Crew.Value.WorkBuilding).Working_crew_list.Contains(Crew.Key) Then Building_List(Crew.Value.WorkBuilding).Working_crew_list.Remove(Crew.Key)
                         If Building_List(Crew.Value.WorkBuilding).access_point.ContainsKey(tile) Then Building_List(Crew.Value.WorkBuilding).access_point(tile).Used = False
                         Dim list As LinkedList(Of PointI)
                         list = path_find.get_path
 
                         'Need to add sleep and stuuuuf
-                        Crew.Value.command_queue.Clear()
+
+
                         For Each dest In list
                             Crew.Value.command_queue.Enqueue(New Crew.Command_move(New PointD(dest.x * 32, dest.y * 32)))
                         Next
@@ -256,6 +300,99 @@
 
     End Sub
 
+
+    Function Send_Crew_Errands(ByVal Crew As Crew, ByVal ID As Integer) As PointI
+
+        If Not tile_map(Crew.find_tile.x, Crew.find_tile.y).walkable = walkable_type_enum.Walkable Then Exit Function
+        Dim tile As PointI = Crew.find_tile
+
+        Dim GotoBank As Boolean
+        Dim Pub_Time As Integer
+        'If Crew.Wealth > 500 Then GotoBank = True
+
+        Dim Found_Bank_AP As Boolean
+        Dim Bank_Point As PointI
+
+        If GotoBank = True Then
+            For Each AP In Building_List(Crew.BankBuilding).access_point
+                If AP.Value.Used = False Then Bank_Point = AP.Key : Found_Bank_AP = True : Exit For
+            Next
+
+            If Found_Bank_AP = True Then
+                Found_Bank_AP = False
+                Building_List(Crew.BankBuilding).access_point(Bank_Point).Used = True
+
+                path_find.set_start_end(tile, Bank_Point)
+                path_find.find_path()
+
+                If path_find.get_status = pf_status.path_found Then
+                    If Crew.command_queue.Any Then
+                        Crew.command_queue.Clear()
+                    End If
+
+                    Building_List(Crew.BankBuilding).Assigned_crew_list.Add(ID)
+                    Dim list As LinkedList(Of PointI)
+                    list = path_find.get_path
+
+                    'Need to add wait for finish
+                    Crew.command_queue.Clear()
+                    For Each dest In list
+                        Crew.command_queue.Enqueue(New Crew.Command_move(New PointD(dest.x * 32, dest.y * 32)))
+                    Next
+                    Crew.command_queue.Enqueue(New Crew.Command_Pub_Start(Bank_Point, Pub_Time))
+                    Return Bank_Point
+                End If
+            End If
+        End If
+
+
+
+        Pub_Time = random(100, 200)
+
+
+        Dim Found_AP As Boolean
+        Dim Pub_Point As PointI
+        For Each AP In Building_List(Crew.PubBuilding).access_point
+            If AP.Value.Used = False Then Pub_Point = AP.Key : Found_AP = True : Exit For
+        Next
+
+        If Found_AP = True Then
+            Found_AP = False
+            'Set NextUp to work to true
+            Building_List(Crew.PubBuilding).access_point(Pub_Point).Used = True
+            'Pathfind
+            path_find.set_start_end(tile, Pub_Point)
+            path_find.find_path()
+
+
+            If path_find.get_status = pf_status.path_found Then
+                If Crew.command_queue.Any Then
+                    Crew.command_queue.Clear()
+                End If
+
+                Building_List(Crew.PubBuilding).Assigned_crew_list.Add(ID)
+                Dim list As LinkedList(Of PointI)
+                list = path_find.get_path
+
+                'Need to add wait for finish
+                Crew.command_queue.Clear()
+                For Each dest In list
+                    Crew.command_queue.Enqueue(New Crew.Command_move(New PointD(dest.x * 32, dest.y * 32)))
+                Next
+                Crew.command_queue.Enqueue(New Crew.Command_Pub_Start(Pub_Point, Pub_Time))
+                Return Pub_Point
+            End If
+        End If
+
+
+
+
+
+
+
+    End Function
+
+
     Sub Load_Pathfinding()
         path_find = New A_star
         path_find.set_map(tile_map, size)
@@ -263,7 +400,7 @@
     End Sub
 
 
-    
+
 
 
 
@@ -289,7 +426,7 @@
 
     Sub Update_Officers()
         For Each item In officer_list
-            If item.Value.input_flages.walking = True Then                
+            If item.Value.input_flages.walking = True Then
                 Select Case item.Value.input_flages.Facing
                     Case Is = Move_Direction.Left
                         If item.Value.input_flages.MoveX = Move_Direction.Left Then MoveOfficer(item.Key, New PointD(-1, 0))
