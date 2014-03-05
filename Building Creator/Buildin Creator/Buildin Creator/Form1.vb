@@ -237,10 +237,13 @@
 
 
     Private Sub Form1_MouseMove(ByVal sender As Object, ByVal e As System.Windows.Forms.MouseEventArgs) Handles Me.MouseMove
-        If Tile_Sprites Is Nothing Then Exit Sub
         Dim pos As Point
         pos.X = e.X \ tile_size
         pos.Y = (e.Y - 70) \ tile_size
+        Label7.Text = pos.X.ToString + " / " + pos.Y.ToString
+
+        If Tile_Sprites Is Nothing Then Exit Sub
+        
         If e.Y < 70 Then pos.Y = -1
         If e.Button = Windows.Forms.MouseButtons.Left Then
             If pos.X >= 0 AndAlso pos.X <= 31 AndAlso pos.Y >= 0 AndAlso pos.Y <= 31 Then
@@ -381,4 +384,5 @@
         Label4.BackColor = Color.Gray
         Label6.BackColor = Color.LawnGreen
     End Sub
+
 End Class

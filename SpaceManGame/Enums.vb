@@ -218,6 +218,8 @@
         'Planet
         try_working
         start_working
+        'Pub
+        pub_start
 
     End Enum
     Enum ship_class_enum As Byte
@@ -294,6 +296,11 @@
         empty = 255
     End Enum
 
+    Enum item_tile_texture_enum As Byte
+        Crystal_Container
+
+    End Enum
+
 
     Enum Projectile_Tile_Type_Enum
         Energy1
@@ -307,7 +314,7 @@
         Computer_MK1
 
         Generator
-        Combustion_engine_MK1        
+        Combustion_engine_MK1
         Projectile_MK1
         Door_MK1
         Door_MK2
@@ -340,7 +347,7 @@
         ship_build__undo
         ship_build__redo
         ship_build__mouse_position
-        ship_build__minimap        
+        ship_build__minimap
         ship_build__stats_panel
         ship_build__stats_button
         ship_build__menu_button
@@ -399,7 +406,7 @@
 
 
     End Enum
-    
+
     Enum panel_texture_enum
         sbm1
         minimap
@@ -546,7 +553,7 @@
     Enum Worker_Type_Enum
         Worker
         Transporter
-        Gaurd        
+        Gaurd
     End Enum
 
 
@@ -580,6 +587,17 @@
         Beam_Sustaned
         Projectile_Single
     End Enum
+
+
+
+    Enum Item_Enum
+        None
+        Crystal
+        Crystal_Piece
+
+
+    End Enum
+
 
 
 
@@ -657,7 +675,7 @@
         Up = 3
         Down = 4
     End Enum
-    
+
 
 
     Enum Internal_menu_items_Enum As Byte

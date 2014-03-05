@@ -30,6 +30,10 @@
         End If
     End Sub
 
+    Sub Draw_Item_Tile(ByVal TileSet As Integer, ByVal Tile As Integer, ByVal Position As PointD, ByVal Color As Color)
+        d3d_sprite.Draw(Item_tile_texture(0), New Rectangle(Tile * 32, TileSet * 32, 32, 32), New Vector3(0, 0, 0), New Vector3(Position.sngX, Position.sngY, 0), Color)
+    End Sub
+
     Sub Draw_Device_Tile(ByVal TileSet As device_tile_type_enum, ByVal Tile As Integer, ByVal Tile_Animation As Integer, ByVal Position As PointD, ByVal Rotation As rotate_enum, ByVal flip As flip_enum, ByVal scale As Single, ByVal Color As Color)
         If Tile >= 0 Then
             Dim matstore As Matrix = d3d_sprite.Transform
@@ -254,6 +258,7 @@
                             Draw_Planet_Tile(TileMap(x, y).type, TileMap(x, y).sprite, pos, Color.FromArgb(255, 255, 255, 255))
                         End If
 
+                        render_personal_planet_item(New PointI(x, y), planet, pos)
 
                         If TileMap(x, y).type = 1 AndAlso TileMap(x, y).sprite = 2 Then Lights.Add(New Lights_Type(New PointD(x * 32 - 112, y * 32 - 112), Set_Brighness(Color.Green, planet.Animation_Glow)))
 
@@ -301,6 +306,38 @@
 
 
     End Sub
+
+
+    Sub render_personal_planet_item(ByVal P As PointI, ByVal Planet As Planet, ByVal pos As PointD)
+
+        'Draw items on ground
+        If Planet.Item_Point.ContainsKey(P) Then
+            Dim PItem As Item_Point_Type = Planet.Item_Point(P)
+            If Not PItem.Item = Item_Enum.None Then
+
+                If PItem.Item = Item_Enum.Crystal Then
+                    Dim amount As Integer = Planet.Item_Point(P).Amount
+                    If amount <= 33 Then
+                        Draw_Item_Tile(item_tile_texture_enum.Crystal_Container, 0, pos, Color.FromArgb(255, 255, 255, 255))
+                    ElseIf amount < 66 Then
+                        Draw_Item_Tile(item_tile_texture_enum.Crystal_Container, 1, pos, Color.FromArgb(255, 255, 255, 255))
+                    ElseIf amount < 100 Then
+                        Draw_Item_Tile(item_tile_texture_enum.Crystal_Container, 2, pos, Color.FromArgb(255, 255, 255, 255))
+                    ElseIf amount = 100 Then
+                        Draw_Item_Tile(item_tile_texture_enum.Crystal_Container, 3, pos, Color.FromArgb(255, 255, 255, 255))
+                    End If
+                End If
+
+            End If
+        End If
+
+    End Sub
+
+
+
+
+
+
 
 
     Sub render_personal_planetS(ByVal player As Integer)

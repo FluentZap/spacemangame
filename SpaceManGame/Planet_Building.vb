@@ -1,10 +1,7 @@
 ﻿Public Class Building_Access_Point_Type
     Public Used As Boolean = False
     Public NextUp As Boolean = False
-
 End Class
-
-
 
 
 Public Class Planet_Building

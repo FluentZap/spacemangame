@@ -44,93 +44,19 @@
         Build_AppartmentH(New PointI(32, 16))
         Build_AppartmentH(New PointI(32, 32))
         'Build_Mine(New PointI(P.Resource_Points.First.Key.x * 32, P.Resource_Points.First.Key.y * 32))
-
+        Build_PubH(New PointI(0, 32))
 
         'Create_City()
+        For x = 0 To 3
+            Add_Crew(x, New Crew(0, New PointD(0, 0), 0, Officer_location_enum.Planet, 10, character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head, New crew_resource_type(0, 0)))
+            P.crew_list(x).Worker_Type = Worker_Type_Enum.Worker
+            P.crew_list(x).HomeBuilding = 1
+            P.crew_list(x).HomeSpace = 0
+            P.crew_list(x).WorkBuilding = 0
+            P.crew_list(x).PubBuilding = 4
+            P.crew_list(x).WorkShift = Work_Shift_Enum.Morning
+        Next
 
-        Add_Crew(0, New Crew(0, New PointD(1184, 256), 0, Officer_location_enum.Planet, 8, character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head, New crew_resource_type(0, 0)))
-        P.crew_list(0).Worker_Type = Worker_Type_Enum.Worker
-        P.crew_list(0).HomeBuilding = 1
-        P.crew_list(0).HomeSpace = 0
-        P.crew_list(0).WorkBuilding = 0
-        P.crew_list(0).WorkShift = Work_Shift_Enum.Morning
-
-        Add_Crew(1, New Crew(0, New PointD(1376, 256), 0, Officer_location_enum.Planet, 8, character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head, New crew_resource_type(0, 0)))
-        P.crew_list(1).Worker_Type = Worker_Type_Enum.Worker
-        P.crew_list(1).HomeBuilding = 1
-        P.crew_list(1).HomeSpace = 1
-        P.crew_list(1).WorkBuilding = 0
-        P.crew_list(1).WorkShift = Work_Shift_Enum.Morning
-
-        Add_Crew(2, New Crew(0, New PointD(1568, 256), 0, Officer_location_enum.Planet, 8, character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head, New crew_resource_type(0, 0)))
-        P.crew_list(2).Worker_Type = Worker_Type_Enum.Worker
-        P.crew_list(2).HomeBuilding = 1
-        P.crew_list(2).HomeSpace = 2
-        P.crew_list(2).WorkBuilding = 0
-        P.crew_list(2).WorkShift = Work_Shift_Enum.Morning
-
-        Add_Crew(3, New Crew(0, New PointD(1760, 256), 0, Officer_location_enum.Planet, 8, character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head, New crew_resource_type(0, 0)))
-        P.crew_list(3).Worker_Type = Worker_Type_Enum.Worker
-        P.crew_list(3).HomeBuilding = 1
-        P.crew_list(3).HomeSpace = 3
-        P.crew_list(3).WorkBuilding = 0
-        P.crew_list(3).WorkShift = Work_Shift_Enum.Morning
-
-        Add_Crew(4, New Crew(0, New PointD(1184, 256), 0, Officer_location_enum.Planet, 8, character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head, New crew_resource_type(0, 0)))
-        P.crew_list(4).Worker_Type = Worker_Type_Enum.Worker
-        P.crew_list(4).HomeBuilding = 2
-        P.crew_list(4).HomeSpace = 0
-        P.crew_list(4).WorkBuilding = 0
-        P.crew_list(4).WorkShift = Work_Shift_Enum.Mid
-
-        Add_Crew(5, New Crew(0, New PointD(1376, 256), 0, Officer_location_enum.Planet, 8, character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head, New crew_resource_type(0, 0)))
-        P.crew_list(5).Worker_Type = Worker_Type_Enum.Worker
-        P.crew_list(5).HomeBuilding = 2
-        P.crew_list(5).HomeSpace = 1
-        P.crew_list(5).WorkBuilding = 0
-        P.crew_list(5).WorkShift = Work_Shift_Enum.Mid
-
-        Add_Crew(6, New Crew(0, New PointD(1568, 256), 0, Officer_location_enum.Planet, 8, character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head, New crew_resource_type(0, 0)))
-        P.crew_list(6).Worker_Type = Worker_Type_Enum.Worker
-        P.crew_list(6).HomeBuilding = 2
-        P.crew_list(6).HomeSpace = 2
-        P.crew_list(6).WorkBuilding = 0
-        P.crew_list(6).WorkShift = Work_Shift_Enum.Mid
-
-        Add_Crew(7, New Crew(0, New PointD(1760, 256), 0, Officer_location_enum.Planet, 8, character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head, New crew_resource_type(0, 0)))
-        P.crew_list(7).Worker_Type = Worker_Type_Enum.Worker
-        P.crew_list(7).HomeBuilding = 2
-        P.crew_list(7).HomeSpace = 3
-        P.crew_list(7).WorkBuilding = 0
-        P.crew_list(7).WorkShift = Work_Shift_Enum.Mid
-
-        Add_Crew(8, New Crew(0, New PointD(1184, 256), 0, Officer_location_enum.Planet, 8, character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head, New crew_resource_type(0, 0)))
-        P.crew_list(8).Worker_Type = Worker_Type_Enum.Worker
-        P.crew_list(8).HomeBuilding = 3
-        P.crew_list(8).HomeSpace = 0
-        P.crew_list(8).WorkBuilding = 0
-        P.crew_list(8).WorkShift = Work_Shift_Enum.Night
-
-        Add_Crew(9, New Crew(0, New PointD(1376, 256), 0, Officer_location_enum.Planet, 8, character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head, New crew_resource_type(0, 0)))
-        P.crew_list(9).Worker_Type = Worker_Type_Enum.Worker
-        P.crew_list(9).HomeBuilding = 3
-        P.crew_list(9).HomeSpace = 1
-        P.crew_list(9).WorkBuilding = 0
-        P.crew_list(9).WorkShift = Work_Shift_Enum.Night
-
-        Add_Crew(10, New Crew(0, New PointD(1568, 256), 0, Officer_location_enum.Planet, 8, character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head, New crew_resource_type(0, 0)))
-        P.crew_list(10).Worker_Type = Worker_Type_Enum.Worker
-        P.crew_list(10).HomeBuilding = 3
-        P.crew_list(10).HomeSpace = 2
-        P.crew_list(10).WorkBuilding = 0
-        P.crew_list(10).WorkShift = Work_Shift_Enum.Night
-
-        Add_Crew(11, New Crew(0, New PointD(1760, 256), 0, Officer_location_enum.Planet, 8, character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head, New crew_resource_type(0, 0)))
-        P.crew_list(11).Worker_Type = Worker_Type_Enum.Worker
-        P.crew_list(11).HomeBuilding = 3
-        P.crew_list(11).HomeSpace = 3
-        P.crew_list(11).WorkBuilding = 0
-        P.crew_list(11).WorkShift = Work_Shift_Enum.Night
     End Sub
 
 
@@ -161,7 +87,14 @@
         P.Building_List(ID).access_point.Add(New PointI(pos.x + 13, pos.y + 9), New Building_Access_Point_Type)
         P.Building_List(ID).access_point.Add(New PointI(pos.x + 18, pos.y + 9), New Building_Access_Point_Type)
 
-
+        For y = 12 To 23
+            P.Item_Point.Add(New PointI(pos.x + 22, pos.y + y), New Item_Point_Type(ID))
+            P.Item_Point.Add(New PointI(pos.x + 23, pos.y + y), New Item_Point_Type(ID))
+            P.Item_Point.Add(New PointI(pos.x + 24, pos.y + y), New Item_Point_Type(ID))
+            P.Item_Point.Add(New PointI(pos.x + 25, pos.y + y), New Item_Point_Type(ID))
+            P.Item_Point.Add(New PointI(pos.x + 26, pos.y + y), New Item_Point_Type(ID))
+            P.Item_Point.Add(New PointI(pos.x + 27, pos.y + y), New Item_Point_Type(ID))
+        Next
     End Sub
 
 
@@ -189,6 +122,38 @@
         P.Building_List(ID).BuildingRect.Add(1, New Rectangle(pos.x + 9, pos.y + 3, 7, 10))
         P.Building_List(ID).BuildingRect.Add(2, New Rectangle(pos.x + 16, pos.y + 3, 7, 10))
         P.Building_List(ID).BuildingRect.Add(3, New Rectangle(pos.x + 22, pos.y + 3, 7, 10))
+
+    End Sub
+
+
+
+    Sub Build_PubH(ByVal pos As PointI)
+        Dim Building_tiles As HashSet(Of Build_Tiles)
+
+        Building_tiles = Load_Building("Desert_PubH.bld")
+
+        For Each t In Building_tiles
+            P.tile_map(t.X + pos.x, t.Y + pos.y).sprite = t.Sprite
+            P.tile_map(t.X + pos.x, t.Y + pos.y).sprite2 = t.Sprite2
+            P.tile_map(t.X + pos.x, t.Y + pos.y).type = CType(t.Type, planet_tile_type_enum)
+            P.tile_map(t.X + pos.x, t.Y + pos.y).walkable = CType(t.Walkable, walkable_type_enum)
+        Next
+
+
+        Dim ID As Integer
+        For a = 0 To 100000
+            If Not P.Building_List.ContainsKey(a) Then ID = a : Exit For
+        Next
+
+        P.Building_List.Add(ID, New Planet_Building(0, New Rectangle(pos.x, pos.y, 32, 16), building_type_enum.Pub))
+        P.Building_List(ID).BuildingRect.Add(0, New Rectangle(pos.x + 4, pos.y + 3, 24, 10))
+
+
+        P.Building_List(ID).access_point.Add(New PointI(pos.x + 5, pos.y + 9), New Building_Access_Point_Type)
+        P.Building_List(ID).access_point.Add(New PointI(pos.x + 7, pos.y + 9), New Building_Access_Point_Type)
+        P.Building_List(ID).access_point.Add(New PointI(pos.x + 9, pos.y + 9), New Building_Access_Point_Type)
+        P.Building_List(ID).access_point.Add(New PointI(pos.x + 11, pos.y + 9), New Building_Access_Point_Type)
+        P.Building_List(ID).access_point.Add(New PointI(pos.x + 13, pos.y + 9), New Building_Access_Point_Type)
 
     End Sub
 

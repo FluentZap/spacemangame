@@ -1,11 +1,21 @@
-﻿<Serializable()> Public Class Officer
+﻿<Serializable()> Public Class Personality_Type
+
+
+
+
+
+
+End Class
+
+
+<Serializable()> Public Class Officer
     Public Officer_Classes As HashSet(Of Officer_Class) = New HashSet(Of Officer_Class)
     Public Current_Class As Class_List_Enum
 
     Public Buff_List As HashSet(Of Buff_List_Enum) = New HashSet(Of Buff_List_Enum)
     Public Ability_List As HashSet(Of Ability_List_Enum) = New HashSet(Of Ability_List_Enum)
 
-    Public Skill_List As HashSet(Of Skill_List_Enum) = New HashSet(Of Skill_List_Enum)    
+    Public Skill_List As HashSet(Of Skill_List_Enum) = New HashSet(Of Skill_List_Enum)
 
     Public Ani_Index As Integer
     Public Ani_Step As Integer
@@ -152,7 +162,7 @@
         Me.location = location
         Me.speed = speed
         Me.StrafeSpeed = StrafeSpeed
-        Me.sprite = Sprite        
+        Me.sprite = Sprite
         Me.Officer_Classes.Add(New Officer_Class(Class_List_Enum.Engineer, random(0, 99), CByte(random(0, 40))))
         Me.Officer_Classes.Add(New Officer_Class(Class_List_Enum.Security, random(0, 99), CByte(random(0, 40))))
         Me.Officer_Classes.Add(New Officer_Class(Class_List_Enum.Scientist, random(0, 99), CByte(random(0, 40))))
@@ -160,7 +170,7 @@
         Me.Officer_Classes(Class_List_Enum.Engineer).Skill_Points = 2
         Me.Officer_Classes(Class_List_Enum.Security).Skill_Points = 5
         'Me.Officer_Classes(Class_List_Enum.Scientist).Skill_Points = 5
-        Recalculate_Abilities_Buffs()        
+        Recalculate_Abilities_Buffs()
     End Sub
 
     Sub Move(ByVal Vector As PointD)
