@@ -4,7 +4,7 @@
 
         'Dim crew_temp(crew_list.Keys.Count - 1) As Integer
         ' crew_list.Keys.CopyTo(crew_temp, 0)
-        Dim completed As List(Of Integer) = New List(Of Integer)
+        Dim completed As New List(Of Integer)()
         For Each key In Crew_List.Keys
             If Crew_List(key).command_queue.Any Then
 

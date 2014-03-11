@@ -98,7 +98,7 @@
 
     'Center point
     Private Set_Center_point As Boolean
-    Private all_menu_items_list As Dictionary(Of Tech_type_enum, Dictionary(Of Integer, Menu_button)) = New Dictionary(Of Tech_type_enum, Dictionary(Of Integer, Menu_button))
+    Private all_menu_items_list As New Dictionary(Of Tech_type_enum, Dictionary(Of Integer, Menu_button))()
     Private atsize As Integer
 
     Enum Info_Panel_Mode_enum
@@ -114,9 +114,9 @@
 
     'Menu Items
     Private device_menu As PointI
-    Private menu_item As Dictionary(Of Integer, Menu_button) = New Dictionary(Of Integer, Menu_button)
-    Private Room_menu_item As Dictionary(Of Integer, Menu_button) = New Dictionary(Of Integer, Menu_button)
-    Private Device_menu_item As Dictionary(Of Integer, Menu_button) = New Dictionary(Of Integer, Menu_button)
+    Private menu_item As New Dictionary(Of Integer, Menu_button)()
+    Private Room_menu_item As New Dictionary(Of Integer, Menu_button)()
+    Private Device_menu_item As New Dictionary(Of Integer, Menu_button)()
 
     'Sub Clear_Ship()
     '    clear_tiles = True
@@ -2766,7 +2766,7 @@
         For Each pipeline In pipeline_list
             Dim L, R, T, B As Boolean
             Dim tile As Pipeline_sprite_enum
-            Dim temp_list As Dictionary(Of PointI, Pipeline_sprite_enum) = New Dictionary(Of PointI, Pipeline_sprite_enum)
+            Dim temp_list As New Dictionary(Of PointI, Pipeline_sprite_enum)()
             For Each pipe In pipeline.Value.Tiles
                 tile = Pipeline_sprite_enum.cross
                 L = False : R = False : T = False : B = False

@@ -194,7 +194,7 @@ End Enum
     Public Ani_Current As Basic_Animation
     Public Current_Animation As Unit_Animation_Name_Enum = Unit_Animation_Name_Enum.None
 
-    Public Item_List As Dictionary(Of Item_Enum, Integer) = New Dictionary(Of Item_Enum, Integer)
+    Public Item_List As New Dictionary(Of Item_Enum, Integer)()
 
     Sub New(ByVal Faction As Integer, ByRef location As PointD, ByVal Location_ID As Integer, ByVal Region As Officer_location_enum, ByVal speed As Double, ByVal sprite_set As character_sprite_set_enum, ByVal sprite As character_sprite_enum, ByVal points As crew_resource_type)
         Me.Faction = Faction

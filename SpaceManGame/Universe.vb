@@ -8,11 +8,11 @@
     End Class
 
     Class Universe
-        Public stars As Dictionary(Of Integer, Star) = New Dictionary(Of Integer, Star)
-        Public planets As Dictionary(Of Integer, Planet) = New Dictionary(Of Integer, Planet)
-        Public regions As Dictionary(Of PointI, region_class)
-        Public nebula As Dictionary(Of Integer, Nebula)
-        Public Projectiles As HashSet(Of Projectile) = New HashSet(Of Projectile)
+        Public stars As New Dictionary(Of Integer, Star)()
+        Public planets As New Dictionary(Of Integer, Planet)()
+        Public regions As New Dictionary(Of PointI, region_class)()
+        Public nebula As New Dictionary(Of Integer, Nebula)()
+        Public Projectiles As New HashSet(Of Projectile)()
     End Class
 
     Sub generate()
@@ -27,7 +27,7 @@
     End Sub
 
     Sub set_regions()
-        Dim regions As Dictionary(Of PointI, region_class) = New Dictionary(Of PointI, region_class)
+        Dim regions As New Dictionary(Of PointI, region_class)()
         For y = -500 To 500
             For x = -500 To 500
                 regions.Add(New PointI(x, y), New region_class)
@@ -163,7 +163,7 @@
 
     Sub generate_nebula()
 
-        Dim nebula As Dictionary(Of Integer, Nebula) = New Dictionary(Of Integer, Nebula)
+        Dim nebula As New Dictionary(Of Integer, Nebula)()
 
         Dim NebulaID As Integer = 0
         Dim r As Integer

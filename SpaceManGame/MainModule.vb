@@ -205,17 +205,17 @@
 
 
     'Ship Decals
-    Public Ship_Decals As Dictionary(Of Integer, String) = New Dictionary(Of Integer, String)
+    Public Ship_Decals As New Dictionary(Of Integer, String)()
 
     Public terminate As Boolean = False
     Public Screen_Lock As Boolean = True
     Public Random_Seed As Double
-    Public Player_Tech As HashSet(Of tech_list_enum) = New HashSet(Of tech_list_enum)
+    Public Player_Tech As New HashSet(Of tech_list_enum)()
 
 
-    Public Tech_list As Dictionary(Of tech_list_enum, Tech_type) = New Dictionary(Of tech_list_enum, Tech_type)
-    Public Device_tech_list As Dictionary(Of tech_list_enum, device_data) = New Dictionary(Of tech_list_enum, device_data)
-    Public Weapon_tech_list As Dictionary(Of Ship_weapon_enum, Ship_Weapon) = New Dictionary(Of Ship_weapon_enum, Ship_Weapon)    
+    Public Tech_list As New Dictionary(Of tech_list_enum, Tech_type)()
+    Public Device_tech_list As New Dictionary(Of tech_list_enum, device_data)()
+    Public Weapon_tech_list As New Dictionary(Of Ship_weapon_enum, Ship_Weapon)()
 
 
     Public current_region As PointI
@@ -242,11 +242,11 @@
     'Public view_external_menu_items As Dictionary(Of External_menu_items_Enum, Menu_button) = New Dictionary(Of External_menu_items_Enum, Menu_button)
 
     'Menu Items
-    Public External_Menu_Items As Dictionary(Of Integer, Menu_button) = New Dictionary(Of Integer, Menu_button)
-    Public External_Menu_Items_Weapon_Control As Dictionary(Of Integer, Menu_button) = New Dictionary(Of Integer, Menu_button)
-    Public External_Menu_Items_Weapon_Control_Buttons As Dictionary(Of Integer, Menu_button) = New Dictionary(Of Integer, Menu_button)
+    Public External_Menu_Items As New Dictionary(Of Integer, Menu_button)()
+    Public External_Menu_Items_Weapon_Control As New Dictionary(Of Integer, Menu_button)()
+    Public External_Menu_Items_Weapon_Control_Buttons As New Dictionary(Of Integer, Menu_button)()
 
-    Public Menu_Items_Personal_Level As Dictionary(Of Integer, Menu_button) = New Dictionary(Of Integer, Menu_button)
+    Public Menu_Items_Personal_Level As New Dictionary(Of Integer, Menu_button)()
 
     Public internal_zoom As Double
     Public external_zoom As Single
@@ -271,8 +271,7 @@
 
     Public Ship_List As New Dictionary(Of Integer, Ship)(500)
     Public Planet_List As New Dictionary(Of Integer, Planet)(150)
-    Public Crew_List As Dictionary(Of Integer, Crew) = New Dictionary(Of Integer, Crew)
-    Public Officer_List As Dictionary(Of Integer, Officer) = New Dictionary(Of Integer, Officer)
+    Public Officer_List As New Dictionary(Of Integer, Officer)()
 
     Public u As Universe.Universe = New Universe.Universe
     Public Drag As Double = 0.02
@@ -283,8 +282,7 @@
 
     Public external_planet_texture(15) As Texture
 
-    Public Loaded_Officer_Textures As Dictionary(Of Integer, Texture) = New Dictionary(Of Integer, Texture)
-
+    Public Loaded_Officer_Textures As New Dictionary(Of Integer, Texture)()
 
     Public OffscreenLightMap As Texture
 
@@ -328,7 +326,7 @@
 
 
     Class Player_Data_Type
-        Public Officer_List As HashSet(Of Integer) = New HashSet(Of Integer)
+        Public Officer_List As New HashSet(Of Integer)()
 
     End Class
 
@@ -967,7 +965,7 @@
 
 
     Sub Add_Crew(ByVal Id As Integer, ByVal Crew As Crew)
-        Crew_List.Add(Id, Crew)
+        'Crew_List.Add(Id, Crew)
 
         Select Case Crew.region
             Case Is = Officer_location_enum.Ship
