@@ -372,9 +372,17 @@
 
         Dim Dropped As Boolean = False
 
-        If Not crew_member.Item_List.ContainsKey(command.Item) Then crew_member.command_queue.First.status = script_status_enum.complete : Exit Sub
+        If crew_member.Item_List.ContainsKey(Item_Enum.Refined_Crystal_Piece) Then
+            For Each Bpoint In B.Item_Slots
+                If Bpoint.Value.Input_Slot = True AndAlso planet.Item_Point.ContainsKey(Bpoint.Key) AndAlso planet.Item_Point(Bpoint.Key).Item = Item_Enum.Refined_Crystal_Piece Then planet.Item_Point(Bpoint.Key).Amount += crew_member.Item_List(Item_Enum.Refined_Crystal_Piece) : crew_member.Item_List(Item_Enum.Refined_Crystal_Piece) = 0 : Exit For
+            Next
+        End If
 
-
+        If Not crew_member.Item_List.ContainsKey(command.Item) Then
+            crew_member.command_queue.First.status = script_status_enum.complete
+            B.Available_Transporters.Add(id)
+            Exit Sub
+        End If
 
         For Each ipoint In B.Item_Slots
 

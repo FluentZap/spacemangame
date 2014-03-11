@@ -219,15 +219,17 @@ Public Class Planet
         Loop
 
 
-        Dim Parts As Integer = Check_Resources(Building.Key, Item_Enum.Crystal)
+        Dim Parts As Integer = Check_Resources(Building.Key, Item_Enum.Parts)
 
 
         'Need to add to personality
         If Parts < 400 Then
             Dim Buy_amount As Integer = 800 - Parts
-            If Safe_Point.Amount < Buy_amount * 10 AndAlso (Safe_Point.Amount \ 10) - 50 > 0 Then Buy_amount = (Safe_Point.Amount \ 10) - 50 Else Buy_amount = 0
+            Dim Can_Affort As Integer = Safe_Point.Amount \ 10
+            If Can_Affort - Buy_amount < 50 AndAlso Can_Affort >= 50 Then Buy_amount = Can_Affort - 50 Else Buy_amount = 0
 
-            If Building.Value.Available_Transporters.Count > 0 AndAlso Buy_amount > 0 Then
+
+            If Building.Value.Available_Transporters.Count > 0 AndAlso Buy_amount >= 0 Then
                 Dim Id As Integer = GetNearistBuilding(building_type_enum.Factory, Safe_Location)
                 Dim Avilable As Integer = Check_Resources(Id, Item_Enum.Parts)
                 If Avilable < Buy_amount Then Buy_amount = Avilable
@@ -345,9 +347,13 @@ Public Class Planet
         'Need to add to personality
         If Crystal < 400 Then
             Dim Buy_amount As Integer = 800 - Crystal
-            If Safe_Point.Amount < Buy_amount * 10 AndAlso (Safe_Point.Amount \ 10) - 50 > 0 Then Buy_amount = (Safe_Point.Amount \ 10) - 50 Else Buy_amount = 0
+            Dim Can_Affort As Integer = Safe_Point.Amount \ 10
 
-            If Building.Value.Available_Transporters.Count > 0 AndAlso Buy_amount > 0 Then
+
+            If Can_Affort - Buy_amount < 50 AndAlso Can_Affort >= 50 Then Buy_amount = Can_Affort - 50 Else Buy_amount = 0
+
+
+            If Building.Value.Available_Transporters.Count > 0 AndAlso Buy_amount >= 0 Then
                 Dim Id As Integer = GetNearistBuilding(building_type_enum.Mine, Safe_Location)
                 Dim Avilable As Integer = Check_Resources(Id, Item_Enum.Crystal)
                 If Avilable < Buy_amount Then Buy_amount = Avilable
@@ -441,16 +447,18 @@ Public Class Planet
         Loop
 
 
-        Dim RCrystal As Integer = Check_Resources(Building.Key, Item_Enum.Crystal)
+        Dim RCrystal As Integer = Check_Resources(Building.Key, Item_Enum.Refined_Crystal)
 
         'Need to add to personality
         If RCrystal < 400 Then
-            Dim Buy_amount As Integer = 800 - RCrystal
-            If Safe_Point.Amount < Buy_amount * 10 AndAlso (Safe_Point.Amount \ 10) - 50 > 0 Then Buy_amount = (Safe_Point.Amount \ 10) - 50 Else Buy_amount = 0
 
-            If Building.Value.Available_Transporters.Count > 0 AndAlso Buy_amount > 0 Then
+            Dim Buy_amount As Integer = 800 - RCrystal
+            Dim Can_Affort As Integer = Safe_Point.Amount \ 10
+            If Can_Affort - Buy_amount < 50 AndAlso Can_Affort >= 50 Then Buy_amount = Can_Affort - 50 Else Buy_amount = 0
+
+            If Building.Value.Available_Transporters.Count > 0 AndAlso Buy_amount >= 0 Then
                 Dim Id As Integer = GetNearistBuilding(building_type_enum.Refinery, Safe_Location)
-                Dim Avilable As Integer = Check_Resources(Id, Item_Enum.Crystal)
+                Dim Avilable As Integer = Check_Resources(Id, Item_Enum.Refined_Crystal)
                 If Avilable < Buy_amount Then Buy_amount = Avilable
 
                 If Id > -1 AndAlso Buy_amount > 100 Then
@@ -522,11 +530,11 @@ Public Class Planet
 
             'Send crew home
             If GST = 1000 Then
-                Send_Crew_Home(Work_Shift_Enum.Night)
+                'Send_Crew_Home(Work_Shift_Enum.Night)
             ElseIf GST = 2000 Then
-                Send_Crew_Home(Work_Shift_Enum.Morning)
+                'Send_Crew_Home(Work_Shift_Enum.Morning)
             ElseIf GST = 3000 Then
-                Send_Crew_Home(Work_Shift_Enum.Mid)
+                'Send_Crew_Home(Work_Shift_Enum.Mid)
             End If
 
 

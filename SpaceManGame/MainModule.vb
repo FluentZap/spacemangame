@@ -502,11 +502,13 @@
     End Sub
 
     Sub Clean_Up()
+        If d3d_device IsNot Nothing Then d3d_device.Dispose()
+        If d3d_sprite IsNot Nothing Then d3d_sprite.Dispose()
+
         'test_texture.Dispose()
         'Ship_Texture.Dispose()
         'Minimap_Texture.Dispose()
-        If d3d_sprite IsNot Nothing Then d3d_sprite.Dispose()
-        If d3d_device IsNot Nothing Then d3d_device.Dispose()
+
 
         Erase tile_texture
         'mouse_texture.Dispose()
@@ -516,6 +518,7 @@
         Erase character_texture
         Erase panel_texture
         Erase icon_texture
+
 
 
 
@@ -1922,7 +1925,7 @@
 
 
         GSTFrequency += 1
-        If GSTFrequency = 2 Then
+        If GSTFrequency = 1 Then
             GSTFrequency = 0
             GST += 1
             If GST > 3000 Then GST = 0

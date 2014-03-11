@@ -166,7 +166,7 @@
         P.Item_Point.Add(New PointI(pos.x + 23, pos.y + 3), New Item_Point_Type(100, Item_Enum.Parts))
 
         P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + 8, pos.y + 20), New Item_Slots_Type(True))
-        P.Item_Point.Add(New PointI(pos.x + 8, pos.y + 20), New Item_Point_Type(1000, Item_Enum.Refined_Crystal_Piece))
+        P.Item_Point.Add(New PointI(pos.x + 8, pos.y + 20), New Item_Point_Type(2000, Item_Enum.Refined_Crystal_Piece))
 
     End Sub
 
@@ -209,7 +209,7 @@
         P.Item_Point.Add(New PointI(pos.x + 4, pos.y + 2), New Item_Point_Type(100, Item_Enum.Crystal))
         
         P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + 4, pos.y + 4), New Item_Slots_Type(True))
-        P.Item_Point.Add(New PointI(pos.x + 4, pos.y + 4), New Item_Point_Type(5000, Item_Enum.Refined_Crystal_Piece))
+        P.Item_Point.Add(New PointI(pos.x + 4, pos.y + 4), New Item_Point_Type(2000, Item_Enum.Refined_Crystal_Piece))
 
     End Sub
 
@@ -256,7 +256,7 @@
 
 
         P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + 10, pos.y + 10), New Item_Slots_Type(True))
-        P.Item_Point.Add(New PointI(pos.x + 10, pos.y + 10), New Item_Point_Type(1000, Item_Enum.Refined_Crystal_Piece))
+        P.Item_Point.Add(New PointI(pos.x + 10, pos.y + 10), New Item_Point_Type(2000, Item_Enum.Refined_Crystal_Piece))
 
     End Sub
 
@@ -289,7 +289,6 @@
     End Sub
 
 
-
     Sub Build_PubH(ByVal pos As PointI)
         Dim Building_tiles As HashSet(Of Build_Tiles)
 
@@ -319,8 +318,6 @@
         P.Building_List(ID).access_point.Add(New PointI(pos.x + 13, pos.y + 9), New Building_Access_Point_Type(BAP_Type.Customer))
 
     End Sub
-
-
 
 
     Sub Create_Resource_Points()
@@ -396,9 +393,6 @@
         WideH
         WideV
     End Enum
-
-
-
 
 
     Sub Create_City()
