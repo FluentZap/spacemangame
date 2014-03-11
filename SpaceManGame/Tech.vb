@@ -595,7 +595,7 @@
 
 
     Class Class_Tech_Tree
-        Public Skills As Dictionary(Of Skill_List_Enum, Skill_Item) = New Dictionary(Of Skill_List_Enum, Skill_Item)
+        Public Skills As New Dictionary(Of Skill_List_Enum, Skill_Item)()
 
 
         Sub New(ByVal ClassID As Class_List_Enum)

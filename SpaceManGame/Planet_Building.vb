@@ -29,24 +29,24 @@ End Class
 
 Public Class Planet_Building
     Public Owner As Integer
-    Public BuildingRect As Dictionary(Of Integer, Rectangle) = New Dictionary(Of Integer, Rectangle)
+    Public BuildingRect As New Dictionary(Of Integer, Rectangle)()
     Public LandRect As Rectangle
     Public Type As building_type_enum
 
-    Public Workers As Dictionary(Of Integer, Crew) = New Dictionary(Of Integer, Crew)
+    Public Workers As New Dictionary(Of Integer, Crew)()
 
     Public Working_crew_list As HashSet(Of Integer) = New HashSet(Of Integer)
     Public Assigned_crew_list As HashSet(Of Integer) = New HashSet(Of Integer)
 
     Public Damaged As Boolean = False
-    Public access_point As Dictionary(Of PointI, Building_Access_Point_Type) = New Dictionary(Of PointI, Building_Access_Point_Type)
+    Public access_point As New Dictionary(Of PointI, Building_Access_Point_Type)()
 
-    Public Item_Slots As Dictionary(Of PointI, Item_Slots_Type) = New Dictionary(Of PointI, Item_Slots_Type)
+    Public Item_Slots As New Dictionary(Of PointI, Item_Slots_Type)()
     Public Building_Level As Byte
     Public Item_Build_Progress As Integer
 
-    Public Available_Transporters As HashSet(Of Integer) = New HashSet(Of Integer)
-    Public Buying_Items As HashSet(Of Item_Enum) = New HashSet(Of Item_Enum)
+    Public Available_Transporters As New HashSet(Of Integer)()
+    Public Buying_Items As New HashSet(Of Item_Enum)()
 
     Public PickupPoint As PointI
     Public Resource_Credit As Integer

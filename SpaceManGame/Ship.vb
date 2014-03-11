@@ -12,7 +12,7 @@ End Class
     Public Tile_Type As device_tile_type_enum
     Public Name As String
     Public Color As Color    
-    Public Tiles As Dictionary(Of PointI, Pipeline_sprite_enum) = New Dictionary(Of PointI, Pipeline_sprite_enum)
+    Public Tiles As New Dictionary(Of PointI, Pipeline_sprite_enum)()
 
     'Public Connected_Devices As HashSet(Of Integer) = New HashSet(Of Integer)
 
@@ -80,13 +80,13 @@ Public Class Ship
     Public type As ship_type_enum 'Bio/Carbon fiber/Energy
     Public shipclass As ship_class_enum 'Frigate/Capital
 
-    Public device_list As Dictionary(Of Integer, Ship_device) = New Dictionary(Of Integer, Ship_device)
-    Public Crew_list As Dictionary(Of Integer, Crew) = New Dictionary(Of Integer, Crew)
-    Public Officer_List As Dictionary(Of Integer, Officer) = New Dictionary(Of Integer, Officer)
-    Public weapon_list As Dictionary(Of Integer, Integer) = New Dictionary(Of Integer, Integer)
-    Public room_list As Dictionary(Of Integer, ship_room_type) = New Dictionary(Of Integer, ship_room_type)
+    Public device_list As New Dictionary(Of Integer, Ship_device)()
+    Public Crew_list As New Dictionary(Of Integer, Crew)()
+    Public Officer_List As New Dictionary(Of Integer, Officer)()
+    Public weapon_list As New Dictionary(Of Integer, Integer)()
+    Public room_list As New Dictionary(Of Integer, ship_room_type)()
 
-    Public pipeline_list As Dictionary(Of Integer, ship_pipeline_type) = New Dictionary(Of Integer, ship_pipeline_type)
+    Public pipeline_list As New Dictionary(Of Integer, ship_pipeline_type)()
 
     'Public 
 
@@ -118,16 +118,16 @@ Public Class Ship
     Public ambient__light As Color
     Public Faction As Integer
 
-    Public Weapon_control_groups As Dictionary(Of Integer, Weapon_control_group) = New Dictionary(Of Integer, Weapon_control_group)
-    Public Engine_Coltrol_Group As Dictionary(Of Direction_Enum, Dictionary(Of Integer, VectorD)) = New Dictionary(Of Direction_Enum, Dictionary(Of Integer, VectorD))
+    Public Weapon_control_groups As New Dictionary(Of Integer, Weapon_control_group)()
+    Public Engine_Coltrol_Group As New Dictionary(Of Direction_Enum, Dictionary(Of Integer, VectorD))()
 
-    Public device_animations As Dictionary(Of Integer, Device_Animation_class) = New Dictionary(Of Integer, Device_Animation_class)
+    Public device_animations As New Dictionary(Of Integer, Device_Animation_class)()
 
-    Public ship_animations As Dictionary(Of Integer, Basic_Animation) = New Dictionary(Of Integer, Basic_Animation)
+    Public ship_animations As New Dictionary(Of Integer, Basic_Animation)()
 
-    Public open_doors As HashSet(Of Integer) = New HashSet(Of Integer)
+    Public open_doors As New HashSet(Of Integer)()
 
-    Public Projectiles As HashSet(Of Projectile) = New HashSet(Of Projectile)
+    Public Projectiles As New HashSet(Of Projectile)()
 
     Sub Load_Pathfinding()
         path_find = New A_star
@@ -472,7 +472,7 @@ Public Class Ship
 
     Sub Populate_Rooms()
         Dim idle_list As List(Of Integer) = New List(Of Integer)
-        Dim working_list As Dictionary(Of Integer, Priority_enum) = New Dictionary(Of Integer, Priority_enum)
+        Dim working_list As New Dictionary(Of Integer, Priority_enum)()
 
         For Each Crew In Crew_list
             If Crew.Value.working = False Then
@@ -688,12 +688,12 @@ Public Class Ship
 
     Sub Calculate_Engines()
         Engine_Coltrol_Group.Clear()
-        Engine_Coltrol_Group.Add(Direction_Enum.Top, New Dictionary(Of Integer, VectorD))
-        Engine_Coltrol_Group.Add(Direction_Enum.Bottom, New Dictionary(Of Integer, VectorD))
-        Engine_Coltrol_Group.Add(Direction_Enum.Left, New Dictionary(Of Integer, VectorD))
-        Engine_Coltrol_Group.Add(Direction_Enum.Right, New Dictionary(Of Integer, VectorD))
-        Engine_Coltrol_Group.Add(Direction_Enum.RotateL, New Dictionary(Of Integer, VectorD))
-        Engine_Coltrol_Group.Add(Direction_Enum.RotateR, New Dictionary(Of Integer, VectorD))
+        Engine_Coltrol_Group.Add(Direction_Enum.Top, New Dictionary(Of Integer, VectorD)())
+        Engine_Coltrol_Group.Add(Direction_Enum.Bottom, New Dictionary(Of Integer, VectorD)())
+        Engine_Coltrol_Group.Add(Direction_Enum.Left, New Dictionary(Of Integer, VectorD)())
+        Engine_Coltrol_Group.Add(Direction_Enum.Right, New Dictionary(Of Integer, VectorD)())
+        Engine_Coltrol_Group.Add(Direction_Enum.RotateL, New Dictionary(Of Integer, VectorD)())
+        Engine_Coltrol_Group.Add(Direction_Enum.RotateR, New Dictionary(Of Integer, VectorD)())
 
         For Each Device In device_list
             If Device.Value.type = device_type_enum.engine OrElse Device.Value.type = device_type_enum.thruster Then
@@ -1296,12 +1296,12 @@ Public Class Ship
     Function Clone() As Ship
         Dim cship As New Ship(0, New PointD(0, 0), ship_type_enum.carbon_fiber, shipclass, shipsize, Faction)
 
-        cship.device_list = New Dictionary(Of Integer, Ship_device)
-        cship.Crew_list = New Dictionary(Of Integer, Crew)
-        cship.Officer_List = New Dictionary(Of Integer, Officer)
-        cship.weapon_list = New Dictionary(Of Integer, Integer)
-        cship.room_list = New Dictionary(Of Integer, ship_room_type)
-        cship.pipeline_list = New Dictionary(Of Integer, ship_pipeline_type)
+        cship.device_list = New Dictionary(Of Integer, Ship_device)()
+        cship.Crew_list = New Dictionary(Of Integer, Crew)()
+        cship.Officer_List = New Dictionary(Of Integer, Officer)()
+        cship.weapon_list = New Dictionary(Of Integer, Integer)()
+        cship.room_list = New Dictionary(Of Integer, ship_room_type)()
+        cship.pipeline_list = New Dictionary(Of Integer, ship_pipeline_type)()
         For Each item In device_list
             cship.device_list.Add(item.Key, item.Value)
         Next
@@ -1341,13 +1341,13 @@ End Class
     Public type As ship_type_enum
     Public shipclass As ship_class_enum
 
-    Public device_list As Dictionary(Of Integer, Ship_device) = New Dictionary(Of Integer, Ship_device)
-    Public Crew_list As Dictionary(Of Integer, Crew) = New Dictionary(Of Integer, Crew)
-    Public Officer_List As Dictionary(Of Integer, Officer) = New Dictionary(Of Integer, Officer)
-    Public weapon_list As Dictionary(Of Integer, Integer) = New Dictionary(Of Integer, Integer)
-    Public room_list As Dictionary(Of Integer, ship_room_type) = New Dictionary(Of Integer, ship_room_type)
+    Public device_list As New Dictionary(Of Integer, Ship_device)()
+    Public Crew_list As New Dictionary(Of Integer, Crew)()
+    Public Officer_List As New Dictionary(Of Integer, Officer)()
+    Public weapon_list As New Dictionary(Of Integer, Integer)()
+    Public room_list As New Dictionary(Of Integer, ship_room_type)()
 
-    Public pipeline_list As Dictionary(Of Integer, ship_pipeline_type) = New Dictionary(Of Integer, ship_pipeline_type)
+    Public pipeline_list As New Dictionary(Of Integer, ship_pipeline_type)()
 
     Public vector_velocity As PointD
     Public center_point As PointI
@@ -1369,8 +1369,8 @@ End Class
     Public shipsize As PointI
     Public ambient__light As Color
 
-    Public Weapon_control_groups As Dictionary(Of Integer, Weapon_control_group) = New Dictionary(Of Integer, Weapon_control_group)
-    Public Engine_Coltrol_Group As Dictionary(Of Direction_Enum, Dictionary(Of Integer, VectorD)) = New Dictionary(Of Direction_Enum, Dictionary(Of Integer, VectorD))
+    Public Weapon_control_groups As New Dictionary(Of Integer, Weapon_control_group)()
+    Public Engine_Coltrol_Group As New Dictionary(Of Direction_Enum, Dictionary(Of Integer, VectorD))()
 
     Sub New(ByVal s As Ship)
         type = s.type

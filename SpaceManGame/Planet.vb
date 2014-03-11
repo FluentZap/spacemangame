@@ -19,16 +19,16 @@ Public Class Planet
     Public population As Integer
     Public theta As Double
     Public size As PointI
-    Public landed_ships As Dictionary(Of Integer, PointI) = New Dictionary(Of Integer, PointI)
+    Public landed_ships As New Dictionary(Of Integer, PointI)()
 
     Public Animation_Glow As Single
     Public Animation_Glow_subtract As Boolean
     Public Block_Map As HashSet(Of PointI) = New HashSet(Of PointI)
-    Public Resource_Points As Dictionary(Of PointI, Boolean) = New Dictionary(Of PointI, Boolean) 'Is true is resource point is taken
-    Public Building_List As Dictionary(Of Integer, Planet_Building) = New Dictionary(Of Integer, Planet_Building)
+    Public Resource_Points As New Dictionary(Of PointI, Boolean)() 'Is true is resource point is taken
+    Public Building_List As New Dictionary(Of Integer, Planet_Building)()
 
 
-    Public Item_Point As Dictionary(Of PointI, Item_Point_Type) = New Dictionary(Of PointI, Item_Point_Type)
+    Public Item_Point As New Dictionary(Of PointI, Item_Point_Type)()
 
     Private path_find As A_star
 
@@ -45,8 +45,8 @@ Public Class Planet
     Public tech As HashSet(Of planet_tech_list_enum)
     Public special_tech As Planet_special_tech_enum
 
-    Public crew_list As Dictionary(Of Integer, Crew) = New Dictionary(Of Integer, Crew)
-    Public officer_list As Dictionary(Of Integer, Officer) = New Dictionary(Of Integer, Officer)
+    Public crew_list As New Dictionary(Of Integer, Crew)()
+    Public officer_list As New Dictionary(Of Integer, Officer)()
 
 
     Public Projectiles As HashSet(Of Projectile) = New HashSet(Of Projectile)
@@ -475,7 +475,7 @@ Public Class Planet
 
 
     Function GetNearistBuilding(ByVal Building_Type As building_type_enum, ByVal Point As PointI) As Integer
-        Dim list As Dictionary(Of Integer, Integer) = New Dictionary(Of Integer, Integer)
+        Dim list As New Dictionary(Of Integer, Integer)()
         For Each building In Building_List
             If building.Value.Type = Building_Type Then list.Add(building.Key, CInt(Math.Sqrt(((building.Value.PickupPoint.x - Point.x) ^ 2) + (building.Value.PickupPoint.y - Point.y) ^ 2)))
         Next
