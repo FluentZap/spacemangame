@@ -502,6 +502,7 @@
         d3d_device.SetSamplerState(0, SamplerStageStates.MinFilter, TextureFilter.Linear)
         d3d_device.SetSamplerState(0, SamplerStageStates.MagFilter, TextureFilter.None)
         d3d_sprite.Transform = Matrix.Transformation2D(New Vector2(0, 0), 0, New Vector2(scale, scale), New Vector2(0, 0), 0, New Vector2(0, 0))
+        BB.Dispose()
     End Sub
 
 #End Region
@@ -974,7 +975,7 @@
             d3d_sprite.End()
         Next
         d3d_device.SetRenderTarget(0, BB)
-
+        BB.Dispose()
     End Sub
 
 
@@ -1021,7 +1022,7 @@
         Next
 
         d3d_device.SetRenderTarget(0, BB)
-
+        BB.Dispose()
     End Sub
 
     Sub Render_MiniMap_Texture(ByVal Ship As Ship, ByVal Minimap_Texture As Texture)
@@ -1058,7 +1059,7 @@
         Next
         d3d_sprite.End()
         d3d_device.SetRenderTarget(0, BB)
-
+        BB.Dispose()
     End Sub
 
     Sub Draw_device_diagram(ByVal Device As tech_list_enum, ByVal Position As PointI)
@@ -1143,6 +1144,7 @@
         d3d_sprite.Transform = MatStore
         d3d_device.SetRenderTarget(0, BB)
         d3d_sprite.Begin(SpriteFlags.AlphaBlend)
+        BB.Dispose()
     End Sub
 
 
@@ -1774,7 +1776,7 @@
         d3d_sprite.End()
         d3d_device.SetRenderTarget(0, BB)
 
-
+        BB.Dispose()
     End Sub
 
 #End Region
@@ -2062,7 +2064,7 @@
             Catch e As DeviceNotResetException
                 Try
                     Dim D3D_PP As New PresentParameters
-                    D3D_PP.BackBufferFormat = Format.A8R8G8B8
+                    D3D_PP.BackBufferFormat = Format.X8R8G8B8
                     D3D_PP.BackBufferWidth = screen_size.x
                     D3D_PP.BackBufferHeight = screen_size.y
                     D3D_PP.Windowed = windowed
