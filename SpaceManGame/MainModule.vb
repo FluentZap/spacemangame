@@ -311,7 +311,7 @@
 
     'Personal view
     Public Mouse_Target As Integer
-
+    Public Tile_Target As PointI
 
     'Dim region(100, 100) As Region_Type
     'Dim ship_view_Region As Point
@@ -1207,6 +1207,10 @@
                 If Crew.Value.find_rect.Contains(adj_mouse.ToPoint) Then Mouse_Target = Crew.Key
             Next
 
+
+            Dim ad_mouse As PointI = New PointI(mouse_info.position.x / personal_zoom + view_location_personal.x, mouse_info.position.y / personal_zoom + view_location_personal.y)
+            Tile_Target = New PointI(ad_mouse.x \ 32, ad_mouse.y \ 32)
+
         End If
 
         If pressedkeys.Contains(Keys.Tab) Then current_view = current_view_enum.ship_external : pressedkeys.Remove(Keys.Tab)
@@ -1913,7 +1917,8 @@
         '0 to 1500
 
         'view_personal_Ambient=color.FromArgb(
-        view_personal_Ambient = Color.FromArgb(255, 240, 240, 240)
+        view_personal_Ambient = Color.FromArgb(255, 240, 240, 220)
+        'view_personal_Ambient = Color.FromArgb(255, 40, 40, 60)
 
 
         GSTFrequency += 1

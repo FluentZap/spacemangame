@@ -41,22 +41,73 @@
         Build_Mine(New PointI(0, 0))
 
         Build_AppartmentH(New PointI(32, 0))
-        Build_AppartmentH(New PointI(32, 16))
-        Build_AppartmentH(New PointI(32, 32))
+
         'Build_Mine(New PointI(P.Resource_Points.First.Key.x * 32, P.Resource_Points.First.Key.y * 32))
-        Build_PubH(New PointI(0, 32))
+        Build_PubH(New PointI(32, 16))
 
+        Build_RefineryH(New PointI(0, 32))
+
+        Build_FactoryH(New PointI(32, 32))
         'Create_City()
-        For x = 0 To 3
-            Add_Crew(x, New Crew(0, New PointD(0, 0), 0, Officer_location_enum.Planet, 10, character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head, New crew_resource_type(0, 0)))
-            P.crew_list(x).Worker_Type = Worker_Type_Enum.Worker
-            P.crew_list(x).HomeBuilding = 1
-            P.crew_list(x).HomeSpace = 0
-            P.crew_list(x).WorkBuilding = 0
-            P.crew_list(x).PubBuilding = 4
-            P.crew_list(x).WorkShift = Work_Shift_Enum.Morning
-        Next
 
+        Add_Crew(0, New Crew(0, New PointD(0, 0), 0, Officer_location_enum.Planet, 10, character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head, New crew_resource_type(0, 0)))
+        P.crew_list(0).Worker_Type = Worker_Type_Enum.Worker
+        P.crew_list(0).HomeBuilding = 1
+        P.crew_list(0).HomeSpace = 0
+        P.crew_list(0).WorkBuilding = 0
+        P.crew_list(0).PubBuilding = 2
+        P.crew_list(0).WorkShift = Work_Shift_Enum.Mid
+
+
+        Add_Crew(1, New Crew(0, New PointD(0, 0), 0, Officer_location_enum.Planet, 10, character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head, New crew_resource_type(0, 0)))
+        P.crew_list(1).Worker_Type = Worker_Type_Enum.Worker
+        P.crew_list(1).HomeBuilding = 1
+        P.crew_list(1).HomeSpace = 1
+        P.crew_list(1).WorkBuilding = 3
+        P.crew_list(1).PubBuilding = 2
+        P.crew_list(1).WorkShift = Work_Shift_Enum.Mid
+
+
+
+        Add_Crew(2, New Crew(0, New PointD(0, 0), 0, Officer_location_enum.Planet, 10, character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head, New crew_resource_type(0, 0)))
+        P.crew_list(2).Worker_Type = Worker_Type_Enum.Worker
+        P.crew_list(2).HomeBuilding = 1
+        P.crew_list(2).HomeSpace = 2
+        P.crew_list(2).WorkBuilding = 4
+        P.crew_list(2).PubBuilding = 2
+        P.crew_list(2).WorkShift = Work_Shift_Enum.Mid
+
+
+
+        Add_Crew(3, New Crew(0, New PointD(0, 0), 0, Officer_location_enum.Planet, 3, character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head, New crew_resource_type(0, 0)))
+        P.crew_list(3).Worker_Type = Worker_Type_Enum.Transporter
+        P.crew_list(3).HomeBuilding = 1
+        P.crew_list(3).HomeSpace = 3
+        P.crew_list(3).WorkBuilding = 0
+        P.crew_list(3).PubBuilding = 2
+        P.crew_list(3).WorkShift = Work_Shift_Enum.Mid
+
+        P.Building_List(0).Available_Transporters.Add(3)
+
+        Add_Crew(4, New Crew(0, New PointD(0, 0), 0, Officer_location_enum.Planet, 3, character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head, New crew_resource_type(0, 0)))
+        P.crew_list(4).Worker_Type = Worker_Type_Enum.Transporter
+        P.crew_list(4).HomeBuilding = 1
+        P.crew_list(4).HomeSpace = 3
+        P.crew_list(4).WorkBuilding = 3
+        P.crew_list(4).PubBuilding = 2
+        P.crew_list(4).WorkShift = Work_Shift_Enum.Mid
+
+        P.Building_List(3).Available_Transporters.Add(4)
+
+        Add_Crew(5, New Crew(0, New PointD(0, 0), 0, Officer_location_enum.Planet, 3, character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head, New crew_resource_type(0, 0)))
+        P.crew_list(5).Worker_Type = Worker_Type_Enum.Transporter
+        P.crew_list(5).HomeBuilding = 1
+        P.crew_list(5).HomeSpace = 3
+        P.crew_list(5).WorkBuilding = 4
+        P.crew_list(5).PubBuilding = 2
+        P.crew_list(5).WorkShift = Work_Shift_Enum.Mid
+
+        P.Building_List(4).Available_Transporters.Add(5)
     End Sub
 
 
@@ -80,21 +131,133 @@
         Next
 
         P.Building_List.Add(ID, New Planet_Building(0, New Rectangle(pos.x, pos.y, 32, 32), building_type_enum.Mine))
+
+        P.Building_List(ID).PickupPoint = New PointI(pos.x + 24, pos.y + 10)
+
         P.Building_List(ID).BuildingRect.Add(0, New Rectangle(pos.x + 7, pos.y + 18, 10, 6))
 
-        P.Building_List(ID).access_point.Add(New PointI(pos.x + 3, pos.y + 9), New Building_Access_Point_Type)
-        P.Building_List(ID).access_point.Add(New PointI(pos.x + 8, pos.y + 9), New Building_Access_Point_Type)
-        P.Building_List(ID).access_point.Add(New PointI(pos.x + 13, pos.y + 9), New Building_Access_Point_Type)
-        P.Building_List(ID).access_point.Add(New PointI(pos.x + 18, pos.y + 9), New Building_Access_Point_Type)
+        P.Building_List(ID).access_point.Add(New PointI(pos.x + 3, pos.y + 9), New Building_Access_Point_Type(BAP_Type.Worker))
+        P.Building_List(ID).access_point.Add(New PointI(pos.x + 8, pos.y + 9), New Building_Access_Point_Type(BAP_Type.Worker))
+        P.Building_List(ID).access_point.Add(New PointI(pos.x + 13, pos.y + 9), New Building_Access_Point_Type(BAP_Type.Worker))
+        P.Building_List(ID).access_point.Add(New PointI(pos.x + 18, pos.y + 9), New Building_Access_Point_Type(BAP_Type.Worker))
 
-        For y = 12 To 23
-            P.Item_Point.Add(New PointI(pos.x + 22, pos.y + y), New Item_Point_Type(ID))
-            P.Item_Point.Add(New PointI(pos.x + 23, pos.y + y), New Item_Point_Type(ID))
-            P.Item_Point.Add(New PointI(pos.x + 24, pos.y + y), New Item_Point_Type(ID))
-            P.Item_Point.Add(New PointI(pos.x + 25, pos.y + y), New Item_Point_Type(ID))
-            P.Item_Point.Add(New PointI(pos.x + 26, pos.y + y), New Item_Point_Type(ID))
-            P.Item_Point.Add(New PointI(pos.x + 27, pos.y + y), New Item_Point_Type(ID))
+        For y = 1 To 4
+            P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + 3, pos.y + y), New Item_Slots_Type(False))
+            P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + 4, pos.y + y), New Item_Slots_Type(False))
+
+            P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + 8, pos.y + y), New Item_Slots_Type(False))
+            P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + 9, pos.y + y), New Item_Slots_Type(False))
+
+            P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + 13, pos.y + y), New Item_Slots_Type(False))
+            P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + 14, pos.y + y), New Item_Slots_Type(False))
+
+            P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + 18, pos.y + y), New Item_Slots_Type(False))
+            P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + 19, pos.y + y), New Item_Slots_Type(False))
         Next
+
+        For x = 23 To 26
+            P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + x, pos.y + 3), New Item_Slots_Type(True))
+            P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + x, pos.y + 4), New Item_Slots_Type(True))
+
+            P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + x, pos.y + 6), New Item_Slots_Type(True))
+            P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + x, pos.y + 7), New Item_Slots_Type(True))
+        Next
+
+        P.Item_Point.Add(New PointI(pos.x + 23, pos.y + 3), New Item_Point_Type(100, Item_Enum.Parts))
+
+        P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + 8, pos.y + 20), New Item_Slots_Type(True))
+        P.Item_Point.Add(New PointI(pos.x + 8, pos.y + 20), New Item_Point_Type(1000, Item_Enum.Refined_Crystal_Piece))
+
+    End Sub
+
+    Sub Build_RefineryH(ByVal pos As PointI)
+        Dim Building_tiles As HashSet(Of Build_Tiles)
+
+        Building_tiles = Load_Building("Desert_RefineryH.bld")
+
+        For Each t In Building_tiles
+            P.tile_map(t.X + pos.x, t.Y + pos.y).sprite = t.Sprite
+            P.tile_map(t.X + pos.x, t.Y + pos.y).sprite2 = t.Sprite2
+            P.tile_map(t.X + pos.x, t.Y + pos.y).type = CType(t.Type, planet_tile_type_enum)
+            P.tile_map(t.X + pos.x, t.Y + pos.y).walkable = CType(t.Walkable, walkable_type_enum)
+        Next
+
+
+
+        Dim ID As Integer
+        For a = 0 To 100000
+            If Not P.Building_List.ContainsKey(a) Then ID = a : Exit For
+        Next
+        P.Building_List.Add(ID, New Planet_Building(0, New Rectangle(pos.x, pos.y, 32, 32), building_type_enum.Refinery))
+
+
+        P.Building_List(ID).PickupPoint = New PointI(pos.x + 15, pos.y + 8)
+
+        P.Building_List(ID).access_point.Add(New PointI(pos.x + 6, pos.y + 9), New Building_Access_Point_Type(BAP_Type.Worker))
+        P.Building_List(ID).access_point.Add(New PointI(pos.x + 14, pos.y + 9), New Building_Access_Point_Type(BAP_Type.Worker))
+        P.Building_List(ID).access_point.Add(New PointI(pos.x + 17, pos.y + 9), New Building_Access_Point_Type(BAP_Type.Worker))
+        P.Building_List(ID).access_point.Add(New PointI(pos.x + 25, pos.y + 9), New Building_Access_Point_Type(BAP_Type.Worker))
+
+
+        P.Building_List(ID).access_point.Add(New PointI(pos.x + 1, pos.y + 1), New Building_Access_Point_Type(BAP_Type.Transporter))
+
+        For x = 4 To 27
+            P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + x, pos.y + 2), New Item_Slots_Type(True))
+            P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + x, pos.y + 3), New Item_Slots_Type(False))            
+        Next
+
+        P.Item_Point.Add(New PointI(pos.x + 4, pos.y + 2), New Item_Point_Type(100, Item_Enum.Crystal))
+        
+        P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + 4, pos.y + 4), New Item_Slots_Type(True))
+        P.Item_Point.Add(New PointI(pos.x + 4, pos.y + 4), New Item_Point_Type(5000, Item_Enum.Refined_Crystal_Piece))
+
+    End Sub
+
+    Sub Build_FactoryH(ByVal pos As PointI)
+        Dim Building_tiles As HashSet(Of Build_Tiles)
+
+        Building_tiles = Load_Building("Desert_FactoryH.bld")
+
+        For Each t In Building_tiles
+            P.tile_map(t.X + pos.x, t.Y + pos.y).sprite = t.Sprite
+            P.tile_map(t.X + pos.x, t.Y + pos.y).sprite2 = t.Sprite2
+            P.tile_map(t.X + pos.x, t.Y + pos.y).type = CType(t.Type, planet_tile_type_enum)
+            P.tile_map(t.X + pos.x, t.Y + pos.y).walkable = CType(t.Walkable, walkable_type_enum)
+        Next
+
+
+
+        Dim ID As Integer
+        For a = 0 To 100000
+            If Not P.Building_List.ContainsKey(a) Then ID = a : Exit For
+        Next
+        P.Building_List.Add(ID, New Planet_Building(0, New Rectangle(pos.x, pos.y, 32, 32), building_type_enum.Factory))
+
+        P.Building_List(ID).PickupPoint = New PointI(pos.x + 15, pos.y + 7)
+
+        P.Building_List(ID).access_point.Add(New PointI(pos.x + 9, pos.y + 8), New Building_Access_Point_Type(BAP_Type.Worker))
+        P.Building_List(ID).access_point.Add(New PointI(pos.x + 13, pos.y + 8), New Building_Access_Point_Type(BAP_Type.Worker))
+        P.Building_List(ID).access_point.Add(New PointI(pos.x + 18, pos.y + 8), New Building_Access_Point_Type(BAP_Type.Worker))
+        P.Building_List(ID).access_point.Add(New PointI(pos.x + 22, pos.y + 8), New Building_Access_Point_Type(BAP_Type.Worker))
+
+
+        For x = 1 To 3
+            P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + x, pos.y + 1), New Item_Slots_Type(True))
+            P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + x, pos.y + 2), New Item_Slots_Type(True))
+            P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + x, pos.y + 3), New Item_Slots_Type(True))
+        Next
+
+        For x = 28 To 30
+            P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + x, pos.y + 1), New Item_Slots_Type(False))
+            P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + x, pos.y + 2), New Item_Slots_Type(False))
+            P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + x, pos.y + 3), New Item_Slots_Type(False))
+        Next
+        P.Item_Point.Add(New PointI(pos.x + 1, pos.y + 1), New Item_Point_Type(100, Item_Enum.Refined_Crystal))
+
+
+        P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + 10, pos.y + 10), New Item_Slots_Type(True))
+        P.Item_Point.Add(New PointI(pos.x + 10, pos.y + 10), New Item_Point_Type(1000, Item_Enum.Refined_Crystal_Piece))
+
     End Sub
 
 
@@ -149,11 +312,11 @@
         P.Building_List(ID).BuildingRect.Add(0, New Rectangle(pos.x + 4, pos.y + 3, 24, 10))
 
 
-        P.Building_List(ID).access_point.Add(New PointI(pos.x + 5, pos.y + 9), New Building_Access_Point_Type)
-        P.Building_List(ID).access_point.Add(New PointI(pos.x + 7, pos.y + 9), New Building_Access_Point_Type)
-        P.Building_List(ID).access_point.Add(New PointI(pos.x + 9, pos.y + 9), New Building_Access_Point_Type)
-        P.Building_List(ID).access_point.Add(New PointI(pos.x + 11, pos.y + 9), New Building_Access_Point_Type)
-        P.Building_List(ID).access_point.Add(New PointI(pos.x + 13, pos.y + 9), New Building_Access_Point_Type)
+        P.Building_List(ID).access_point.Add(New PointI(pos.x + 5, pos.y + 9), New Building_Access_Point_Type(BAP_Type.Customer))
+        P.Building_List(ID).access_point.Add(New PointI(pos.x + 7, pos.y + 9), New Building_Access_Point_Type(BAP_Type.Customer))
+        P.Building_List(ID).access_point.Add(New PointI(pos.x + 9, pos.y + 9), New Building_Access_Point_Type(BAP_Type.Customer))
+        P.Building_List(ID).access_point.Add(New PointI(pos.x + 11, pos.y + 9), New Building_Access_Point_Type(BAP_Type.Customer))
+        P.Building_List(ID).access_point.Add(New PointI(pos.x + 13, pos.y + 9), New Building_Access_Point_Type(BAP_Type.Customer))
 
     End Sub
 

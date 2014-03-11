@@ -1,17 +1,12 @@
 ﻿Public Class Item_Point_Type
     Public Amount As Integer
     Public Item As Item_Enum
-    Public Base_Building As Integer = -1
-
+    
     Sub New(ByVal Amount As Integer, ByVal item As Item_Enum)
         Me.Amount = Amount
         Me.Item = item
     End Sub
-
-    Sub New(ByVal Base_Building As Integer)
-        Me.Base_Building = Base_Building
-    End Sub
-
+    
     Sub New()
     End Sub
 End Class
@@ -31,6 +26,7 @@ Public Class Planet
     Public Block_Map As HashSet(Of PointI) = New HashSet(Of PointI)
     Public Resource_Points As Dictionary(Of PointI, Boolean) = New Dictionary(Of PointI, Boolean) 'Is true is resource point is taken
     Public Building_List As Dictionary(Of Integer, Planet_Building) = New Dictionary(Of Integer, Planet_Building)
+
 
     Public Item_Point As Dictionary(Of PointI, Item_Point_Type) = New Dictionary(Of PointI, Item_Point_Type)
 
@@ -129,38 +125,381 @@ Public Class Planet
 
     End Sub
 
-
     Sub Process_Work()
-        If GSTFrequency = 0 Then
-            If GST Mod 10 = 0 Then
-                For Each buiding In Building_List
-                    If buiding.Value.Type = building_type_enum.Mine Then
-                        For Each CrewID In buiding.Value.Working_crew_list
-                            crew_list(CrewID).Wealth += 1
-                        Next
+        If GSTFrequency = 0 AndAlso GST Mod 10 = 0 Then
+            For Each buiding In Building_List
 
-                        For a = 1 To buiding.Value.Working_crew_list.Count
-                            For Each ipoint In Item_Point
-                                If (ipoint.Value.Item = Item_Enum.None OrElse ipoint.Value.Item = Item_Enum.Crystal) AndAlso ipoint.Value.Base_Building = buiding.Key Then
-                                    If ipoint.Value.Amount < 100 Then
-                                        ipoint.Value.Item = Item_Enum.Crystal
-                                        ipoint.Value.Amount += 1
-                                        Exit For
-                                    End If
-                                End If
-                            Next
-                        Next
-
-                    End If
-                Next
-
-            End If
-
-
+                'Mine
+                If buiding.Value.Type = building_type_enum.Mine Then Process_Mine(buiding)
+                If buiding.Value.Type = building_type_enum.Refinery Then Process_Refinery(buiding)
+                If buiding.Value.Type = building_type_enum.Factory Then Process_Factory(buiding)
+            Next
         End If
     End Sub
 
 
+
+    Sub Process_Mine(ByVal Building As KeyValuePair(Of Integer, Planet_Building))
+
+        Dim Safe_Point As Item_Point_Type = Nothing
+        Dim Safe_Location As PointI
+
+        For Each ipoint In Building.Value.Item_Slots
+            If ipoint.Value.Input_Slot = True AndAlso Item_Point.ContainsKey(ipoint.Key) AndAlso Item_Point(ipoint.Key).Item = Item_Enum.Refined_Crystal_Piece Then Safe_Point = Item_Point(ipoint.Key) : Safe_Location = ipoint.Key : Exit For
+        Next
+
+        'Need better safty
+        If Safe_Point Is Nothing Then Exit Sub
+
+        Dim Free_Slots As Double
+        For Each ipoint In Building.Value.Item_Slots
+            If ipoint.Value.Input_Slot = False Then
+                If Item_Point.ContainsKey(ipoint.Key) Then
+                    If Item_Point(ipoint.Key).Item = Item_Enum.Crystal AndAlso Item_Point(ipoint.Key).Amount < 100 Then
+                        Free_Slots += 100 - Item_Point(ipoint.Key).Amount
+                    End If
+                Else
+                    Free_Slots += 100
+                End If
+            End If
+        Next
+
+
+        'Pay workers/Remove resources
+
+        For Each CrewID In Building.Value.Working_crew_list
+            Dim processed As Boolean = False
+            If Free_Slots >= 1.5 Then
+                For Each ipoint In Building.Value.Item_Slots
+                    If ipoint.Value.Input_Slot = True AndAlso Item_Point.ContainsKey(ipoint.Key) AndAlso Item_Point(ipoint.Key).Item = Item_Enum.Parts Then
+                        If Item_Point(ipoint.Key).Amount >= 1 Then
+                            If Safe_Point.Amount >= 1 Then
+                                Safe_Point.Amount -= 1
+                                crew_list(CrewID).Wealth += 1
+                                Building.Value.Item_Build_Progress += 150
+                                Free_Slots -= 1.5
+                                Item_Point(ipoint.Key).Amount -= 1
+                                If Item_Point(ipoint.Key).Amount = 0 Then Item_Point.Remove(ipoint.Key)
+                            End If
+                            processed = True
+                            Exit For
+                        End If
+                    End If
+                Next
+                If processed = False Then
+                    If Safe_Point.Amount >= 1 Then
+                        Safe_Point.Amount -= 1
+                        crew_list(CrewID).Wealth += 1
+                        Building.Value.Item_Build_Progress += 30
+                        Free_Slots -= 0.3                        
+                    End If                    
+                End If
+
+            End If
+        Next
+
+
+        'Add crystal        
+        Do Until Building.Value.Item_Build_Progress < 100
+            For Each ipoint In Building.Value.Item_Slots
+
+                If ipoint.Value.Input_Slot = False Then
+                    If Not Item_Point.ContainsKey(ipoint.Key) Then Item_Point.Add(ipoint.Key, New Item_Point_Type)
+                    If (Item_Point(ipoint.Key).Item = Item_Enum.None OrElse Item_Point(ipoint.Key).Item = Item_Enum.Crystal) Then
+                        If Item_Point(ipoint.Key).Amount < 100 Then
+                            Item_Point(ipoint.Key).Item = Item_Enum.Crystal
+                            Item_Point(ipoint.Key).Amount += 1
+                            Exit For
+                        End If
+                    End If
+                End If
+
+            Next
+            Building.Value.Item_Build_Progress -= 100
+        Loop
+
+
+        Dim Parts As Integer = Check_Resources(Building.Key, Item_Enum.Crystal)
+
+
+        'Need to add to personality
+        If Parts < 400 Then
+            Dim Buy_amount As Integer = 800 - Parts
+            If Safe_Point.Amount < Buy_amount * 10 AndAlso (Safe_Point.Amount \ 10) - 50 > 0 Then Buy_amount = (Safe_Point.Amount \ 10) - 50 Else Buy_amount = 0
+
+            If Building.Value.Available_Transporters.Count > 0 AndAlso Buy_amount > 0 Then
+                Dim Id As Integer = GetNearistBuilding(building_type_enum.Factory, Safe_Location)
+                Dim Avilable As Integer = Check_Resources(Id, Item_Enum.Parts)
+                If Avilable < Buy_amount Then Buy_amount = Avilable
+
+                If Id > -1 AndAlso Buy_amount > 100 Then
+                    Send_Transporter_Buy(crew_list(Building.Value.Available_Transporters.First), Item_Enum.Parts, Buy_amount * 10, Buy_amount, Safe_Location, Building_List(Id).PickupPoint, Id, Building.Value.PickupPoint, Building.Key)
+                    Building.Value.Available_Transporters.Remove(Building.Value.Available_Transporters.First)
+                End If
+
+            End If
+        End If
+
+
+    End Sub
+
+
+    Sub Process_Refinery(ByVal Building As KeyValuePair(Of Integer, Planet_Building))
+
+        Dim Safe_Point As Item_Point_Type = Nothing
+        Dim Safe_Location As PointI
+
+        For Each ipoint In Building.Value.Item_Slots
+            If ipoint.Value.Input_Slot = True AndAlso Item_Point.ContainsKey(ipoint.Key) AndAlso Item_Point(ipoint.Key).Item = Item_Enum.Refined_Crystal_Piece Then Safe_Point = Item_Point(ipoint.Key) : Safe_Location = ipoint.Key : Exit For
+        Next
+
+
+
+
+        'Need better safty
+        If Safe_Point Is Nothing Then Exit Sub
+
+
+        Dim Free_Slots As Double
+        For Each ipoint In Building.Value.Item_Slots
+            If ipoint.Value.Input_Slot = False Then
+                If Item_Point.ContainsKey(ipoint.Key) Then
+                    If Item_Point(ipoint.Key).Item = Item_Enum.Refined_Crystal AndAlso Item_Point(ipoint.Key).Amount < 100 Then
+                        Free_Slots += 100 - Item_Point(ipoint.Key).Amount
+                    End If
+                Else
+                    Free_Slots += 100
+                End If
+            End If
+        Next
+
+        'Convert Refined Crystal to Refined Crystal Peices
+        If Safe_Point.Amount < 1000 Then
+            For Each ipoint In Building.Value.Item_Slots
+                If Item_Point.ContainsKey(ipoint.Key) AndAlso Item_Point(ipoint.Key).Item = Item_Enum.Refined_Crystal Then
+                    For a = 1 To 10
+                        If Item_Point.ContainsKey(ipoint.Key) AndAlso Item_Point(ipoint.Key).Amount >= 1 Then
+                            Item_Point(ipoint.Key).Amount -= 1
+                            If Item_Point(ipoint.Key).Amount = 0 Then Item_Point.Remove(ipoint.Key)
+                            Safe_Point.Amount += 10
+                        End If
+                    Next a
+                    If Safe_Point.Amount >= 100 Then Exit For
+                End If
+            Next
+        End If
+
+        'Pay workers/Remove resources
+        For Each CrewID In Building.Value.Working_crew_list
+            If Free_Slots >= 1 Then
+                For Each ipoint In Building.Value.Item_Slots
+                    If (ipoint.Value.Input_Slot = True AndAlso Item_Point.ContainsKey(ipoint.Key) AndAlso Item_Point(ipoint.Key).Item = Item_Enum.Crystal) OrElse Building.Value.Resource_Credit >= 1 Then
+                        If Building.Value.Resource_Credit >= 1 OrElse Item_Point(ipoint.Key).Amount >= 1 Then
+
+                            If Safe_Point.Amount >= 1 Then
+                                Safe_Point.Amount -= 1
+                                crew_list(CrewID).Wealth += 1
+                                Building.Value.Item_Build_Progress += 100
+                                Free_Slots -= 1
+                                If Building.Value.Resource_Credit >= 1 Then
+                                    Building.Value.Resource_Credit -= 1
+                                Else
+                                    Item_Point(ipoint.Key).Amount -= 1
+                                    Building.Value.Resource_Credit += 1
+                                    If Item_Point(ipoint.Key).Amount = 0 Then Item_Point.Remove(ipoint.Key)
+                                End If
+                            End If
+                            Exit For
+
+                        End If
+                    End If
+                Next
+            End If
+        Next
+
+
+        'Add crystal
+        Do Until Building.Value.Item_Build_Progress < 100
+            For Each ipoint In Building.Value.Item_Slots
+
+                If ipoint.Value.Input_Slot = False Then
+                    If Not Item_Point.ContainsKey(ipoint.Key) Then Item_Point.Add(ipoint.Key, New Item_Point_Type)
+                    If (Item_Point(ipoint.Key).Item = Item_Enum.None OrElse Item_Point(ipoint.Key).Item = Item_Enum.Refined_Crystal) Then
+                        If Item_Point(ipoint.Key).Amount < 100 Then
+                            Item_Point(ipoint.Key).Item = Item_Enum.Refined_Crystal
+                            Item_Point(ipoint.Key).Amount += 1
+                            Exit For
+                        End If
+                    End If
+                End If
+
+            Next
+            Building.Value.Item_Build_Progress -= 100
+        Loop
+
+
+
+        Dim Crystal As Integer = Check_Resources(Building.Key, Item_Enum.Crystal)
+
+
+        'Need to add to personality
+        If Crystal < 400 Then
+            Dim Buy_amount As Integer = 800 - Crystal
+            If Safe_Point.Amount < Buy_amount * 10 AndAlso (Safe_Point.Amount \ 10) - 50 > 0 Then Buy_amount = (Safe_Point.Amount \ 10) - 50 Else Buy_amount = 0
+
+            If Building.Value.Available_Transporters.Count > 0 AndAlso Buy_amount > 0 Then
+                Dim Id As Integer = GetNearistBuilding(building_type_enum.Mine, Safe_Location)
+                Dim Avilable As Integer = Check_Resources(Id, Item_Enum.Crystal)
+                If Avilable < Buy_amount Then Buy_amount = Avilable
+
+                If Id > -1 AndAlso Buy_amount > 100 Then
+                    Send_Transporter_Buy(crew_list(Building.Value.Available_Transporters.First), Item_Enum.Crystal, Buy_amount * 10, Buy_amount, Safe_Location, Building_List(Id).PickupPoint, Id, Building.Value.PickupPoint, Building.Key)
+                    Building.Value.Available_Transporters.Remove(Building.Value.Available_Transporters.First)
+                End If
+
+            End If
+        End If
+
+
+
+    End Sub
+
+
+    Sub Process_Factory(ByVal Building As KeyValuePair(Of Integer, Planet_Building))
+
+        Dim Safe_Point As Item_Point_Type = Nothing
+        Dim Safe_Location As PointI
+
+        For Each ipoint In Building.Value.Item_Slots
+            If ipoint.Value.Input_Slot = True AndAlso Item_Point.ContainsKey(ipoint.Key) AndAlso Item_Point(ipoint.Key).Item = Item_Enum.Refined_Crystal_Piece Then Safe_Point = Item_Point(ipoint.Key) : Safe_Location = ipoint.Key : Exit For
+        Next
+
+
+        'Need better safty
+        If Safe_Point Is Nothing Then Exit Sub
+
+
+        Dim Free_Slots As Double
+        For Each ipoint In Building.Value.Item_Slots
+            If ipoint.Value.Input_Slot = False Then
+                If Item_Point.ContainsKey(ipoint.Key) Then
+                    If Item_Point(ipoint.Key).Item = Item_Enum.Parts AndAlso Item_Point(ipoint.Key).Amount < 100 Then
+                        Free_Slots += 100 - Item_Point(ipoint.Key).Amount
+                    End If
+                Else
+                    Free_Slots += 100
+                End If
+            End If
+        Next
+
+        'Pay workers/Remove resources
+        For Each CrewID In Building.Value.Working_crew_list
+            If Free_Slots >= 1 Then
+                For Each ipoint In Building.Value.Item_Slots
+                    If (ipoint.Value.Input_Slot = True AndAlso Item_Point.ContainsKey(ipoint.Key) AndAlso Item_Point(ipoint.Key).Item = Item_Enum.Refined_Crystal) OrElse Building.Value.Resource_Credit >= 1 Then
+                        If Building.Value.Resource_Credit >= 1 OrElse Item_Point(ipoint.Key).Amount >= 1 Then
+
+                            If Safe_Point.Amount >= 1 Then
+                                Safe_Point.Amount -= 1
+                                crew_list(CrewID).Wealth += 1
+                                Building.Value.Item_Build_Progress += 100
+                                Free_Slots -= 1
+                                If Building.Value.Resource_Credit >= 1 Then
+                                    Building.Value.Resource_Credit -= 1
+                                Else
+                                    Item_Point(ipoint.Key).Amount -= 1
+                                    Building.Value.Resource_Credit += 1
+                                    If Item_Point(ipoint.Key).Amount = 0 Then Item_Point.Remove(ipoint.Key)
+                                End If
+                            End If
+                            Exit For
+
+                        End If
+                    End If
+                Next
+            End If
+        Next
+
+
+        'Add crystal
+        Do Until Building.Value.Item_Build_Progress < 100
+            For Each ipoint In Building.Value.Item_Slots
+
+                If ipoint.Value.Input_Slot = False Then
+                    If Not Item_Point.ContainsKey(ipoint.Key) Then Item_Point.Add(ipoint.Key, New Item_Point_Type)
+                    If (Item_Point(ipoint.Key).Item = Item_Enum.None OrElse Item_Point(ipoint.Key).Item = Item_Enum.Parts) Then
+                        If Item_Point(ipoint.Key).Amount < 100 Then
+                            Item_Point(ipoint.Key).Item = Item_Enum.Parts
+                            Item_Point(ipoint.Key).Amount += 1
+                            Exit For
+                        End If
+                    End If
+                End If
+
+            Next
+            Building.Value.Item_Build_Progress -= 100
+        Loop
+
+
+        Dim RCrystal As Integer = Check_Resources(Building.Key, Item_Enum.Crystal)
+
+        'Need to add to personality
+        If RCrystal < 400 Then
+            Dim Buy_amount As Integer = 800 - RCrystal
+            If Safe_Point.Amount < Buy_amount * 10 AndAlso (Safe_Point.Amount \ 10) - 50 > 0 Then Buy_amount = (Safe_Point.Amount \ 10) - 50 Else Buy_amount = 0
+
+            If Building.Value.Available_Transporters.Count > 0 AndAlso Buy_amount > 0 Then
+                Dim Id As Integer = GetNearistBuilding(building_type_enum.Refinery, Safe_Location)
+                Dim Avilable As Integer = Check_Resources(Id, Item_Enum.Crystal)
+                If Avilable < Buy_amount Then Buy_amount = Avilable
+
+                If Id > -1 AndAlso Buy_amount > 100 Then
+                    Send_Transporter_Buy(crew_list(Building.Value.Available_Transporters.First), Item_Enum.Refined_Crystal, Buy_amount * 10, Buy_amount, Safe_Location, Building_List(Id).PickupPoint, Id, Building.Value.PickupPoint, Building.Key)
+                    Building.Value.Available_Transporters.Remove(Building.Value.Available_Transporters.First)
+                End If
+
+            End If
+        End If
+
+
+    End Sub
+
+
+
+    Function GetNearistBuilding(ByVal Building_Type As building_type_enum, ByVal Point As PointI) As Integer
+        Dim list As Dictionary(Of Integer, Integer) = New Dictionary(Of Integer, Integer)
+        For Each building In Building_List
+            If building.Value.Type = Building_Type Then list.Add(building.Key, CInt(Math.Sqrt(((building.Value.PickupPoint.x - Point.x) ^ 2) + (building.Value.PickupPoint.y - Point.y) ^ 2)))
+        Next
+
+        Dim Lowest As Integer = 1000000
+        Dim ID As Integer
+        For Each item In list
+            If item.Value < Lowest Then Lowest = item.Value : ID = item.Key
+        Next
+        If Building_List.Count = 0 Then Return -1
+        Return ID
+    End Function
+
+
+    Function Check_Resources(ByVal BuildingID As Integer, ByVal Item As Item_Enum) As Integer
+        Dim amount As Integer
+        If Building_List.ContainsKey(BuildingID) Then
+
+            Dim B As Planet_Building = Building_List(BuildingID)
+
+            For Each ipoint In B.Item_Slots
+                If Item_Point.ContainsKey(ipoint.Key) AndAlso Item_Point(ipoint.Key).Item = Item Then
+                    amount += Item_Point(ipoint.Key).Amount
+                End If
+            Next
+            Return amount
+
+        End If
+        Return 0
+    End Function
+
+    
     Sub Process_crew()
         If GSTFrequency = 0 Then
             'Send Crew to work
@@ -206,10 +545,10 @@ Public Class Planet
 
 
 
-                    If Crew.Value.WorkShift = WorkShift Then
+                    If Crew.Value.WorkShift = WorkShift AndAlso Crew.Value.Worker_Type = Worker_Type_Enum.Worker Then
                         'Find AP in building
                         For Each AP In Building_List(Crew.Value.WorkBuilding).access_point
-                            If AP.Value.NextUp = False Then
+                            If AP.Value.Type = BAP_Type.Worker AndAlso AP.Value.NextUp = False Then
                                 work_Point = AP.Key
                                 Found_AP = True
                                 Exit For
@@ -255,14 +594,13 @@ Public Class Planet
     End Sub
 
 
-
     Sub Send_Crew_Home(ByVal WorkShift As Work_Shift_Enum)
         Dim Home_Point As PointI
         Dim Home_rect As Rectangle
 
         For Each Crew In crew_list
             If Crew.Value.HomeBuilding > -1 Then
-                If Crew.Value.WorkShift = WorkShift Then
+                If Crew.Value.WorkShift = WorkShift AndAlso Crew.Value.Worker_Type = Worker_Type_Enum.Worker Then
                     Home_rect = Building_List(Crew.Value.HomeBuilding).BuildingRect(Crew.Value.HomeSpace)
                     Home_Point.x = CInt(Home_rect.X + Home_rect.Width / 2)
                     Home_Point.y = CInt(Home_rect.Y + Home_rect.Height / 2)
@@ -315,7 +653,7 @@ Public Class Planet
 
         If GotoBank = True Then
             For Each AP In Building_List(Crew.BankBuilding).access_point
-                If AP.Value.Used = False Then Bank_Point = AP.Key : Found_Bank_AP = True : Exit For
+                If AP.Value.Type = BAP_Type.Customer AndAlso AP.Value.Used = False Then Bank_Point = AP.Key : Found_Bank_AP = True : Exit For
             Next
 
             If Found_Bank_AP = True Then
@@ -353,7 +691,7 @@ Public Class Planet
         Dim Found_AP As Boolean
         Dim Pub_Point As PointI
         For Each AP In Building_List(Crew.PubBuilding).access_point
-            If AP.Value.Used = False Then Pub_Point = AP.Key : Found_AP = True : Exit For
+            If AP.Value.Type = BAP_Type.Customer AndAlso AP.Value.Used = False Then Pub_Point = AP.Key : Found_AP = True : Exit For
         Next
 
         If Found_AP = True Then
@@ -392,16 +730,70 @@ Public Class Planet
 
     End Function
 
+    Sub Send_Transporter_Buy(ByVal Crew As Crew, ByVal Type As Item_Enum, ByVal Cash As Integer, ByVal Amount As Integer, ByVal Safe_Point As PointI, ByVal Buy_Point As PointI, ByVal DestanationID As Integer, ByVal Dropoff_Point As PointI, ByVal DropoffID As Integer)
+
+
+        'Goto Safe Point
+        If Not tile_map(Crew.find_tile.x, Crew.find_tile.y).walkable = walkable_type_enum.Walkable Then Exit Sub
+        Dim tile As PointI = Crew.find_tile
+
+        Crew.command_queue.Clear()
+
+        path_find.set_start_end(tile, Safe_Point)
+        path_find.find_path()
+        If path_find.get_status = pf_status.path_found Then
+            Dim list As LinkedList(Of PointI)
+            list = path_find.get_path
+
+            For Each dest In list
+                Crew.command_queue.Enqueue(New Crew.Command_move(New PointD(dest.x * 32, dest.y * 32)))
+            Next
+        End If
+
+        'Pickup Money
+        Crew.command_queue.Enqueue(New Crew.Command_Trans_Pickup(Cash))
+
+        'Send To Buy Point
+        path_find.set_start_end(Safe_Point, Buy_Point)
+        path_find.find_path()
+
+        If path_find.get_status = pf_status.path_found Then
+            Dim list As LinkedList(Of PointI)
+            list = path_find.get_path
+
+            For Each dest In list
+                Crew.command_queue.Enqueue(New Crew.Command_move(New PointD(dest.x * 32, dest.y * 32)))
+            Next
+        End If
+
+        'Buy Goods
+        Crew.command_queue.Enqueue(New Crew.Command_Trans_Buy(DestanationID, Amount, Type))
+
+        'Send To Drop Off Point
+        path_find.set_start_end(Buy_Point, Dropoff_Point)
+        path_find.find_path()
+
+        If path_find.get_status = pf_status.path_found Then
+            Dim list As LinkedList(Of PointI)
+            list = path_find.get_path
+
+
+            For Each dest In list
+                Crew.command_queue.Enqueue(New Crew.Command_move(New PointD(dest.x * 32, dest.y * 32)))
+            Next
+        End If
+
+        'Drop Off Goods
+        Crew.command_queue.Enqueue(New Crew.Command_Trans_Dropoff(DropoffID, Amount, Type))
+
+    End Sub
+
 
     Sub Load_Pathfinding()
         path_find = New A_star
         path_find.set_map(tile_map, size)
 
     End Sub
-
-
-
-
 
 
     Sub Run_animations()

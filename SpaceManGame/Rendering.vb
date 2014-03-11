@@ -181,6 +181,15 @@
             render_personal_health_overlay(New PointI(128, screen_size.y - 96), Crew_List(Mouse_Target).Health)
             draw_text("Wealth " + Crew_List(Mouse_Target).Wealth.ToString, New Rectangle(0, 150, 100, 20), CType(DrawTextFormat.Center + DrawTextFormat.VerticalCenter, DrawTextFormat), Color.White, d3d_font(d3d_font_enum.SB_small))
         End If
+
+        If Tile_Target.x >= 0 AndAlso Tile_Target.y >= 0 AndAlso Tile_Target.x <= 512 AndAlso Tile_Target.y <= 512 Then
+            If Planet_List(Officer_List(player).Location_ID).Item_Point.ContainsKey(Tile_Target) Then
+                Dim tile As Item_Point_Type = Planet_List(Officer_List(player).Location_ID).Item_Point(Tile_Target)
+                draw_text(tile.Item.ToString + " " + tile.Amount.ToString, New Rectangle(0, 180, 200, 20), CType(DrawTextFormat.Center + DrawTextFormat.VerticalCenter, DrawTextFormat), Color.White, d3d_font(d3d_font_enum.SB_small))
+            End If
+        End If
+
+
         d3d_sprite.End()
 
         d3d_device.EndScene()
@@ -315,19 +324,73 @@
             Dim PItem As Item_Point_Type = Planet.Item_Point(P)
             If Not PItem.Item = Item_Enum.None Then
 
-                If PItem.Item = Item_Enum.Crystal Then
+                If PItem.Item = Item_Enum.Crystal Then                    
                     Dim amount As Integer = Planet.Item_Point(P).Amount
-                    If amount <= 33 Then
-                        Draw_Item_Tile(item_tile_texture_enum.Crystal_Container, 0, pos, Color.FromArgb(255, 255, 255, 255))
-                    ElseIf amount < 66 Then
-                        Draw_Item_Tile(item_tile_texture_enum.Crystal_Container, 1, pos, Color.FromArgb(255, 255, 255, 255))
-                    ElseIf amount < 100 Then
-                        Draw_Item_Tile(item_tile_texture_enum.Crystal_Container, 2, pos, Color.FromArgb(255, 255, 255, 255))
-                    ElseIf amount = 100 Then
-                        Draw_Item_Tile(item_tile_texture_enum.Crystal_Container, 3, pos, Color.FromArgb(255, 255, 255, 255))
-                    End If
+                    Select Case amount
+                        Case Is < 33
+                            Draw_Item_Tile(item_tile_texture_enum.Crystal_Container, 0, pos, Color.FromArgb(255, 255, 255, 255))
+                            Lights.Add(New Lights_Type(New PointD(P.x * 32 - 112, P.y * 32 - 112), Set_Brighness(Color.Green, Planet.Animation_Glow - 0.8F)))
+                        Case Is < 66
+                            Draw_Item_Tile(item_tile_texture_enum.Crystal_Container, 1, pos, Color.FromArgb(255, 255, 255, 255))
+                            Lights.Add(New Lights_Type(New PointD(P.x * 32 - 112, P.y * 32 - 112), Set_Brighness(Color.Green, Planet.Animation_Glow - 0.7F)))
+                        Case Is < 100
+                            Draw_Item_Tile(item_tile_texture_enum.Crystal_Container, 2, pos, Color.FromArgb(255, 255, 255, 255))
+                            Lights.Add(New Lights_Type(New PointD(P.x * 32 - 112, P.y * 32 - 112), Set_Brighness(Color.Green, Planet.Animation_Glow - 0.6F)))
+                        Case Is = 100
+                            Draw_Item_Tile(item_tile_texture_enum.Crystal_Container, 3, pos, Color.FromArgb(255, 255, 255, 255))
+                            Lights.Add(New Lights_Type(New PointD(P.x * 32 - 112, P.y * 32 - 112), Set_Brighness(Color.Green, Planet.Animation_Glow - 0.5F)))
+                        Case Else
+                    End Select
                 End If
 
+
+                If PItem.Item = Item_Enum.Refined_Crystal_Piece Then
+                    Dim amount As Integer = Planet.Item_Point(P).Amount
+                    Select Case amount
+                        Case Is < 3300
+                            Draw_Item_Tile(item_tile_texture_enum.Crystal_Container, 0, pos, Color.FromArgb(255, 255, 255, 255))
+                        Case Is < 6600
+                            Draw_Item_Tile(item_tile_texture_enum.Crystal_Container, 1, pos, Color.FromArgb(255, 255, 255, 255))
+                        Case Is < 10000
+                            Draw_Item_Tile(item_tile_texture_enum.Crystal_Container, 2, pos, Color.FromArgb(255, 255, 255, 255))
+                        Case Is = 10000
+                            Draw_Item_Tile(item_tile_texture_enum.Crystal_Container, 3, pos, Color.FromArgb(255, 255, 255, 255))
+                        Case Else
+                    End Select
+
+                End If
+
+
+                If PItem.Item = Item_Enum.Refined_Crystal Then
+                    Dim amount As Integer = Planet.Item_Point(P).Amount
+                    Select Case amount                        
+                        Case Is < 50
+                            Draw_Item_Tile(item_tile_texture_enum.Crystal_Container, 4, pos, Color.FromArgb(255, 255, 255, 255))
+                        Case Is < 100
+                            Draw_Item_Tile(item_tile_texture_enum.Crystal_Container, 5, pos, Color.FromArgb(255, 255, 255, 255))
+                        Case Is = 100
+                            Draw_Item_Tile(item_tile_texture_enum.Crystal_Container, 6, pos, Color.FromArgb(255, 255, 255, 255))
+                        Case Else
+                    End Select
+
+                End If
+
+
+                If PItem.Item = Item_Enum.Parts Then
+                    Dim amount As Integer = Planet.Item_Point(P).Amount
+                    Select Case amount
+                        Case Is < 33
+                            Draw_Item_Tile(item_tile_texture_enum.Crystal_Container, 7, pos, Color.FromArgb(255, 255, 255, 255))
+                        Case Is < 66
+                            Draw_Item_Tile(item_tile_texture_enum.Crystal_Container, 8, pos, Color.FromArgb(255, 255, 255, 255))
+                        Case Is < 100
+                            Draw_Item_Tile(item_tile_texture_enum.Crystal_Container, 9, pos, Color.FromArgb(255, 255, 255, 255))
+                        Case Is = 100
+                            Draw_Item_Tile(item_tile_texture_enum.Crystal_Container, 10, pos, Color.FromArgb(255, 255, 255, 255))
+                        Case Else
+                    End Select
+
+                End If
             End If
         End If
 
