@@ -27,6 +27,15 @@
 
                     Case crew_script_enum.pub_start : crew_script_pub_start(Crew_List(key), key)
 
+
+
+                    Case crew_script_enum.transport_buy_goods : crew_script_transport_buy_goods(Crew_List(key), key)
+                    Case crew_script_enum.transport_dropoff_goods : crew_script_transport_dropoff_goods(Crew_List(key), key)
+                    Case crew_script_enum.transport_pickup_money : crew_script_transport_pickup_money(Crew_List(key), key)
+
+
+
+
                 End Select
                 If Crew_List(key).command_queue.First.status = script_status_enum.complete Then Crew_List(key).command_queue.Dequeue()
             End If
@@ -282,6 +291,118 @@
         End If
     End Sub
 
+
+    Public Sub crew_script_transport_pickup_money(ByVal crew_member As Crew, ByVal id As Integer)
+        Dim command As Crew.Command_Trans_Pickup = DirectCast(crew_member.command_queue.First, Crew.Command_Trans_Pickup)
+        'Only programed for planets
+        Dim planet As Planet = Planet_List(crew_member.Location_ID)
+        Dim pos As PointI
+        pos.x = crew_member.find_tile.x
+        pos.y = crew_member.find_tile.y
+        If planet.Item_Point.ContainsKey(pos) AndAlso planet.Item_Point(pos).Item = Item_Enum.Refined_Crystal_Piece Then
+            planet.Item_Point(pos).Amount -= command.Amount
+            If planet.Item_Point(pos).Amount < 0 Then command.Amount += planet.Item_Point(pos).Amount : planet.Item_Point(pos).Amount = 0
+
+            If crew_member.Item_List.ContainsKey(Item_Enum.Refined_Crystal_Piece) Then
+                crew_member.Item_List(Item_Enum.Refined_Crystal_Piece) += command.Amount
+            Else
+                crew_member.Item_List.Add(Item_Enum.Refined_Crystal_Piece, command.Amount)
+            End If
+
+            crew_member.command_queue.First.status = script_status_enum.complete
+        Else
+            crew_member.command_queue.First.status = script_status_enum.complete
+        End If
+
+    End Sub
+
+    Public Sub crew_script_transport_buy_goods(ByVal crew_member As Crew, ByVal id As Integer)
+        Dim command As Crew.Command_Trans_Buy = DirectCast(crew_member.command_queue.First, Crew.Command_Trans_Buy)
+        'Only programed for planets
+        Dim planet As Planet = Planet_List(crew_member.Location_ID)
+        Dim B As Planet_Building = planet.Building_List(command.ID)
+        Dim pos As PointI
+        pos.x = crew_member.find_tile.x
+        pos.y = crew_member.find_tile.y
+
+        Dim Bought As Boolean = False
+        For Each ipoint In B.Item_Slots
+            If planet.Item_Point.ContainsKey(ipoint.Key) AndAlso planet.Item_Point(ipoint.Key).Item = command.Item Then
+                If planet.Item_Point(ipoint.Key).Amount >= 1 Then
+
+
+                    If crew_member.Item_List.ContainsKey(Item_Enum.Refined_Crystal_Piece) Then
+                        crew_member.Item_List(Item_Enum.Refined_Crystal_Piece) -= 10                    
+                    End If
+                    If crew_member.Item_List(Item_Enum.Refined_Crystal_Piece) <= 0 Then crew_member.Item_List.Remove(Item_Enum.Refined_Crystal_Piece) : command.status = script_status_enum.complete : Exit Sub
+
+                    planet.Item_Point(ipoint.Key).Amount -= 1
+                    For Each Bpoint In B.Item_Slots
+                        If Bpoint.Value.Input_Slot = True AndAlso planet.Item_Point.ContainsKey(Bpoint.Key) AndAlso planet.Item_Point(Bpoint.Key).Item = Item_Enum.Refined_Crystal_Piece Then planet.Item_Point(Bpoint.Key).Amount += 10 : Exit For
+                    Next
+
+
+                    If crew_member.Item_List.ContainsKey(command.Item) Then
+                        crew_member.Item_List(command.Item) += 1
+                    Else
+                        crew_member.Item_List.Add(command.Item, 1)
+                    End If
+
+                    command.Amount -= 1
+                    If planet.Item_Point(ipoint.Key).Amount = 0 Then planet.Item_Point.Remove(ipoint.Key)
+                    Bought = True
+                End If
+            End If
+            If Bought = True Then Exit For
+        Next
+
+        If command.Amount = 0 OrElse Bought = False Then crew_member.command_queue.First.status = script_status_enum.complete
+
+
+    End Sub
+
+    Public Sub crew_script_transport_dropoff_goods(ByVal crew_member As Crew, ByVal id As Integer)
+        Dim command As Crew.Command_Trans_Dropoff = DirectCast(crew_member.command_queue.First, Crew.Command_Trans_Dropoff)
+        'Only programed for planets
+        Dim planet As Planet = Planet_List(crew_member.Location_ID)
+        Dim B As Planet_Building = planet.Building_List(command.Dropoff_ID)
+        Dim pos As PointI
+        pos.x = crew_member.find_tile.x
+        pos.y = crew_member.find_tile.y
+
+        Dim Dropped As Boolean = False
+
+        If Not crew_member.Item_List.ContainsKey(command.Item) Then crew_member.command_queue.First.status = script_status_enum.complete : Exit Sub
+
+
+
+        For Each ipoint In B.Item_Slots
+
+            If ipoint.Value.Input_Slot = True Then
+                If Not planet.Item_Point.ContainsKey(ipoint.Key) Then planet.Item_Point.Add(ipoint.Key, New Item_Point_Type)
+                If (planet.Item_Point(ipoint.Key).Item = Item_Enum.None OrElse planet.Item_Point(ipoint.Key).Item = command.Item) Then
+                    If planet.Item_Point(ipoint.Key).Amount < 100 Then
+
+                        planet.Item_Point(ipoint.Key).Item = command.Item
+                        planet.Item_Point(ipoint.Key).Amount += 1
+
+                        crew_member.Item_List(command.Item) -= 1
+
+                        command.Amount -= 1
+                        Dropped = True
+                    End If
+                End If
+            End If
+            If Dropped = True Then Exit For
+        Next
+
+        If crew_member.Item_List(command.Item) <= 0 Then
+            crew_member.Item_List.Remove(command.Item)
+            crew_member.command_queue.First.status = script_status_enum.complete
+            B.Available_Transporters.Add(id)
+        End If
+        
+    End Sub
 
 #End Region
 

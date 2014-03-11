@@ -108,6 +108,43 @@ End Enum
         End Sub
     End Class
 
+
+    <Serializable()> Public Class Command_Trans_Pickup
+        Inherits Crew_Command_script
+        Public Amount As Integer
+        Sub New(ByVal Amount As Integer)
+            Me.Amount = Amount            
+            type = crew_script_enum.transport_pickup_money
+        End Sub
+    End Class
+
+    <Serializable()> Public Class Command_Trans_Buy
+        Inherits Crew_Command_script
+        Public Amount As Integer
+        Public Item As Item_Enum
+        Public ID As Integer
+        Sub New(ByVal Building_ID As Integer, ByVal Amount As Integer, ByVal Item As Item_Enum)
+            Me.ID = Building_ID
+            Me.Amount = Amount
+            Me.Item = Item
+            type = crew_script_enum.transport_buy_goods
+        End Sub
+    End Class
+
+    <Serializable()> Public Class Command_Trans_Dropoff
+        Inherits Crew_Command_script
+        Public Amount As Integer
+        Public Item As Item_Enum
+        Public Dropoff_ID As Integer
+
+        Sub New(ByVal Dropoff_ID As Integer, ByVal Amount As Integer, ByVal Item As Item_Enum)
+            Me.Dropoff_ID = Dropoff_ID
+            Me.Amount = Amount
+            Me.Item = Item
+            type = crew_script_enum.transport_dropoff_goods
+        End Sub
+    End Class
+
 #End Region
 
 
@@ -156,6 +193,8 @@ End Enum
     Public Ani_Step As Integer
     Public Ani_Current As Basic_Animation
     Public Current_Animation As Unit_Animation_Name_Enum = Unit_Animation_Name_Enum.None
+
+    Public Item_List As Dictionary(Of Item_Enum, Integer) = New Dictionary(Of Item_Enum, Integer)
 
     Sub New(ByVal Faction As Integer, ByRef location As PointD, ByVal Location_ID As Integer, ByVal Region As Officer_location_enum, ByVal speed As Double, ByVal sprite_set As character_sprite_set_enum, ByVal sprite As character_sprite_enum, ByVal points As crew_resource_type)
         Me.Faction = Faction

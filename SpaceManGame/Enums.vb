@@ -221,6 +221,10 @@
         'Pub
         pub_start
 
+        transport_pickup_money
+        transport_buy_goods        
+        transport_dropoff_goods
+
     End Enum
     Enum ship_class_enum As Byte
         fighterW
@@ -512,7 +516,7 @@
 
     Enum building_type_enum
         'Industrial
-        Manufacturer
+        Factory
         Refinery
         Mine
         Laboratory
@@ -593,8 +597,9 @@
     Enum Item_Enum
         None
         Crystal
-        Crystal_Piece
-
+        Refined_Crystal
+        Refined_Crystal_Piece
+        Parts
 
     End Enum
 
