@@ -109,6 +109,13 @@ End Enum
     End Class
 
 
+    <Serializable()> Public Class Command_Trans_Start
+        Inherits Crew_Command_script        
+        Sub New()
+            type = crew_script_enum.transport_start
+        End Sub
+    End Class
+
     <Serializable()> Public Class Command_Trans_Pickup
         Inherits Crew_Command_script
         Public Amount As Integer
@@ -175,7 +182,7 @@ End Enum
     Public BankBuilding As Integer
     Public PubBuilding As Integer
     Public Wealth As Integer
-
+    Public RemoveWhenDone As Boolean = False 'For Transporters
 
     'Public command_Queue As New LinkedList(Of crew_command_script)
 

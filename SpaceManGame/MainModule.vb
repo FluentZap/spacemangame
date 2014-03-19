@@ -3,7 +3,7 @@
 
 #Region "DirectX"
     Public d3d_device As Device
-    Public d3d_chain As SwapChain
+    'Public d3d_chain As SwapChain
     Public d3d_sprite As Sprite
     Public d3d_font() As Direct3D.Font
     'Public offscreentexture As Texture
@@ -271,6 +271,7 @@
 
     Public Ship_List As New Dictionary(Of Integer, Ship)(500)
     Public Planet_List As New Dictionary(Of Integer, Planet)(150)
+    Public Crew_List As New Dictionary(Of Integer, Crew)()
     Public Officer_List As New Dictionary(Of Integer, Officer)()
 
     Public u As Universe.Universe = New Universe.Universe
@@ -500,18 +501,22 @@
     End Sub
 
     Sub Clean_Up()
-        If d3d_device IsNot Nothing Then d3d_device.Dispose()
+        'If d3d_device IsNot Nothing Then d3d_device.Dispose()
+        For Each item In d3d_font
+            If item IsNot Nothing Then item.Dispose()
+        Next
         If d3d_sprite IsNot Nothing Then d3d_sprite.Dispose()
 
         'test_texture.Dispose()
         'Ship_Texture.Dispose()
         'Minimap_Texture.Dispose()
 
-
+        For Each item In tile_texture
+            If item IsNot Nothing Then item.Dispose()
+        Next
         Erase tile_texture
         'mouse_texture.Dispose()
         Erase button_texture
-        Erase tile_texture
         Erase device_tile_texture
         Erase character_texture
         Erase panel_texture
@@ -775,7 +780,7 @@
         'planet1.landed_ships.Add(0, New PointI(0, 0))
         
         'Fix movement
-        Add_Officer(0, New Officer(0, "Captian", Officer_location_enum.Planet, 0, pos, 1, 0.2, New Officer.sprite_list(character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head)))
+        Add_Officer(0, New Officer(0, "Captian", Officer_location_enum.Planet, 0, pos, 6, 0.2, New Officer.sprite_list(character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head)))
 
 
         Officer_List(0).Officer_Classes.Add(New Officer_Class(Class_List_Enum.Mage, 0, 1))
@@ -965,7 +970,7 @@
 
 
     Sub Add_Crew(ByVal Id As Integer, ByVal Crew As Crew)
-        'Crew_List.Add(Id, Crew)
+        Crew_List.Add(Id, Crew)
 
         Select Case Crew.region
             Case Is = Officer_location_enum.Ship
@@ -1110,7 +1115,7 @@
             For id = 0 To 500
                 If Not Crew_List.ContainsKey(id) Then Exit For
             Next
-            Add_Crew(id, New Crew(1, pos, 0, Officer_location_enum.Planet, 1, character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head, New crew_resource_type(10, 10)))
+            Add_Crew(id, New Crew(0, pos, 0, Officer_location_enum.Ship, 1, character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head, New crew_resource_type(10, 10)))
             'Ship_List(0).Crew_list.Add(id, New Crew(0, pos, 1, character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head, New crew_resource_type(10, 10)))
             'ship1.Crew_list.Add(0, New Crew(pos, 1, 100, character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head, New crew_resource_type(10, 10)))
             pressedkeys.Remove(Keys.Space)
@@ -1923,7 +1928,7 @@
 
 
         GSTFrequency += 1
-        If GSTFrequency = 1 Then
+        If GSTFrequency = 5 Then
             GSTFrequency = 0
             GST += 1
             If GST > 3000 Then GST = 0

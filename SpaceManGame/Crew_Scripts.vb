@@ -33,7 +33,7 @@
                     Case crew_script_enum.transport_dropoff_goods : crew_script_transport_dropoff_goods(Crew_List(key), key)
                     Case crew_script_enum.transport_pickup_money : crew_script_transport_pickup_money(Crew_List(key), key)
 
-
+                    Case crew_script_enum.transport_start : crew_script_transport_start_work(Crew_List(key), key)
 
 
                 End Select
@@ -292,6 +292,16 @@
     End Sub
 
 
+    Public Sub crew_script_transport_start_work(ByVal crew_member As Crew, ByVal id As Integer)
+        Dim command As Crew.Command_Trans_Start = DirectCast(crew_member.command_queue.First, Crew.Command_Trans_Start)
+        'Only programed for planets
+        Dim planet As Planet = Planet_List(crew_member.Location_ID)
+
+        If crew_member.RemoveWhenDone = False Then planet.Building_List(crew_member.WorkBuilding).Available_Transporters.Add(id) Else crew_member.RemoveWhenDone = False
+
+        crew_member.command_queue.First.status = script_status_enum.complete
+    End Sub
+
     Public Sub crew_script_transport_pickup_money(ByVal crew_member As Crew, ByVal id As Integer)
         Dim command As Crew.Command_Trans_Pickup = DirectCast(crew_member.command_queue.First, Crew.Command_Trans_Pickup)
         'Only programed for planets
@@ -333,14 +343,14 @@
 
                     If crew_member.Item_List.ContainsKey(Item_Enum.Refined_Crystal_Piece) Then
                         crew_member.Item_List(Item_Enum.Refined_Crystal_Piece) -= 10                    
-                    End If
-                    If crew_member.Item_List(Item_Enum.Refined_Crystal_Piece) <= 0 Then crew_member.Item_List.Remove(Item_Enum.Refined_Crystal_Piece) : command.status = script_status_enum.complete : Exit Sub
+                    End If                    
 
                     planet.Item_Point(ipoint.Key).Amount -= 1
                     For Each Bpoint In B.Item_Slots
                         If Bpoint.Value.Input_Slot = True AndAlso planet.Item_Point.ContainsKey(Bpoint.Key) AndAlso planet.Item_Point(Bpoint.Key).Item = Item_Enum.Refined_Crystal_Piece Then planet.Item_Point(Bpoint.Key).Amount += 10 : Exit For
                     Next
 
+                    If crew_member.Item_List(Item_Enum.Refined_Crystal_Piece) <= 0 Then crew_member.Item_List.Remove(Item_Enum.Refined_Crystal_Piece) : command.status = script_status_enum.complete : Exit Sub
 
                     If crew_member.Item_List.ContainsKey(command.Item) Then
                         crew_member.Item_List(command.Item) += 1
@@ -378,11 +388,8 @@
             Next
         End If
 
-        If Not crew_member.Item_List.ContainsKey(command.Item) Then
-            crew_member.command_queue.First.status = script_status_enum.complete
-            B.Available_Transporters.Add(id)
-            Exit Sub
-        End If
+        If Not crew_member.Item_List.ContainsKey(command.Item) Then crew_member.command_queue.First.status = script_status_enum.complete : Exit Sub
+
 
         For Each ipoint In B.Item_Slots
 
@@ -404,12 +411,9 @@
             If Dropped = True Then Exit For
         Next
 
-        If crew_member.Item_List(command.Item) <= 0 Then
-            crew_member.Item_List.Remove(command.Item)
-            crew_member.command_queue.First.status = script_status_enum.complete
-            B.Available_Transporters.Add(id)
-        End If
-        
+        If crew_member.Item_List(command.Item) <= 0 Then crew_member.Item_List.Remove(command.Item) : crew_member.command_queue.First.status = script_status_enum.complete
+
+
     End Sub
 
 #End Region

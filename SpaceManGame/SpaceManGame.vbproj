@@ -101,6 +101,7 @@
     <Compile Include="Crew_Scripts.vb" />
     <Compile Include="LoadSave.vb" />
     <Compile Include="MainMenu.vb" />
+    <Compile Include="Pathfind.vb" />
     <Compile Include="pathfinder.vb" />
     <Compile Include="Planet.vb" />
     <Compile Include="PlanetGenerator.vb" />

@@ -221,6 +221,7 @@
         'Pub
         pub_start
 
+        transport_start
         transport_pickup_money
         transport_buy_goods        
         transport_dropoff_goods
