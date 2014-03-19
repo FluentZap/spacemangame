@@ -34,81 +34,94 @@
                 P.Resource_Points.Add(po, False)
             End If
         Next
+        P.Resource_Points.Clear()
+        P.Resource_Points.Add(New PointI(1, 1), False)
 
         Create_Resource_Points()
 
-        'P.Resource_Points(New PointI(0, 0)) = True
-        Build_Mine(New PointI(0, 0))
-
         Build_AppartmentH(New PointI(32, 0))
-
-        'Build_Mine(New PointI(P.Resource_Points.First.Key.x * 32, P.Resource_Points.First.Key.y * 32))
         Build_PubH(New PointI(32, 16))
 
-        Build_RefineryH(New PointI(0, 32))
+        Dim CID As Integer
+        Dim BID As Integer = 2
+        For Each Point In P.Resource_Points
 
-        Build_FactoryH(New PointI(32, 32))
+            Build_Mine(New PointI(Point.Key.x * 32, Point.Key.y * 32))            
+            CID = AddTestWorkforce(BID, CID)
+            BID += 1
+
+            Build_RefineryH(New PointI(Point.Key.x * 32 + 32, Point.Key.y * 32))
+            CID = AddTestWorkforce(BID, CID)
+            BID += 1
+            Build_RefineryH(New PointI(Point.Key.x * 32 + 32, Point.Key.y * 32 + 16))
+            CID = AddTestWorkforce(BID, CID)
+            BID += 1
+
+            Build_FactoryH(New PointI(Point.Key.x * 32, Point.Key.y * 32 + 32))
+            CID = AddTestWorkforce(BID, CID)
+            BID += 1
+
+            Build_FactoryH(New PointI(Point.Key.x * 32, Point.Key.y * 32 + 48))
+            CID = AddTestWorkforce(BID, CID)
+            BID += 1
+
+
+        Next
+
+
+        'Build_Mine(New PointI(0, 0))
+
+        'Build_AppartmentH(New PointI(32, 0))
+
+        'Build_Mine(New PointI(P.Resource_Points.First.Key.x * 32, P.Resource_Points.First.Key.y * 32))
+
+
+
+
+        'Build_RefineryH(New PointI(0, 32))
+
+        'Build_FactoryH(New PointI(32, 32))
+
         'Create_City()
 
-        Add_Crew(0, New Crew(0, New PointD(0, 0), 0, Officer_location_enum.Planet, 10, character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head, New crew_resource_type(0, 0)))
-        P.crew_list(0).Worker_Type = Worker_Type_Enum.Worker
-        P.crew_list(0).HomeBuilding = 1
-        P.crew_list(0).HomeSpace = 0
-        P.crew_list(0).WorkBuilding = 0
-        P.crew_list(0).PubBuilding = 2
-        P.crew_list(0).WorkShift = Work_Shift_Enum.Mid
-
-
-        Add_Crew(1, New Crew(0, New PointD(0, 0), 0, Officer_location_enum.Planet, 10, character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head, New crew_resource_type(0, 0)))
-        P.crew_list(1).Worker_Type = Worker_Type_Enum.Worker
-        P.crew_list(1).HomeBuilding = 1
-        P.crew_list(1).HomeSpace = 1
-        P.crew_list(1).WorkBuilding = 3
-        P.crew_list(1).PubBuilding = 2
-        P.crew_list(1).WorkShift = Work_Shift_Enum.Mid
-
-
-
-        Add_Crew(2, New Crew(0, New PointD(0, 0), 0, Officer_location_enum.Planet, 10, character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head, New crew_resource_type(0, 0)))
-        P.crew_list(2).Worker_Type = Worker_Type_Enum.Worker
-        P.crew_list(2).HomeBuilding = 1
-        P.crew_list(2).HomeSpace = 2
-        P.crew_list(2).WorkBuilding = 4
-        P.crew_list(2).PubBuilding = 2
-        P.crew_list(2).WorkShift = Work_Shift_Enum.Mid
-
-
-
-        Add_Crew(3, New Crew(0, New PointD(0, 0), 0, Officer_location_enum.Planet, 3, character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head, New crew_resource_type(0, 0)))
-        P.crew_list(3).Worker_Type = Worker_Type_Enum.Transporter
-        P.crew_list(3).HomeBuilding = 1
-        P.crew_list(3).HomeSpace = 3
-        P.crew_list(3).WorkBuilding = 0
-        P.crew_list(3).PubBuilding = 2
-        P.crew_list(3).WorkShift = Work_Shift_Enum.Mid
-
-        P.Building_List(0).Available_Transporters.Add(3)
-
-        Add_Crew(4, New Crew(0, New PointD(0, 0), 0, Officer_location_enum.Planet, 3, character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head, New crew_resource_type(0, 0)))
-        P.crew_list(4).Worker_Type = Worker_Type_Enum.Transporter
-        P.crew_list(4).HomeBuilding = 1
-        P.crew_list(4).HomeSpace = 3
-        P.crew_list(4).WorkBuilding = 3
-        P.crew_list(4).PubBuilding = 2
-        P.crew_list(4).WorkShift = Work_Shift_Enum.Mid
-
-        P.Building_List(3).Available_Transporters.Add(4)
-
-        Add_Crew(5, New Crew(0, New PointD(0, 0), 0, Officer_location_enum.Planet, 3, character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head, New crew_resource_type(0, 0)))
-        P.crew_list(5).Worker_Type = Worker_Type_Enum.Transporter
-        P.crew_list(5).HomeBuilding = 1
-        P.crew_list(5).HomeSpace = 3
-        P.crew_list(5).WorkBuilding = 4
-        P.crew_list(5).PubBuilding = 2
-        P.crew_list(5).WorkShift = Work_Shift_Enum.Mid
-
-        P.Building_List(4).Available_Transporters.Add(5)
     End Sub
+
+    Function AddTestWorkforce(ByVal BID As Integer, ByVal CID As Integer) As Integer
+        QuickAddCrew(CID, Worker_Type_Enum.Worker, 0, 0, BID, 1, Work_Shift_Enum.Morning) : CID += 1
+        QuickAddCrew(CID, Worker_Type_Enum.Worker, 0, 0, BID, 1, Work_Shift_Enum.Morning) : CID += 1
+        QuickAddCrew(CID, Worker_Type_Enum.Worker, 0, 0, BID, 1, Work_Shift_Enum.Morning) : CID += 1
+        QuickAddCrew(CID, Worker_Type_Enum.Worker, 0, 0, BID, 1, Work_Shift_Enum.Morning) : CID += 1
+
+        QuickAddCrew(CID, Worker_Type_Enum.Worker, 0, 0, BID, 1, Work_Shift_Enum.Mid) : CID += 1
+        QuickAddCrew(CID, Worker_Type_Enum.Worker, 0, 0, BID, 1, Work_Shift_Enum.Mid) : CID += 1
+        QuickAddCrew(CID, Worker_Type_Enum.Worker, 0, 0, BID, 1, Work_Shift_Enum.Mid) : CID += 1
+        QuickAddCrew(CID, Worker_Type_Enum.Worker, 0, 0, BID, 1, Work_Shift_Enum.Mid) : CID += 1
+
+        QuickAddCrew(CID, Worker_Type_Enum.Worker, 0, 0, BID, 1, Work_Shift_Enum.Night) : CID += 1
+        QuickAddCrew(CID, Worker_Type_Enum.Worker, 0, 0, BID, 1, Work_Shift_Enum.Night) : CID += 1
+        QuickAddCrew(CID, Worker_Type_Enum.Worker, 0, 0, BID, 1, Work_Shift_Enum.Night) : CID += 1
+        QuickAddCrew(CID, Worker_Type_Enum.Worker, 0, 0, BID, 1, Work_Shift_Enum.Night) : CID += 1
+
+        QuickAddCrew(CID, Worker_Type_Enum.Transporter, 0, 0, BID, 1, Work_Shift_Enum.Morning) : CID += 1
+        QuickAddCrew(CID, Worker_Type_Enum.Transporter, 0, 0, BID, 1, Work_Shift_Enum.Mid) : CID += 1
+        QuickAddCrew(CID, Worker_Type_Enum.Transporter, 0, 0, BID, 1, Work_Shift_Enum.Night) : CID += 1
+        Return CID
+    End Function
+
+
+    Sub QuickAddCrew(ByVal ID As Integer, ByVal WorkerType As Worker_Type_Enum, ByVal HomeBuilding As Integer, ByVal HomeSpace As Integer, ByVal WorkBuilding As Integer, ByVal PubBuilding As Integer, ByVal WorkShift As Work_Shift_Enum)
+        Add_Crew(ID, New Crew(0, New PointD(0, 0), 0, Officer_location_enum.Planet, 10, character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head, New crew_resource_type(0, 0)))
+        P.crew_list(ID).Worker_Type = WorkerType
+        P.crew_list(ID).HomeBuilding = HomeBuilding
+        P.crew_list(ID).HomeSpace = HomeSpace
+        P.crew_list(ID).WorkBuilding = WorkBuilding
+        P.crew_list(ID).PubBuilding = PubBuilding
+        P.crew_list(ID).WorkShift = WorkShift
+    End Sub
+
+
+
+
 
 
     Sub Build_Mine(ByVal pos As PointI)
@@ -203,11 +216,11 @@
 
         For x = 4 To 27
             P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + x, pos.y + 2), New Item_Slots_Type(True))
-            P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + x, pos.y + 3), New Item_Slots_Type(False))            
+            P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + x, pos.y + 3), New Item_Slots_Type(False))
         Next
 
         P.Item_Point.Add(New PointI(pos.x + 4, pos.y + 2), New Item_Point_Type(100, Item_Enum.Crystal))
-        
+
         P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + 4, pos.y + 4), New Item_Slots_Type(True))
         P.Item_Point.Add(New PointI(pos.x + 4, pos.y + 4), New Item_Point_Type(2000, Item_Enum.Refined_Crystal_Piece))
 
@@ -310,12 +323,13 @@
         P.Building_List.Add(ID, New Planet_Building(0, New Rectangle(pos.x, pos.y, 32, 16), building_type_enum.Pub))
         P.Building_List(ID).BuildingRect.Add(0, New Rectangle(pos.x + 4, pos.y + 3, 24, 10))
 
+        For y = 5 To 13 Step 2
+            For x = 5 To 27 Step 2
 
-        P.Building_List(ID).access_point.Add(New PointI(pos.x + 5, pos.y + 9), New Building_Access_Point_Type(BAP_Type.Customer))
-        P.Building_List(ID).access_point.Add(New PointI(pos.x + 7, pos.y + 9), New Building_Access_Point_Type(BAP_Type.Customer))
-        P.Building_List(ID).access_point.Add(New PointI(pos.x + 9, pos.y + 9), New Building_Access_Point_Type(BAP_Type.Customer))
-        P.Building_List(ID).access_point.Add(New PointI(pos.x + 11, pos.y + 9), New Building_Access_Point_Type(BAP_Type.Customer))
-        P.Building_List(ID).access_point.Add(New PointI(pos.x + 13, pos.y + 9), New Building_Access_Point_Type(BAP_Type.Customer))
+                P.Building_List(ID).access_point.Add(New PointI(pos.x + x, pos.y + y), New Building_Access_Point_Type(BAP_Type.Customer))
+
+            Next
+        Next
 
     End Sub
 
