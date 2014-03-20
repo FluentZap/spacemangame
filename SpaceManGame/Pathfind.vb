@@ -109,7 +109,7 @@
                     Do Until ListNode Is Nothing
                         Path.AddFirst(ListNode.Pos)
                         ListNode = ListNode.Parent
-                    Loop
+                    Loop                    
                 End If
                 Return PFState.NotFinished
             End If
@@ -128,10 +128,12 @@
             Me.Start_Point = Start_Point
             Me.End_Point = End_Point            
             If Not (Tile_Map(End_Point.x, End_Point.y).walkable = walkable_type_enum.Door OrElse Tile_Map(End_Point.x, End_Point.y).walkable = walkable_type_enum.OpenDoor OrElse Tile_Map(End_Point.x, End_Point.y).walkable = walkable_type_enum.Walkable) Then Found_State = PFState.Imposable : Exit Sub
-            Do
-                Pathfind_Step()                
-            Loop Until Found_State <> PFState.NotFinished
-
+            'Do
+            'Pathfind_Step()
+            'Loop Until Found_State <> PFState.NotFinished
+            Path.Clear()
+            Path.AddFirst(End_Point)
+            Found_State = PFState.Found
             'Return Path
         End Sub
 
