@@ -400,10 +400,10 @@
         D3D_PP.BackBufferFormat = Format.X8R8G8B8
         D3D_PP.BackBufferWidth = screen_size.x
         D3D_PP.BackBufferHeight = screen_size.y
-        D3D_PP.Windowed = True
+        D3D_PP.Windowed = False
         D3D_PP.SwapEffect = SwapEffect.Discard
         D3D_PP.BackBufferCount = 1
-        D3D_PP.PresentationInterval = PresentInterval.Immediate
+        D3D_PP.PresentationInterval = PresentInterval.Default
         'Create D3D Device
         d3d_device = New Device(monitor, DeviceType.Hardware, MainForm.Handle, CreateFlags.MixedVertexProcessing, D3D_PP)
         'd3d_chain = New SwapChain(d3d_device, D3D_PP)

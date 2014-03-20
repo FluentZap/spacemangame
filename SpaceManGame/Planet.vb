@@ -11,6 +11,12 @@
     End Sub
 End Class
 
+
+Public Enum Send_work_List_Enum
+    Home
+    Work
+End Enum
+
 Public Class Planet
     Public orbits_planet As Boolean
     Public orbit_point As Integer
@@ -26,6 +32,9 @@ Public Class Planet
     Public Block_Map As HashSet(Of PointI) = New HashSet(Of PointI)
     Public Resource_Points As New Dictionary(Of PointI, Boolean)() 'Is true is resource point is taken
     Public Building_List As New Dictionary(Of Integer, Planet_Building)()
+
+
+    Public Send_List As New Dictionary(Of KeyValuePair(Of Integer, Crew), Send_work_List_Enum)()
 
 
     Public Item_Point As New Dictionary(Of PointI, Item_Point_Type)()
@@ -275,20 +284,20 @@ Public Class Planet
         Next
 
         'Convert Refined Crystal to Refined Crystal Peices
-        If Safe_Point.Amount < 1500 Then
-            For Each ipoint In Building.Value.Item_Slots
-                If Item_Point.ContainsKey(ipoint.Key) AndAlso Item_Point(ipoint.Key).Item = Item_Enum.Refined_Crystal Then
-                    For a = 1 To 10
-                        If Item_Point.ContainsKey(ipoint.Key) AndAlso Item_Point(ipoint.Key).Amount >= 1 Then
-                            Item_Point(ipoint.Key).Amount -= 1
-                            If Item_Point(ipoint.Key).Amount = 0 Then Item_Point.Remove(ipoint.Key)
-                            Safe_Point.Amount += 10
-                        End If
-                    Next a
-                    If Safe_Point.Amount >= 100 Then Exit For
-                End If
-            Next
-        End If
+        'If Safe_Point.Amount < 1500 Then
+        'For Each ipoint In Building.Value.Item_Slots
+        'If Item_Point.ContainsKey(ipoint.Key) AndAlso Item_Point(ipoint.Key).Item = Item_Enum.Refined_Crystal Then
+        'For a = 1 To 10
+        'If Item_Point.ContainsKey(ipoint.Key) AndAlso Item_Point(ipoint.Key).Amount >= 1 Then
+        'Item_Point(ipoint.Key).Amount -= 1
+        'If Item_Point(ipoint.Key).Amount = 0 Then Item_Point.Remove(ipoint.Key)
+        'Safe_Point.Amount += 10
+        'End If
+        'Next a
+        'If Safe_Point.Amount >= 100 Then Exit For
+        'End If
+        'Next
+        'End If
 
         'Pay workers/Remove resources
         For Each CrewID In Building.Value.Working_crew_list
@@ -515,207 +524,233 @@ Public Class Planet
 
 
             'Send to work
-            If GST = 800 Then
-                Send_Crew_ToWork(Work_Shift_Enum.Morning)
+            If GST = 800 Then                
+                For Each Crew In crew_list
+                    If Crew.Value.WorkBuilding > -1 AndAlso Crew.Value.WorkShift = Work_Shift_Enum.Morning Then
+                        Send_List.Add(Crew, Send_work_List_Enum.Work)
+                    End If
+                Next
             ElseIf GST = 1800 Then
-                Send_Crew_ToWork(Work_Shift_Enum.Mid)
+                For Each Crew In crew_list
+                    If Crew.Value.WorkBuilding > -1 AndAlso Crew.Value.WorkShift = Work_Shift_Enum.Mid Then
+                        Send_List.Add(Crew, Send_work_List_Enum.Work)
+                    End If
+                Next
             ElseIf GST = 2800 Then
-                Send_Crew_ToWork(Work_Shift_Enum.Night)
+                For Each Crew In crew_list
+                    If Crew.Value.WorkBuilding > -1 AndAlso Crew.Value.WorkShift = Work_Shift_Enum.Night Then
+                        Send_List.Add(Crew, Send_work_List_Enum.Work)
+                    End If
+                Next
             End If
-
-
 
             'Send crew home
             If GST = 1000 Then
-                Send_Crew_Home(Work_Shift_Enum.Night)
+                For Each Crew In crew_list
+                    If Crew.Value.WorkBuilding > -1 AndAlso Crew.Value.WorkShift = Work_Shift_Enum.Night Then
+                        Send_List.Add(Crew, Send_work_List_Enum.Home)
+                    End If
+                Next
             ElseIf GST = 2000 Then
-                Send_Crew_Home(Work_Shift_Enum.Morning)
+                For Each Crew In crew_list
+                    If Crew.Value.WorkBuilding > -1 AndAlso Crew.Value.WorkShift = Work_Shift_Enum.Morning Then
+                        Send_List.Add(Crew, Send_work_List_Enum.Home)
+                    End If
+                Next
             ElseIf GST = 3000 Then
-                Send_Crew_Home(Work_Shift_Enum.Mid)
+                For Each Crew In crew_list
+                    If Crew.Value.WorkBuilding > -1 AndAlso Crew.Value.WorkShift = Work_Shift_Enum.Mid Then
+                        Send_List.Add(Crew, Send_work_List_Enum.Home)
+                    End If
+                Next
             End If
 
 
         End If
+
+
+        If Send_List.Count > 0 Then
+
+            Select Case Send_List.First.Value
+
+                Case Is = Send_work_List_Enum.Work
+                    Send_Crew_ToWork(Send_List.First.Key)
+                    Send_List.Remove(Send_List.First.Key)
+
+                Case Is = Send_work_List_Enum.Home
+                    Send_Crew_Home(Send_List.First.Key)
+                    Send_List.Remove(Send_List.First.Key)
+
+            End Select
+
+        End If
+
     End Sub
 
 
-    Sub Send_Crew_ToWork(ByVal WorkShift As Work_Shift_Enum)
+    Sub Send_Crew_ToWork(ByVal Crew As KeyValuePair(Of Integer, Crew))
         Dim work_Point As PointI
         Dim Found_AP As Boolean = False
 
-        For Each Crew In crew_list
-            'Not already working/going to work
-            If Not Building_List(Crew.Value.WorkBuilding).Working_crew_list.Contains(Crew.Key) AndAlso Not Building_List(Crew.Value.WorkBuilding).Assigned_crew_list.Contains(Crew.Key) Then
-                If Crew.Value.WorkBuilding > -1 Then
+        'Not already working/going to work
+        If Not Building_List(Crew.Value.WorkBuilding).Working_crew_list.Contains(Crew.Key) AndAlso Not Building_List(Crew.Value.WorkBuilding).Assigned_crew_list.Contains(Crew.Key) Then
+            If Crew.Value.WorkBuilding > -1 Then
 
 
+                'Worker
+                If Crew.Value.Worker_Type = Worker_Type_Enum.Worker Then
+                    'Find AP in building
+                    For Each AP In Building_List(Crew.Value.WorkBuilding).access_point
+                        If AP.Value.Type = BAP_Type.Worker AndAlso AP.Value.NextUp = False Then
+                            work_Point = AP.Key
+                            Found_AP = True
+                            Exit For
+                        End If
+                    Next
+                    'If Open access point is found send crew to work
+                    If Found_AP = True Then
+                        Found_AP = False
+                        'Set NextUp to work to true
+                        Building_List(Crew.Value.WorkBuilding).access_point(work_Point).NextUp = True
+                        'Pathfind
 
-                    If Crew.Value.WorkShift = WorkShift Then
-                        'Worker
-                        If Crew.Value.Worker_Type = Worker_Type_Enum.Worker Then
-                            'Find AP in building
-                            For Each AP In Building_List(Crew.Value.WorkBuilding).access_point
-                                If AP.Value.Type = BAP_Type.Worker AndAlso AP.Value.NextUp = False Then
-                                    work_Point = AP.Key
-                                    Found_AP = True
-                                    Exit For
+                        'If Not tile_map(Crew.Value.find_tile.x, Crew.Value.find_tile.y).walkable = walkable_type_enum.Walkable Then Exit For
+
+                        Dim tile As PointI = Crew.Value.find_tile
+
+
+                        path_find.Standard_Pathfind(tile, work_Point)
+                        If path_find.Found_State = Pathfind.Pathfind.PFState.Found Then
+
+                            If Crew.Value.command_queue.Any Then
+                                Crew.Value.command_queue.Clear()
+                            End If
+                            Building_List(Crew.Value.WorkBuilding).Assigned_crew_list.Add(Crew.Key)
+                            Dim list As LinkedList(Of PointI)
+                            list = path_find.Path
+
+                            'Need to add wait for finish
+                            Crew.Value.command_queue.Clear()
+                            For Each dest In list
+                                If dest = work_Point Then
+                                    Crew.Value.command_queue.Enqueue(New Crew.Command_Try_Work(work_Point))
                                 End If
+                                Crew.Value.command_queue.Enqueue(New Crew.Command_move(New PointD(dest.x * 32, dest.y * 32)))
                             Next
-                            'If Open access point is found send crew to work
-                            If Found_AP = True Then
-                                Found_AP = False
-                                'Set NextUp to work to true
-                                Building_List(Crew.Value.WorkBuilding).access_point(work_Point).NextUp = True
-                                'Pathfind
-
-                                'If Not tile_map(Crew.Value.find_tile.x, Crew.Value.find_tile.y).walkable = walkable_type_enum.Walkable Then Exit For
-
-                                Dim tile As PointI = Crew.Value.find_tile
-
-
-                                path_find.Standard_Pathfind(tile, work_Point)
-                                If path_find.Found_State = Pathfind.Pathfind.PFState.Found Then
-
-                                    If Crew.Value.command_queue.Any Then
-                                        Crew.Value.command_queue.Clear()
-                                    End If
-                                    Building_List(Crew.Value.WorkBuilding).Assigned_crew_list.Add(Crew.Key)
-                                    Dim list As LinkedList(Of PointI)
-                                    list = path_find.Path
-
-                                    'Need to add wait for finish
-                                    Crew.Value.command_queue.Clear()
-                                    For Each dest In list
-                                        If dest = work_Point Then
-                                            Crew.Value.command_queue.Enqueue(New Crew.Command_Try_Work(work_Point))
-                                        End If
-                                        Crew.Value.command_queue.Enqueue(New Crew.Command_move(New PointD(dest.x * 32, dest.y * 32)))
-                                    Next
-                                    Crew.Value.command_queue.Enqueue(New Crew.Command_Start_Work(work_Point))
-                                End If
-
-                            End If
+                            Crew.Value.command_queue.Enqueue(New Crew.Command_Start_Work(work_Point))
                         End If
 
-
-
-
-
-
-                        If Crew.Value.Worker_Type = Worker_Type_Enum.Transporter Then
-
-                            Dim point As PointI = Building_List(Crew.Value.WorkBuilding).PickupPoint
-                            'If Not tile_map(Crew.Value.find_tile.x, Crew.Value.find_tile.y).walkable = walkable_type_enum.Walkable Then Exit For
-
-
-                            Dim tile As PointI = Crew.Value.find_tile
-
-                            path_find.Standard_Pathfind(tile, work_Point)
-
-                            If path_find.Found_State = Pathfind.Pathfind.PFState.Found Then
-                                Dim list As LinkedList(Of PointI)
-                                list = path_find.Path
-
-                                'Need to add wait for finish                                
-                                For Each dest In list
-                                    Crew.Value.command_queue.Enqueue(New Crew.Command_move(New PointD(dest.x * 32, dest.y * 32)))
-                                Next
-                                Crew.Value.command_queue.Enqueue(New Crew.Command_Trans_Start())
-
-
-                            End If
-                        End If
+                    End If
+                End If
 
 
 
 
 
 
+                If Crew.Value.Worker_Type = Worker_Type_Enum.Transporter Then
+
+                    Dim point As PointI = Building_List(Crew.Value.WorkBuilding).PickupPoint
+                    'If Not tile_map(Crew.Value.find_tile.x, Crew.Value.find_tile.y).walkable = walkable_type_enum.Walkable Then Exit For
+
+
+                    Dim tile As PointI = Crew.Value.find_tile
+
+                    path_find.Standard_Pathfind(tile, work_Point)
+
+                    If path_find.Found_State = Pathfind.Pathfind.PFState.Found Then
+                        Dim list As LinkedList(Of PointI)
+                        list = path_find.Path
+
+                        'Need to add wait for finish                                
+                        For Each dest In list
+                            Crew.Value.command_queue.Enqueue(New Crew.Command_move(New PointD(dest.x * 32, dest.y * 32)))
+                        Next
+                        Crew.Value.command_queue.Enqueue(New Crew.Command_Trans_Start())
 
 
                     End If
-
-
                 End If
+
+
             End If
-        Next
+        End If
 
     End Sub
 
 
-    Sub Send_Crew_Home(ByVal WorkShift As Work_Shift_Enum)
+    Sub Send_Crew_Home(ByVal crew As KeyValuePair(Of Integer, Crew))
         Dim Home_Point As PointI
         Dim Home_rect As Rectangle
 
-        For Each Crew In crew_list
-            If Crew.Value.HomeBuilding > -1 Then
-                If Crew.Value.WorkShift = WorkShift Then
-                    If Crew.Value.Worker_Type = Worker_Type_Enum.Worker Then
 
-                        Home_rect = Building_List(Crew.Value.HomeBuilding).BuildingRect(Crew.Value.HomeSpace)
-                        Home_Point.x = CInt(Home_rect.X + Home_rect.Width / 2)
-                        Home_Point.y = CInt(Home_rect.Y + Home_rect.Height / 2)
-                        'Find AP in building                    
-                        'Pathfind
+        If crew.Value.HomeBuilding > -1 Then
 
-                        If Not tile_map(Crew.Value.find_tile.x, Crew.Value.find_tile.y).walkable = walkable_type_enum.Walkable Then Exit For
-                        Dim tile As PointI = Crew.Value.find_tile
+            If crew.Value.Worker_Type = Worker_Type_Enum.Worker Then
 
-                        Crew.Value.command_queue.Clear()
-                        Dim End_Point As PointI
-                        End_Point = Send_Crew_Errands(Crew.Value, Crew.Key)
+                Home_rect = Building_List(crew.Value.HomeBuilding).BuildingRect(crew.Value.HomeSpace)
+                Home_Point.x = CInt(Home_rect.X + Home_rect.Width / 2)
+                Home_Point.y = CInt(Home_rect.Y + Home_rect.Height / 2)
+                'Find AP in building                    
+                'Pathfind
 
-                        
-                        path_find.Standard_Pathfind(End_Point, Home_Point)
-                        If path_find.Found_State = Pathfind.Pathfind.PFState.Found Then
-                            If Building_List(Crew.Value.WorkBuilding).Working_crew_list.Contains(Crew.Key) Then Building_List(Crew.Value.WorkBuilding).Working_crew_list.Remove(Crew.Key)
-                            If Building_List(Crew.Value.WorkBuilding).access_point.ContainsKey(tile) Then Building_List(Crew.Value.WorkBuilding).access_point(tile).Used = False
-                            Dim list As LinkedList(Of PointI)
-                            list = path_find.Path
+                If Not tile_map(crew.Value.find_tile.x, crew.Value.find_tile.y).walkable = walkable_type_enum.Walkable Then Exit Sub
+                Dim tile As PointI = crew.Value.find_tile
 
-                            'Need to add sleep and stuuuuf
+                crew.Value.command_queue.Clear()
+                Dim End_Point As PointI
+                End_Point = Send_Crew_Errands(crew.Value, crew.Key)
 
 
-                            For Each dest In list
-                                Crew.Value.command_queue.Enqueue(New Crew.Command_move(New PointD(dest.x * 32, dest.y * 32)))
-                            Next
-                        End If
-                    End If
+                path_find.Standard_Pathfind(End_Point, Home_Point)
+                If path_find.Found_State = Pathfind.Pathfind.PFState.Found Then
+                    If Building_List(crew.Value.WorkBuilding).Working_crew_list.Contains(crew.Key) Then Building_List(crew.Value.WorkBuilding).Working_crew_list.Remove(crew.Key)
+                    If Building_List(crew.Value.WorkBuilding).access_point.ContainsKey(tile) Then Building_List(crew.Value.WorkBuilding).access_point(tile).Used = False
+                    Dim list As LinkedList(Of PointI)
+                    list = path_find.Path
+
+                    'Need to add sleep and stuuuuf
 
 
-                    If Crew.Value.Worker_Type = Worker_Type_Enum.Transporter Then
-
-                        Home_rect = Building_List(Crew.Value.HomeBuilding).BuildingRect(Crew.Value.HomeSpace)
-                        Home_Point.x = CInt(Home_rect.X + Home_rect.Width / 2)
-                        Home_Point.y = CInt(Home_rect.Y + Home_rect.Height / 2)
-                        'Find AP in building                    
-                        'Pathfind
-                        Crew.Value.RemoveWhenDone = True
-                        'If Not tile_map(Crew.Value.find_tile.x, Crew.Value.find_tile.y).walkable = walkable_type_enum.Walkable Then Exit For
-
-
-
-                        Dim End_Point As PointI
-                        End_Point = Send_Crew_Errands(Crew.Value, Crew.Key)
-
-                        path_find.Standard_Pathfind(End_Point, Home_Point)
-                        If path_find.Found_State = Pathfind.Pathfind.PFState.Found Then
-                            Dim list As LinkedList(Of PointI)
-                            list = path_find.Path
-                            'Need to add sleep and stuuuuf
-
-                            For Each dest In list
-                                Crew.Value.command_queue.Enqueue(New Crew.Command_move(New PointD(dest.x * 32, dest.y * 32)))
-                            Next
-                        End If
-                    End If
-
-
-
-
+                    For Each dest In list
+                        crew.Value.command_queue.Enqueue(New Crew.Command_move(New PointD(dest.x * 32, dest.y * 32)))
+                    Next
                 End If
             End If
-        Next
+
+
+            If crew.Value.Worker_Type = Worker_Type_Enum.Transporter Then
+
+                Home_rect = Building_List(crew.Value.HomeBuilding).BuildingRect(crew.Value.HomeSpace)
+                Home_Point.x = CInt(Home_rect.X + Home_rect.Width / 2)
+                Home_Point.y = CInt(Home_rect.Y + Home_rect.Height / 2)
+                'Find AP in building                    
+                'Pathfind
+                crew.Value.RemoveWhenDone = True
+                'If Not tile_map(Crew.Value.find_tile.x, Crew.Value.find_tile.y).walkable = walkable_type_enum.Walkable Then Exit For
+
+
+
+                Dim End_Point As PointI
+                End_Point = Send_Crew_Errands(crew.Value, crew.Key)
+
+                path_find.Standard_Pathfind(End_Point, Home_Point)
+                If path_find.Found_State = Pathfind.Pathfind.PFState.Found Then
+                    Dim list As LinkedList(Of PointI)
+                    list = path_find.Path
+                    'Need to add sleep and stuuuuf
+
+                    For Each dest In list
+                        crew.Value.command_queue.Enqueue(New Crew.Command_move(New PointD(dest.x * 32, dest.y * 32)))
+                    Next
+                End If
+            End If
+
+
+
+
+        End If
+         
 
     End Sub
 
@@ -874,8 +909,8 @@ Public Class Planet
 
 
     Sub Load_Pathfinding()
-        'path_find = New Pathfind.Pathfind(tile_map, New Rectangle(0, 0, size.x, size.y))
-        path_find = New Pathfind.Pathfind(tile_map, New Rectangle(0, 0, size.x \ 4, size.y \ 4))
+        path_find = New Pathfind.Pathfind(tile_map, New Rectangle(0, 0, size.x, size.y))
+        'path_find = New Pathfind.Pathfind(tile_map, New Rectangle(0, 0, size.x \ 4, size.y \ 4))
 
 
     End Sub
@@ -977,22 +1012,32 @@ Public Class Planet
     Sub Detonate_Local_Projectile(ByVal Pro As Projectile)
         Dim contact_Point As PointI = New PointI(Pro.Location.intX \ 32, Pro.Location.intY \ 32)
         'tile_map(contact_Point.x, contact_Point.y).color = Color.Red
+        Dim remove_List As New List(Of Integer)()
 
-        For y = contact_Point.y - 2 To contact_Point.y + 2
-            For x = contact_Point.x - 2 To contact_Point.x + 2
+        For y = contact_Point.y - 4 To contact_Point.y + 4
+            For x = contact_Point.x - 4 To contact_Point.x + 4
                 If x >= 0 AndAlso x <= size.x AndAlso y >= 0 AndAlso y <= size.y Then
-                    'tile_map(x, y).color = Color.Red
+                    'tile_map(x, y).sprite = 0
 
                     For Each Crew In crew_list
                         If Crew.Value.find_tile = New PointI(x, y) Then
                             Crew.Value.Health.Damage_All_Limbs(3)
+                            If Crew.Value.Health.Torso = 0 Then remove_List.Add(Crew.Key)
                         End If
-
                     Next
-
                 End If
             Next
         Next
+
+        For Each Crew In remove_List            
+            crew_list.Remove(Crew)
+            For Each building In Building_List
+                If building.Value.Working_crew_list.Contains(Crew) Then building.Value.Working_crew_list.Remove(Crew)
+                If building.Value.Assigned_crew_list.Contains(Crew) Then building.Value.Assigned_crew_list.Remove(Crew)
+                If building.Value.Available_Transporters.Contains(Crew) Then building.Value.Available_Transporters.Remove(Crew)
+            Next
+        Next        
+        remove_List.Clear()
 
     End Sub
 

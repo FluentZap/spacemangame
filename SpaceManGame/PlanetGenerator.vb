@@ -35,7 +35,14 @@
             End If
         Next
         P.Resource_Points.Clear()
-        P.Resource_Points.Add(New PointI(1, 1), False)
+
+        For x = 0 To 14 Step 2
+            For y = 1 To 14 Step 2
+                P.Resource_Points.Add(New PointI(x, y), False)
+            Next
+        Next
+
+        'P.Resource_Points.Add(New PointI(2, 2), False)
 
         Create_Resource_Points()
 
@@ -46,18 +53,20 @@
         Dim BID As Integer = 2
         For Each Point In P.Resource_Points
 
-            Build_Mine(New PointI(Point.Key.x * 32, Point.Key.y * 32))            
+            Build_Mine(New PointI(Point.Key.x * 32, Point.Key.y * 32))
             CID = AddTestWorkforce(BID, CID)
             BID += 1
 
             Build_RefineryH(New PointI(Point.Key.x * 32 + 32, Point.Key.y * 32))
             CID = AddTestWorkforce(BID, CID)
             BID += 1
-            Build_RefineryH(New PointI(Point.Key.x * 32 + 32, Point.Key.y * 32 + 16))
+
+            Build_FactoryH(New PointI(Point.Key.x * 32 + 32, Point.Key.y * 32 + 16))
             CID = AddTestWorkforce(BID, CID)
             BID += 1
 
-            Build_FactoryH(New PointI(Point.Key.x * 32, Point.Key.y * 32 + 32))
+
+            Build_RefineryH(New PointI(Point.Key.x * 32, Point.Key.y * 32 + 32))
             CID = AddTestWorkforce(BID, CID)
             BID += 1
 
