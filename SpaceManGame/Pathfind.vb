@@ -28,7 +28,6 @@
         Public List As New Dictionary(Of Integer, List(Of PointI))()
 
 
-
         Sub New()
 
         End Sub
@@ -59,13 +58,11 @@
     End Class
 
 
-
-
     Class Pathfind
 
         Dim Tile_Map As Tile(,)
         Dim MapRect As Rectangle
-        Public Path As New LinkedList(Of PointI)()
+        Public Path As New LinkedList(Of PointI)()        
 
         Sub New(ByVal Map(,) As Tile, ByVal Rect As Rectangle)
             Tile_Map = Map
@@ -128,12 +125,12 @@
             Me.Start_Point = Start_Point
             Me.End_Point = End_Point            
             If Not (Tile_Map(End_Point.x, End_Point.y).walkable = walkable_type_enum.Door OrElse Tile_Map(End_Point.x, End_Point.y).walkable = walkable_type_enum.OpenDoor OrElse Tile_Map(End_Point.x, End_Point.y).walkable = walkable_type_enum.Walkable) Then Found_State = PFState.Imposable : Exit Sub
-            'Do
-            'Pathfind_Step()
-            'Loop Until Found_State <> PFState.NotFinished
-            Path.Clear()
-            Path.AddFirst(End_Point)
-            Found_State = PFState.Found
+            Do
+                Pathfind_Step()
+            Loop Until Found_State <> PFState.NotFinished
+            'Path.Clear()
+            'Path.AddFirst(End_Point)
+            'Found_State = PFState.Found
             'Return Path
         End Sub
 
