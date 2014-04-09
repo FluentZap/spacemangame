@@ -674,7 +674,7 @@ Public Class Ship
         End If
 
 
-
+        
         If orbiting > -1 Then
             Dim planetPos As PointD
             Dim planetPosNext As PointD

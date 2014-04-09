@@ -269,10 +269,7 @@
     Public current_selected_planet_view As Integer
 
 
-    Public Ship_List As New Dictionary(Of Integer, Ship)(500)
-    Public Planet_List As New Dictionary(Of Integer, Planet)(150)
-    Public Crew_List As New Dictionary(Of Integer, Crew)()
-    Public Officer_List As New Dictionary(Of Integer, Officer)()
+    
 
     Public u As Universe.Universe = New Universe.Universe
     Public Drag As Double = 0.02
@@ -400,7 +397,7 @@
         D3D_PP.BackBufferFormat = Format.X8R8G8B8
         D3D_PP.BackBufferWidth = screen_size.x
         D3D_PP.BackBufferHeight = screen_size.y
-        D3D_PP.Windowed = False
+        D3D_PP.Windowed = windowed
         D3D_PP.SwapEffect = SwapEffect.Discard
         D3D_PP.BackBufferCount = 1
         D3D_PP.PresentationInterval = PresentInterval.Default
@@ -662,7 +659,7 @@
 
 
     Sub change_to_view(ByVal view As current_view_enum)
-        Dim ship As Ship = Ship_List(Officer_List(current_player).Location_ID)
+        Dim ship As Ship = u.Ship_List(u.Officer_List(current_player).Location_ID)
 
         'If view = current_view_enum.ship_build Then
         'Build_ship = New Ship(-1,New PointD (0,0),ship_type_enum.steel 
@@ -702,11 +699,11 @@
     Sub check_near_planet(ByVal ship As Integer)
         Dim pos, planetpos As PointI
 
-        Dim shipcenter As PointD = Ship_List(ship).Get_Relative_Pos
+        Dim shipcenter As PointD = u.Ship_List(ship).Get_Relative_Pos
         'Dim shiprectPlanet As New Rectangle(Ship_List(ship).location.intX - 8192, Ship_List(ship).location.intY - 8192, 16384, 16384)
         'Dim shiprectMoon As New Rectangle(Ship_List(ship).location.intX - 4096, Ship_List(ship).location.intY - 4096, 8192, 8192)
 
-        Ship_List(ship).orbiting = -1
+        u.Ship_List(ship).orbiting = -1
         For Each planet In u.planets
 
             If planet.Value.orbits_planet = True Then
@@ -720,7 +717,7 @@
                 Dim distance As Double = Math.Sqrt(((shipcenter.x - pos.x) ^ 2) + ((shipcenter.y - pos.y) ^ 2))
                 If distance < planet.Value.size.x * 32 Then
                     Near_planet = planet.Key
-                    Ship_List(ship).orbiting = planet.Key
+                    u.Ship_List(ship).orbiting = planet.Key
                 End If
 
             Else
@@ -731,7 +728,7 @@
                 Dim distance As Double = Math.Sqrt(((shipcenter.x - pos.x) ^ 2) + ((shipcenter.y - pos.y) ^ 2))
                 If distance < planet.Value.size.x * 32 Then
                     Near_planet = planet.Key
-                    Ship_List(ship).orbiting = planet.Key
+                    u.Ship_List(ship).orbiting = planet.Key
                 End If                
 
             End If
@@ -761,18 +758,18 @@
 
         ship1.Refresh()
         ship1.Faction = 0
-        Ship_List.Add(0, ship1)
+        u.Ship_List.Add(0, ship1)
 
 
         Dim ship2 As Ship = load_ship_schematic()
         ship2.location = New PointD(0, -2000)
         ship2.Refresh()
-        Ship_List.Add(1, ship2)
+        u.Ship_List.Add(1, ship2)
 
 
 
-        Dim planet1 As Planet = New Planet(planet_type_enum.Desert, New PointI(512, 512), 0, 50000, False, 0.5)
-        Planet_List = u.planets
+        Dim planet1 As Planet = New Planet(0, planet_type_enum.Desert, New PointI(512, 512), 0, 50000, False, 0.5)
+        u.Planet_List = u.planets
         u.planets.Remove(0)
         u.planets.Add(0, planet1)
 
@@ -783,32 +780,32 @@
         Add_Officer(0, New Officer(0, "Captian", Officer_location_enum.Planet, 0, pos, 6, 0.2, New Officer.sprite_list(character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head)))
 
 
-        Officer_List(0).Officer_Classes.Add(New Officer_Class(Class_List_Enum.Mage, 0, 1))
-        Officer_List(0).Officer_Classes.Add(New Officer_Class(Class_List_Enum.SpellSword, 0, 1))
-        Officer_List(0).Officer_Classes.Add(New Officer_Class(Class_List_Enum.Shadow, 0, 1))
-        Officer_List(0).Officer_Classes.Add(New Officer_Class(Class_List_Enum.Thief, 0, 1))
-        Officer_List(0).Officer_Classes.Add(New Officer_Class(Class_List_Enum.Inventor, 0, 1))
-        Officer_List(0).Officer_Classes.Add(New Officer_Class(Class_List_Enum.PlaceHolder, 20, 10))
-        Officer_List(0).Officer_Classes.Add(New Officer_Class(Class_List_Enum.Eye_Of_The_Placeholder, 56, 1))
+        u.Officer_List(0).Officer_Classes.Add(New Officer_Class(Class_List_Enum.Mage, 0, 1))
+        u.Officer_List(0).Officer_Classes.Add(New Officer_Class(Class_List_Enum.Spellsword, 0, 1))
+        u.Officer_List(0).Officer_Classes.Add(New Officer_Class(Class_List_Enum.Shadow, 0, 1))
+        u.Officer_List(0).Officer_Classes.Add(New Officer_Class(Class_List_Enum.Thief, 0, 1))
+        u.Officer_List(0).Officer_Classes.Add(New Officer_Class(Class_List_Enum.Inventor, 0, 1))
+        u.Officer_List(0).Officer_Classes.Add(New Officer_Class(Class_List_Enum.PlaceHolder, 20, 10))
+        u.Officer_List(0).Officer_Classes.Add(New Officer_Class(Class_List_Enum.Eye_Of_The_Placeholder, 56, 1))
 
 
 
-        Officer_List(0).Current_Class = Class_List_Enum.Mage
+        u.Officer_List(0).Current_Class = Class_List_Enum.Mage
 
         Add_Officer(1, New Officer(0, "Skippy", Officer_location_enum.Ship, 0, pos, 1, 0.2, New Officer.sprite_list(0, 0)))
-        Officer_List(1).Current_Class = Class_List_Enum.Engineer
+        u.Officer_List(1).Current_Class = Class_List_Enum.Engineer
         Add_Officer(2, New Officer(0, "Perpa", Officer_location_enum.Ship, 0, pos, 1, 0.2, New Officer.sprite_list(0, 0)))
-        Officer_List(2).Current_Class = Class_List_Enum.Mage
+        u.Officer_List(2).Current_Class = Class_List_Enum.Mage
         Add_Officer(3, New Officer(0, "Surpa", Officer_location_enum.Ship, 0, pos, 1, 0.2, New Officer.sprite_list(0, 0)))
-        Officer_List(3).Current_Class = Class_List_Enum.Aviator
+        u.Officer_List(3).Current_Class = Class_List_Enum.Aviator
         Add_Officer(4, New Officer(0, "Kerpa", Officer_location_enum.Ship, 0, pos, 1, 0.2, New Officer.sprite_list(0, 0)))
-        Officer_List(4).Current_Class = Class_List_Enum.Scientist
+        u.Officer_List(4).Current_Class = Class_List_Enum.Scientist
         Add_Officer(5, New Officer(0, "Kilki", Officer_location_enum.Ship, 0, pos, 1, 0.2, New Officer.sprite_list(0, 0)))
-        Officer_List(5).Current_Class = Class_List_Enum.Security
+        u.Officer_List(5).Current_Class = Class_List_Enum.Security
         Add_Officer(6, New Officer(0, "Stan", Officer_location_enum.Ship, 0, pos, 1, 0.2, New Officer.sprite_list(0, 0)))
-        Officer_List(6).Current_Class = Class_List_Enum.Mage
+        u.Officer_List(6).Current_Class = Class_List_Enum.Mage
         Add_Officer(7, New Officer(0, "Vextorz", Officer_location_enum.Ship, 0, pos, 1, 0.2, New Officer.sprite_list(0, 0)))
-        Officer_List(7).Current_Class = Class_List_Enum.Aviator
+        u.Officer_List(7).Current_Class = Class_List_Enum.Aviator
         Player_Data.Officer_List.Add(1)
         Player_Data.Officer_List.Add(2)
         Player_Data.Officer_List.Add(3)
@@ -818,12 +815,12 @@
         Player_Data.Officer_List.Add(7)
 
 
-        Officer_List(0).sprite.Head_SpriteSet = character_sprite_set_enum.Human_Renagade_1
-        Officer_List(0).sprite.Torso_SpriteSet = character_sprite_set_enum.Human_Renagade_1
-        Officer_List(0).sprite.Left_Arm_SpriteSet = character_sprite_set_enum.Human_Renagade_1
-        Officer_List(0).sprite.Right_Arm_SpriteSet = character_sprite_set_enum.Human_Renagade_1
-        Officer_List(0).sprite.Left_Leg_SpriteSet = character_sprite_set_enum.Human_Renagade_1
-        Officer_List(0).sprite.Right_Leg_SpriteSet = character_sprite_set_enum.Human_Renagade_1
+        u.Officer_List(0).sprite.Head_SpriteSet = character_sprite_set_enum.Human_Renagade_1
+        u.Officer_List(0).sprite.Torso_SpriteSet = character_sprite_set_enum.Human_Renagade_1
+        u.Officer_List(0).sprite.Left_Arm_SpriteSet = character_sprite_set_enum.Human_Renagade_1
+        u.Officer_List(0).sprite.Right_Arm_SpriteSet = character_sprite_set_enum.Human_Renagade_1
+        u.Officer_List(0).sprite.Left_Leg_SpriteSet = character_sprite_set_enum.Human_Renagade_1
+        u.Officer_List(0).sprite.Right_Leg_SpriteSet = character_sprite_set_enum.Human_Renagade_1
 
 
         current_player = 0
@@ -849,7 +846,7 @@
         Do Until terminate
             'Get keys/mouse
             MainForm.getUI(pressedkeys, mouse_info)
-            Ship_List(1).angular_velocity = 0.001
+            u.Ship_List(1).angular_velocity = 0.001
             'Logic
             QueryPerformanceCounter(time_current)
             If Logic_Time >= 1 Then
@@ -860,20 +857,20 @@
                         test_ui()
                     Case Is = current_view_enum.personal
                         Personal_UI(1)
-                        For Each ship In Ship_List.Values
+                        For Each ship In u.Ship_List.Values
                             ship.DoEvents()
                         Next
                         'For Each Planet In Planet_List.Values
                         'Planet.DoEvents()
                         'Next
-                        Planet_List(0).DoEvents()
+                        u.Planet_List(0).DoEvents()
                         update_Planet_Movements()
                         check_near_planet(current_selected_ship_view)
 
 
                     Case Is = current_view_enum.ship_external
 
-                        For Each ship In Ship_List.Values
+                        For Each ship In u.Ship_List.Values
                             ship.DoEvents()
                         Next
                         External_UI()
@@ -883,7 +880,7 @@
                         Near_planet = 0
 
                     Case Is = current_view_enum.planet
-                        For Each ship In Ship_List.Values
+                        For Each ship In u.Ship_List.Values
                             run_crew_scrips(ship.Crew_list)
                             ship.Process_Devices()
                         Next
@@ -917,7 +914,7 @@
                     Case Is = current_view_enum.personal
                         render_personal(current_player)
                     Case Is = current_view_enum.ship_external
-                        render_ship_external_new(Ship_List.Item(current_selected_ship_view))
+                        render_ship_external_new(u.Ship_List.Item(current_selected_ship_view))
                     Case Is = current_view_enum.planet
                         render_planetoid(u.planets(current_selected_planet_view))
                     Case Is = current_view_enum.star_map
@@ -932,7 +929,8 @@
                 QueryPerformanceCounter(render_end)
                 render_duration = render_end - render_start
                 loops += 1
-                Logic_Time += Logic_Ratio
+                Logic_Time = Logic_Ratio
+                'Logic_Time += Logic_Ratio
 
             End If
             QueryPerformanceCounter(time_current)
@@ -957,26 +955,26 @@
     End Sub
 
     Sub Add_Officer(ByVal Id As Integer, ByVal Officer As Officer)
-        Officer_List.Add(Id, Officer)
+        u.Officer_List.Add(Id, Officer)
 
         Select Case Officer.region
             Case Is = Officer_location_enum.Ship
-                Ship_List(Officer.Location_ID).Officer_List.Add(Id, Officer)
+                u.Ship_List(Officer.Location_ID).Officer_List.Add(Id, Officer)
             Case Is = Officer_location_enum.Planet
-                Planet_List(Officer.Location_ID).officer_list.Add(Id, Officer)
+                u.Planet_List(Officer.Location_ID).officer_list.Add(Id, Officer)
         End Select
 
     End Sub
 
 
     Sub Add_Crew(ByVal Id As Integer, ByVal Crew As Crew)
-        Crew_List.Add(Id, Crew)
+        u.Crew_List.Add(Id, Crew)
 
         Select Case Crew.region
             Case Is = Officer_location_enum.Ship
-                Ship_List(Crew.Location_ID).Crew_list.Add(Id, Crew)
+                u.Ship_List(Crew.Location_ID).Crew_list.Add(Id, Crew)
             Case Is = Officer_location_enum.Planet
-                Planet_List(Crew.Location_ID).Crew_List.Add(Id, Crew)
+                u.Planet_List(Crew.Location_ID).crew_list.Add(Id, Crew)
         End Select
 
     End Sub
@@ -1005,7 +1003,7 @@
 
 
 
-            For Each ship In Ship_List
+            For Each ship In u.Ship_List
                 If ship.Key > 0 Then
                     Dim BoxSize As Integer
                     BoxSize = CInt(Math.Sqrt(ship.Value.GetShipSize.x ^ 2 + ship.Value.GetShipSize.y ^ 2))
@@ -1070,13 +1068,13 @@
     Sub Activate_Ability(ByVal player As Integer, ByVal Ability As Ability_List_Enum)
         Select Case Ability
             Case Is = Ability_List_Enum.Mage__Fireball
-                Dim start_Point As PointD = Officer_List(player).GetLocationD
+                Dim start_Point As PointD = u.Officer_List(player).GetLocationD
                 Dim Vector_Velocity As PointD
                 Dim Rotation As Double
                 Dim velocity As Double = 5
                 start_Point.x += 15 : start_Point.y += 15
 
-                Select Case Officer_List(player).input_flages.Facing
+                Select Case u.Officer_List(player).input_flages.Facing
                     Case Is = Move_Direction.Up
                         Vector_Velocity = New PointD(0, -1 * velocity) : Rotation = 0
                     Case Is = Move_Direction.Down
@@ -1086,12 +1084,12 @@
                     Case Is = Move_Direction.Right
                         Vector_Velocity = New PointD(1 * velocity, 0) : Rotation = PI * 0.5
                 End Select
-                Select Case Officer_List(player).region
+                Select Case u.Officer_List(player).region
                     Case Is = Officer_location_enum.Planet
-                        Planet_List(Officer_List(player).Location_ID).Projectiles.Add(New Projectile(start_Point, Vector_Velocity, Rotation, 100))
+                        u.Planet_List(u.Officer_List(player).Location_ID).Projectiles.Add(New Projectile(start_Point, Vector_Velocity, Rotation, 100))
                     Case Is = Officer_location_enum.Ship
-                        Ship_List(Officer_List(player).Location_ID).Projectiles.Add(New Projectile(start_Point, Vector_Velocity, Rotation, 500))
-                    Case Is = Officer_location_enum.Enemy_Ship                        
+                        u.Ship_List(u.Officer_List(player).Location_ID).Projectiles.Add(New Projectile(start_Point, Vector_Velocity, Rotation, 500))
+                    Case Is = Officer_location_enum.Enemy_Ship
                 End Select
 
 
@@ -1113,7 +1111,7 @@
             Dim pos As New PointD(16 * 32, 16 * 32)
             Dim id As Integer
             For id = 0 To 500
-                If Not Crew_List.ContainsKey(id) Then Exit For
+                If Not u.Crew_List.ContainsKey(id) Then Exit For
             Next
             Add_Crew(id, New Crew(0, pos, 0, Officer_location_enum.Ship, 1, character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head, New crew_resource_type(10, 10)))
             'Ship_List(0).Crew_list.Add(id, New Crew(0, pos, 1, character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head, New crew_resource_type(10, 10)))
@@ -1129,7 +1127,7 @@
 
 
         If pressedkeys.Contains(Keys.G) Then
-            If Officer_List(current_player).Health.Torso > 0 Then Officer_List(current_player).Health.Torso -= CByte(1)
+            If u.Officer_List(current_player).Health.Torso > 0 Then u.Officer_List(current_player).Health.Torso -= CByte(1)
             pressedkeys.Remove(Keys.G)
         End If
 
@@ -1150,7 +1148,7 @@
         'If (pressedkeys.Contains(Keys.S) AndAlso pressedkeys.Contains(Keys.A)) OrElse (pressedkeys.Contains(Keys.S) AndAlso pressedkeys.Contains(Keys.D)) Then amount = Convert.ToSingle(amount * DIAGONAL_SPEED_MODIFIER)
 
 
-        Dim Input_flage As Officer.officer_input_flages = Officer_List(current_player).input_flages
+        Dim Input_flage As Officer.officer_input_flages = u.Officer_List(current_player).input_flages
         Input_flage.walking = False
         Input_flage.MoveX = Move_Direction.None
         Input_flage.MoveY = Move_Direction.None
@@ -1169,27 +1167,27 @@
 
 
 
-        If Officer_List(current_player).region = Officer_location_enum.Ship Then
+        If u.Officer_List(current_player).region = Officer_location_enum.Ship Then
 
-            view_location_personal.x = Ship_List(current_selected_ship_view).GetOfficer.Item(0).GetLocationD.x + 16 - ((screen_size.x / 2) / personal_zoom)
-            view_location_personal.y = Ship_List(current_selected_ship_view).GetOfficer.Item(0).GetLocationD.y + 16 - ((screen_size.y / 2) / personal_zoom)
+            view_location_personal.x = u.Ship_List(current_selected_ship_view).GetOfficer.Item(0).GetLocationD.x + 16 - ((screen_size.x / 2) / personal_zoom)
+            view_location_personal.y = u.Ship_List(current_selected_ship_view).GetOfficer.Item(0).GetLocationD.y + 16 - ((screen_size.y / 2) / personal_zoom)
 
 
             If view_location_personal.x < -(screen_size.x / 2) Then view_location_personal.x = -(screen_size.x \ 2)
             'If view_location_personal.x > Ship_List.Item(current_selected_ship_view).GetShipSize.x * 32 * personal_zoom - screen_size.x / 2 Then view_location_personal.x = CInt(Ship_List.Item(current_selected_ship_view).GetShipSize.x * 32 * personal_zoom) - screen_size.x / 2
 
             If view_location_personal.y < -(screen_size.y / 2) Then view_location_personal.y = -(screen_size.y \ 2)
-            If view_location_personal.y > Ship_List.Item(current_selected_ship_view).GetShipSize.y * 32 * personal_zoom - screen_size.y / 2 Then view_location_personal.y = CInt(Ship_List.Item(current_selected_ship_view).GetShipSize.y * 32 * personal_zoom) - screen_size.y / 2
+            If view_location_personal.y > u.Ship_List.Item(current_selected_ship_view).GetShipSize.y * 32 * personal_zoom - screen_size.y / 2 Then view_location_personal.y = CInt(u.Ship_List.Item(current_selected_ship_view).GetShipSize.y * 32 * personal_zoom) - screen_size.y / 2
 
             Mouse_Target = -1
-            For Each Crew In Ship_List(current_selected_ship_view).Crew_list
+            For Each Crew In u.Ship_List(current_selected_ship_view).Crew_list
                 Dim adj_mouse As PointI = New PointI(mouse_info.position.x / personal_zoom + view_location_personal.x, mouse_info.position.y / personal_zoom + view_location_personal.y)
                 If Crew.Value.find_rect.Contains(adj_mouse.ToPoint) Then Mouse_Target = Crew.Key
             Next
 
         End If
 
-        If Officer_List(current_player).region = Officer_location_enum.Planet Then
+        If u.Officer_List(current_player).region = Officer_location_enum.Planet Then
             'have to be separate
 
             'If pressedkeys.Contains(Keys.W) Then Planet_List(Officer_List(current_player).Location_ID).MoveOfficer(0, New PointD(0, -amount * rate))
@@ -1208,7 +1206,7 @@
             view_location_personal_Last = view_location_personal
 
             Mouse_Target = -1
-            For Each Crew In Planet_List(current_selected_planet_view).crew_list
+            For Each Crew In u.Planet_List(current_selected_planet_view).crew_list
                 Dim adj_mouse As PointI = New PointI(mouse_info.position.x / personal_zoom + view_location_personal.x, mouse_info.position.y / personal_zoom + view_location_personal.y)
                 If Crew.Value.find_rect.Contains(adj_mouse.ToPoint) Then Mouse_Target = Crew.Key
             Next
@@ -1239,8 +1237,8 @@
             Dim selection As PointI
             selection.x = Convert.ToInt32(view_location_internal.x + mouse_info.position.x / internal_zoom) \ 32
             selection.y = Convert.ToInt32(view_location_internal.y + mouse_info.position.y / internal_zoom) \ 32
-            If selection.x >= 0 AndAlso selection.x <= Ship_List(0).shipsize.x AndAlso selection.y >= 0 AndAlso selection.y <= Ship_List(0).shipsize.y Then
-                Ship_List(0).SetTile(selection, New Ship_tile(0, tile_type_enum.empty, 0, 0, 0, walkable_type_enum.Impassable))
+            If selection.x >= 0 AndAlso selection.x <= u.Ship_List(0).shipsize.x AndAlso selection.y >= 0 AndAlso selection.y <= u.Ship_List(0).shipsize.y Then
+                u.Ship_List(0).SetTile(selection, New Ship_tile(0, tile_type_enum.empty, 0, 0, 0, walkable_type_enum.Impassable))
             End If
         End If
 
@@ -1250,29 +1248,29 @@
             right_click_location.x = Convert.ToInt32(view_location_internal.x + right_click_location.x / internal_zoom) \ 32
             right_click_location.y = Convert.ToInt32(view_location_internal.y + right_click_location.y / internal_zoom) \ 32
 
-            If Ship_List(0).Crew_list(0).command_queue.Any Then
-                Ship_List(0).Crew_list(0).command_queue.Clear()
+            If u.Ship_List(0).Crew_list(0).command_queue.Any Then
+                u.Ship_List(0).Crew_list(0).command_queue.Clear()
             End If
 
             Dim pf As New A_star
 
-            pf.set_map(Ship_List(0).tile_map, Ship_List(0).shipsize)
+            pf.set_map(u.Ship_List(0).tile_map, u.Ship_List(0).shipsize)
 
-            pf.set_start_end(Ship_List(0).Crew_list(0).find_tile, New PointI(right_click_location.x, right_click_location.y))
+            pf.set_start_end(u.Ship_List(0).Crew_list(0).find_tile, New PointI(right_click_location.x, right_click_location.y))
             pf.find_path()
             If pf.get_status = pf_status.path_found Then
                 Dim list As LinkedList(Of PointI)
                 list = pf.get_path()
-                Ship_List(0).Crew_list(0).speed = 4
+                u.Ship_List(0).Crew_list(0).speed = 4
                 For Each location In list
-                    Ship_List(0).Crew_list(0).command_queue.Enqueue(New Crew.Command_move(New PointD(location.x * 32, location.y * 32)))
+                    u.Ship_List(0).Crew_list(0).command_queue.Enqueue(New Crew.Command_move(New PointD(location.x * 32, location.y * 32)))
                 Next
             End If
 
 
         End If
 
-        If pressedkeys.Contains(Keys.Add) Then Ship_List(0).ambient__light = Color.FromArgb(Ship_List(0).ambient__light.ToArgb - Color.FromArgb(1, 1, 1, 1).ToArgb)
+        If pressedkeys.Contains(Keys.Add) Then u.Ship_List(0).ambient__light = Color.FromArgb(u.Ship_List(0).ambient__light.ToArgb - Color.FromArgb(1, 1, 1, 1).ToArgb)
 
         If pressedkeys.Contains(Keys.Z) Then internal_zoom = internal_zoom + 1 : pressedkeys.Remove(Keys.Z)
         If pressedkeys.Contains(Keys.X) Then internal_zoom = internal_zoom - 1 : pressedkeys.Remove(Keys.X)
@@ -1286,17 +1284,17 @@
 
 
         'have to be separate
-        If pressedkeys.Contains(Keys.W) Then Ship_List(current_selected_ship_view).MoveOfficer(0, New PointD(0, -amount))
-        If pressedkeys.Contains(Keys.S) Then Ship_List(current_selected_ship_view).MoveOfficer(0, New PointD(0, amount))
-        If pressedkeys.Contains(Keys.A) Then Ship_List(current_selected_ship_view).MoveOfficer(0, New PointD(-amount, 0))
-        If pressedkeys.Contains(Keys.D) Then Ship_List(current_selected_ship_view).MoveOfficer(0, New PointD(amount, 0))
+        If pressedkeys.Contains(Keys.W) Then u.Ship_List(current_selected_ship_view).MoveOfficer(0, New PointD(0, -amount))
+        If pressedkeys.Contains(Keys.S) Then u.Ship_List(current_selected_ship_view).MoveOfficer(0, New PointD(0, amount))
+        If pressedkeys.Contains(Keys.A) Then u.Ship_List(current_selected_ship_view).MoveOfficer(0, New PointD(-amount, 0))
+        If pressedkeys.Contains(Keys.D) Then u.Ship_List(current_selected_ship_view).MoveOfficer(0, New PointD(amount, 0))
 
         'lock screen
         'current_view_location_internal.x = Convert.ToInt32(Ships(current_selected_ship_view).GetOfficer.Item(0).GetLocation.x + (screen_size.x / 2) + 16)
         'current_view_location_internal.y = Convert.ToInt32(Ships(current_selected_ship_view).GetOfficer.Item(0).GetLocation.y + (screen_size.y / 2) + 16)
 
-        view_location_internal.x = Convert.ToInt32(Ship_List(current_selected_ship_view).GetOfficer.Item(0).GetLocation.x - (screen_size.x / 2 / internal_zoom)) + 16
-        view_location_internal.y = Convert.ToInt32(Ship_List(current_selected_ship_view).GetOfficer.Item(0).GetLocation.y - (screen_size.y / 2 / internal_zoom)) + 16
+        view_location_internal.x = Convert.ToInt32(u.Ship_List(current_selected_ship_view).GetOfficer.Item(0).GetLocation.x - (screen_size.x / 2 / internal_zoom)) + 16
+        view_location_internal.y = Convert.ToInt32(u.Ship_List(current_selected_ship_view).GetOfficer.Item(0).GetLocation.y - (screen_size.y / 2 / internal_zoom)) + 16
 
 
 
@@ -1308,10 +1306,10 @@
 
 
         If view_location_internal.x < -(screen_size.x / 2) Then view_location_internal.x = Convert.ToInt32(-(screen_size.x / 2))
-        If view_location_internal.x > Ship_List.Item(current_selected_ship_view).GetShipSize.x * 32 * internal_zoom - screen_size.x / 2 Then view_location_internal.x = Convert.ToInt32(Ship_List.Item(current_selected_ship_view).GetShipSize.x * 32 * internal_zoom - screen_size.x / 2)
+        If view_location_internal.x > u.Ship_List.Item(current_selected_ship_view).GetShipSize.x * 32 * internal_zoom - screen_size.x / 2 Then view_location_internal.x = Convert.ToInt32(u.Ship_List.Item(current_selected_ship_view).GetShipSize.x * 32 * internal_zoom - screen_size.x / 2)
 
         If view_location_internal.y < -(screen_size.y / 2) Then view_location_internal.y = Convert.ToInt32(-(screen_size.y / 2))
-        If view_location_internal.y > Ship_List.Item(current_selected_ship_view).GetShipSize.y * 32 * internal_zoom - screen_size.y / 2 Then view_location_internal.y = Convert.ToInt32(Ship_List.Item(current_selected_ship_view).GetShipSize.y * 32 * internal_zoom - screen_size.y / 2)
+        If view_location_internal.y > u.Ship_List.Item(current_selected_ship_view).GetShipSize.y * 32 * internal_zoom - screen_size.y / 2 Then view_location_internal.y = Convert.ToInt32(u.Ship_List.Item(current_selected_ship_view).GetShipSize.y * 32 * internal_zoom - screen_size.y / 2)
 
 
         If pressedkeys.Contains(Keys.Tab) Then current_view = current_view_enum.ship_external : shipexternal_redraw = False : pressedkeys.Remove(Keys.Tab)
@@ -1327,7 +1325,7 @@
         Dim left_release_point As PointI = Nothing
         MainForm.getUI(pressedkeys, mouse_info)
         Dim choice As Integer = -1
-        Dim ship As Ship = Ship_List(current_selected_ship_view)
+        Dim ship As Ship = u.Ship_List(current_selected_ship_view)
 
         If mouse_info.get_left_click(left_down_point, left_release_point) Then
             mouse_click = True
@@ -1394,7 +1392,7 @@
         'Dim dest_point, dest_release_point As PointI
 
         If mouse_info.right_down = True Then
-            Ship_List(current_selected_ship_view).NavControl = True
+            u.Ship_List(current_selected_ship_view).NavControl = True
             Dim delta As PointD
             delta.x = screen_size.x / 2 - mouse_info.position.x
             delta.y = screen_size.y / 2 - mouse_info.position.y
@@ -1402,10 +1400,10 @@
             If rot < 0 Then rot += PI * 2
             'If rot < -PI Then rot += PI * 2
             'Ships(current_selected_ship_view).target_rotation = rot
-            Ship_List(current_selected_ship_view).angular_velocity = 0
-            Ship_List(current_selected_ship_view).rotation = 0
+            u.Ship_List(current_selected_ship_view).angular_velocity = 0
+            u.Ship_List(current_selected_ship_view).rotation = 0
             rot = PI / 2
-            Ship_List(current_selected_ship_view).SetFullTurn(rot)
+            u.Ship_List(current_selected_ship_view).SetFullTurn(rot)
             mouse_info.right_down = False
         End If
 
@@ -1425,60 +1423,60 @@
 
         Dim percent As Double = 0.01
 
-        If Ship_List(current_selected_ship_view).NavControl = False Then
+        If u.Ship_List(current_selected_ship_view).NavControl = False Then
 
             If pressedkeys.Contains(Keys.ShiftKey) Then percent = -0.01
 
             If pressedkeys.Contains(Keys.Q) Then
-                For Each Device In Ship_List(current_selected_ship_view).Engine_Coltrol_Group(Direction_Enum.Right)
+                For Each Device In u.Ship_List(current_selected_ship_view).Engine_Coltrol_Group(Direction_Enum.Right)
                     'Device.Value.
                     'If Ship_List(current_selected_ship_view).device_list(Device.Key).type = device_type_enum.thruster Then
-                    Ship_List(current_selected_ship_view).Set_Engine_Throttle(Device.Key, percent, True)
+                    u.Ship_List(current_selected_ship_view).Set_Engine_Throttle(Device.Key, percent, True)
                     'End If
                 Next
             End If
 
             If pressedkeys.Contains(Keys.E) Then
-                For Each Device In Ship_List(current_selected_ship_view).Engine_Coltrol_Group(Direction_Enum.Left)
+                For Each Device In u.Ship_List(current_selected_ship_view).Engine_Coltrol_Group(Direction_Enum.Left)
                     'If Ship_List(current_selected_ship_view).device_list(Device.Key).type = device_type_enum.thruster Then
-                    Ship_List(current_selected_ship_view).Set_Engine_Throttle(Device.Key, percent, True)
+                    u.Ship_List(current_selected_ship_view).Set_Engine_Throttle(Device.Key, percent, True)
                     'End If
                 Next
             End If
 
 
             If pressedkeys.Contains(Keys.W) Then percent = 1 Else percent = 0
-            For Each Device In Ship_List(current_selected_ship_view).Engine_Coltrol_Group(Direction_Enum.Bottom)
-                Ship_List(current_selected_ship_view).Set_Engine_Throttle(Device.Key, percent)
+            For Each Device In u.Ship_List(current_selected_ship_view).Engine_Coltrol_Group(Direction_Enum.Bottom)
+                u.Ship_List(current_selected_ship_view).Set_Engine_Throttle(Device.Key, percent)
             Next
 
 
             If pressedkeys.Contains(Keys.S) Then percent = 1 Else percent = 0
-            For Each Device In Ship_List(current_selected_ship_view).Engine_Coltrol_Group(Direction_Enum.Top)
-                Ship_List(current_selected_ship_view).Set_Engine_Throttle(Device.Key, percent)
+            For Each Device In u.Ship_List(current_selected_ship_view).Engine_Coltrol_Group(Direction_Enum.Top)
+                u.Ship_List(current_selected_ship_view).Set_Engine_Throttle(Device.Key, percent)
             Next
 
 
             If pressedkeys.Contains(Keys.A) Then percent = 1 Else percent = 0
-            For Each Device In Ship_List(current_selected_ship_view).Engine_Coltrol_Group(Direction_Enum.RotateL)
-                If Ship_List(current_selected_ship_view).device_list(Device.Key).type = device_type_enum.thruster Then
-                    Ship_List(current_selected_ship_view).Set_Engine_Throttle(Device.Key, percent)
+            For Each Device In u.Ship_List(current_selected_ship_view).Engine_Coltrol_Group(Direction_Enum.RotateL)
+                If u.Ship_List(current_selected_ship_view).device_list(Device.Key).type = device_type_enum.thruster Then
+                    u.Ship_List(current_selected_ship_view).Set_Engine_Throttle(Device.Key, percent)
                 End If
             Next
 
 
             If pressedkeys.Contains(Keys.D) Then percent = 1 Else percent = 0
-            For Each Device In Ship_List(current_selected_ship_view).Engine_Coltrol_Group(Direction_Enum.RotateR)
-                If Ship_List(current_selected_ship_view).device_list(Device.Key).type = device_type_enum.thruster Then
-                    Ship_List(current_selected_ship_view).Set_Engine_Throttle(Device.Key, percent)
+            For Each Device In u.Ship_List(current_selected_ship_view).Engine_Coltrol_Group(Direction_Enum.RotateR)
+                If u.Ship_List(current_selected_ship_view).device_list(Device.Key).type = device_type_enum.thruster Then
+                    u.Ship_List(current_selected_ship_view).Set_Engine_Throttle(Device.Key, percent)
                 End If
             Next
 
 
             If pressedkeys.Contains(Keys.X) Then
-                For Each group In Ship_List(current_selected_ship_view).Engine_Coltrol_Group
+                For Each group In u.Ship_List(current_selected_ship_view).Engine_Coltrol_Group
                     For Each Device In group.Value
-                        Ship_List(current_selected_ship_view).Set_Engine_Throttle(Device.Key, 0)
+                        u.Ship_List(current_selected_ship_view).Set_Engine_Throttle(Device.Key, 0)
                     Next
                 Next
             End If
@@ -1534,7 +1532,7 @@
 
     Sub Weapon_Control_UI()
 
-        Dim ship As Ship = Ship_List(Officer_List(current_player).Location_ID)
+        Dim ship As Ship = u.Ship_List(u.Officer_List(current_player).Location_ID)
         Dim mouse_info As New MainForm.mouse_info_type
         Dim mouse_click As Boolean
         Dim left_down_point As PointI = Nothing
@@ -1565,9 +1563,9 @@
             Case Is = External_Weapon_Control_Enums.New_Control_Group
                 Dim id As Integer
                 For id = 0 To 255
-                    If Not Ship_List(current_selected_ship_view).Weapon_control_groups.ContainsKey(id) Then Exit For
+                    If Not u.Ship_List(current_selected_ship_view).Weapon_control_groups.ContainsKey(id) Then Exit For
                 Next
-                Ship_List(current_selected_ship_view).Weapon_control_groups.Add(id, New Weapon_control_group("Group 1"))
+                u.Ship_List(current_selected_ship_view).Weapon_control_groups.Add(id, New Weapon_control_group("Group 1"))
                 Weapon_Control__Reload_Menu = True
 
             Case 1000 To 1999
@@ -1707,41 +1705,41 @@
                 If PLV__Officer_Scroll < Player_Data.Officer_List.Count - 5 Then PLV__Officer_Scroll += 1
             Case Is = Personal_level_enums.Officer_1
                 PLV__Selected_Officer = PLV__Officer_Scroll
-                PLV__Selected_Class = Officer_List(PLV__Selected_Officer).Current_Class
-                Officer_List(PLV__Selected_Officer).Recalculate_Abilities_Buffs()
+                PLV__Selected_Class = u.Officer_List(PLV__Selected_Officer).Current_Class
+                u.Officer_List(PLV__Selected_Officer).Recalculate_Abilities_Buffs()
             Case Is = Personal_level_enums.Officer_2
                 PLV__Selected_Officer = PLV__Officer_Scroll + 1
-                PLV__Selected_Class = Officer_List(PLV__Selected_Officer).Current_Class
-                Officer_List(PLV__Selected_Officer).Recalculate_Abilities_Buffs()
+                PLV__Selected_Class = u.Officer_List(PLV__Selected_Officer).Current_Class
+                u.Officer_List(PLV__Selected_Officer).Recalculate_Abilities_Buffs()
             Case Is = Personal_level_enums.Officer_3
                 PLV__Selected_Officer = PLV__Officer_Scroll + 2
-                PLV__Selected_Class = Officer_List(PLV__Selected_Officer).Current_Class
-                Officer_List(PLV__Selected_Officer).Recalculate_Abilities_Buffs()
+                PLV__Selected_Class = u.Officer_List(PLV__Selected_Officer).Current_Class
+                u.Officer_List(PLV__Selected_Officer).Recalculate_Abilities_Buffs()
             Case Is = Personal_level_enums.Officer_4
                 PLV__Selected_Officer = PLV__Officer_Scroll + 3
-                PLV__Selected_Class = Officer_List(PLV__Selected_Officer).Current_Class
-                Officer_List(PLV__Selected_Officer).Recalculate_Abilities_Buffs()
+                PLV__Selected_Class = u.Officer_List(PLV__Selected_Officer).Current_Class
+                u.Officer_List(PLV__Selected_Officer).Recalculate_Abilities_Buffs()
             Case Is = Personal_level_enums.Officer_5
                 PLV__Selected_Officer = PLV__Officer_Scroll + 4
-                PLV__Selected_Class = Officer_List(PLV__Selected_Officer).Current_Class
-                Officer_List(PLV__Selected_Officer).Recalculate_Abilities_Buffs()
+                PLV__Selected_Class = u.Officer_List(PLV__Selected_Officer).Current_Class
+                u.Officer_List(PLV__Selected_Officer).Recalculate_Abilities_Buffs()
 
 
             Case Is = Personal_level_enums.Class_Scroll_Left
                 If PLV__Class_Scroll > 0 Then PLV__Class_Scroll -= 1
             Case Is = Personal_level_enums.Class_Scroll_Right
-                If PLV__Class_Scroll < (Officer_List(PLV__Selected_Officer).Officer_Classes.Count - 4) - 5 Then PLV__Class_Scroll += 1
+                If PLV__Class_Scroll < (u.Officer_List(PLV__Selected_Officer).Officer_Classes.Count - 4) - 5 Then PLV__Class_Scroll += 1
 
             Case Is = Personal_level_enums.Class_1
-                If Officer_List(PLV__Selected_Officer).Officer_Classes.Count - 4 > 0 + PLV__Class_Scroll Then PLV__Selected_Class = Officer_List(PLV__Selected_Officer).GetClassByNumber(0 + PLV__Class_Scroll).ClassID
+                If u.Officer_List(PLV__Selected_Officer).Officer_Classes.Count - 4 > 0 + PLV__Class_Scroll Then PLV__Selected_Class = u.Officer_List(PLV__Selected_Officer).GetClassByNumber(0 + PLV__Class_Scroll).ClassID
             Case Is = Personal_level_enums.Class_2
-                If Officer_List(PLV__Selected_Officer).Officer_Classes.Count - 4 > 1 + PLV__Class_Scroll Then PLV__Selected_Class = Officer_List(PLV__Selected_Officer).GetClassByNumber(1 + PLV__Class_Scroll).ClassID                
+                If u.Officer_List(PLV__Selected_Officer).Officer_Classes.Count - 4 > 1 + PLV__Class_Scroll Then PLV__Selected_Class = u.Officer_List(PLV__Selected_Officer).GetClassByNumber(1 + PLV__Class_Scroll).ClassID
             Case Is = Personal_level_enums.Class_3
-                If Officer_List(PLV__Selected_Officer).Officer_Classes.Count - 4 > 2 + PLV__Class_Scroll Then PLV__Selected_Class = Officer_List(PLV__Selected_Officer).GetClassByNumber(2 + PLV__Class_Scroll).ClassID            
+                If u.Officer_List(PLV__Selected_Officer).Officer_Classes.Count - 4 > 2 + PLV__Class_Scroll Then PLV__Selected_Class = u.Officer_List(PLV__Selected_Officer).GetClassByNumber(2 + PLV__Class_Scroll).ClassID
             Case Is = Personal_level_enums.Class_4
-                If Officer_List(PLV__Selected_Officer).Officer_Classes.Count - 4 > 3 + PLV__Class_Scroll Then PLV__Selected_Class = Officer_List(PLV__Selected_Officer).GetClassByNumber(3 + PLV__Class_Scroll).ClassID            
+                If u.Officer_List(PLV__Selected_Officer).Officer_Classes.Count - 4 > 3 + PLV__Class_Scroll Then PLV__Selected_Class = u.Officer_List(PLV__Selected_Officer).GetClassByNumber(3 + PLV__Class_Scroll).ClassID
             Case Is = Personal_level_enums.Class_5
-                If Officer_List(PLV__Selected_Officer).Officer_Classes.Count - 4 > 4 + PLV__Class_Scroll Then PLV__Selected_Class = Officer_List(PLV__Selected_Officer).GetClassByNumber(4 + PLV__Class_Scroll).ClassID                
+                If u.Officer_List(PLV__Selected_Officer).Officer_Classes.Count - 4 > 4 + PLV__Class_Scroll Then PLV__Selected_Class = u.Officer_List(PLV__Selected_Officer).GetClassByNumber(4 + PLV__Class_Scroll).ClassID
 
 
             Case Is = Personal_level_enums.Class_Engineer
@@ -1755,10 +1753,10 @@
 
             Case 999 To 1999
                 Dim skill As Skill_Item = New Class_Tech_Tree(PLV__Selected_Class).Skills(CType(choice - 1000, Skill_List_Enum))
-                If Officer_List(PLV__Selected_Officer).Officer_Classes(PLV__Selected_Class).Skill_Points >= skill.Cost Then
-                    If skill.Parent = Skill_List_Enum.None OrElse Officer_List(PLV__Selected_Officer).Skill_List.Contains(skill.Parent) Then
-                        Officer_List(PLV__Selected_Officer).Skill_List.Add(CType(choice - 1000, Skill_List_Enum))
-                        Officer_List(PLV__Selected_Officer).Officer_Classes(PLV__Selected_Class).Skill_Points -= skill.Cost
+                If u.Officer_List(PLV__Selected_Officer).Officer_Classes(PLV__Selected_Class).Skill_Points >= skill.Cost Then
+                    If skill.Parent = Skill_List_Enum.None OrElse u.Officer_List(PLV__Selected_Officer).Skill_List.Contains(skill.Parent) Then
+                        u.Officer_List(PLV__Selected_Officer).Skill_List.Add(CType(choice - 1000, Skill_List_Enum))
+                        u.Officer_List(PLV__Selected_Officer).Officer_Classes(PLV__Selected_Class).Skill_Points -= skill.Cost
                     End If
                 End If
 
@@ -1853,7 +1851,7 @@
                     Menu_Items_Personal_Level.Add(2000 + item.Value.Parent, New Menu_button(button_texture_enum.PLV__Skill_Bar, New Rectangle(740 + item.Value.Position.x * 100 + 12, 50 + item.Value.Position.y * 96 - 64, 8, 64), button_style.DisplayOnly))
                 End If
                 Menu_Items_Personal_Level(1000 + item.Key).tile = item.Value.Sprite
-                If Officer_List(PLV__Selected_Officer).Skill_List.Contains(item.Key) Then Menu_Items_Personal_Level(1000 + item.Key).color = Color.FromArgb(255, 100, 100, 255)
+                If u.Officer_List(PLV__Selected_Officer).Skill_List.Contains(item.Key) Then Menu_Items_Personal_Level(1000 + item.Key).color = Color.FromArgb(255, 100, 100, 255)
             Next
 
             PLV__Selected_Class_Old = PLV__Selected_Class
@@ -1866,7 +1864,7 @@
 
         'Dim Tree As Class_Tech_Tree = New Class_Tech_Tree(PLV__Selected_Class)
 
-        For Each item In Officer_List(PLV__Selected_Officer).Skill_List
+        For Each item In u.Officer_List(PLV__Selected_Officer).Skill_List
             If item > -1 AndAlso Menu_Items_Personal_Level.ContainsKey(1000 + item) Then
                 Menu_Items_Personal_Level(1000 + item).Adj_color = Color.FromArgb(255, 100, 100, 255)
 
@@ -1943,10 +1941,10 @@
 
 
     Public Function Get_Planet_Location(ByVal PlanetID As Integer, Optional ByVal ThetaOffset As Double = 0) As PointD
-        Dim planet = Planet_List(PlanetID)
+        Dim planet = u.Planet_List(PlanetID)
         Dim planetpos As PointD
         Dim pos As PointD
-        If Planet_List(PlanetID).orbits_planet = True Then
+        If u.Planet_List(PlanetID).orbits_planet = True Then
             'moons
             planetpos.x = u.stars(u.planets(planet.orbit_point).orbit_point).location.x + u.planets(planet.orbit_point).orbit_distance * Math.Cos((u.planets(planet.orbit_point).theta * (planet_theta_offset + ThetaOffset)) * 0.017453292519943295)
             planetpos.y = u.stars(u.planets(planet.orbit_point).orbit_point).location.y + u.planets(planet.orbit_point).orbit_distance * Math.Sin((u.planets(planet.orbit_point).theta * (planet_theta_offset + ThetaOffset)) * 0.017453292519943295)

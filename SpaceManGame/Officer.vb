@@ -1,10 +1,16 @@
 ﻿<Serializable()> Public Class Personality_Type
+    Public Dominant As Personality_Type_Type
+    Public Recessive As Personality_Type_Type
 
+    Sub New(ByVal Dominant As Personality_Type_Type, ByVal Recessive As Personality_Type_Type)
+        Me.Dominant = Dominant
+        Me.Recessive = Recessive
+    End Sub
 
-
-
-
-
+    Sub New()
+        Me.Dominant = CType(random(0, 4), Personality_Type_Type)
+        Me.Recessive = CType(random(0, 4), Personality_Type_Type)
+    End Sub
 End Class
 
 
@@ -43,6 +49,12 @@ End Class
     Public Energy As Integer
     Public EnergyMax As Integer
     Public Health As New Actor_Stats_Class(10, 10, 10)
+    Public Item_List As New Dictionary(Of Item_Enum, Integer)()
+
+    Public Owned_Buildings As New Dictionary(Of Integer, HashSet(Of Integer))()
+    Public Citizen_Rights As New HashSet(Of Integer)()
+    Public Personality As New Personality_Type()
+
 
 
     Class Actor_Stats_Class

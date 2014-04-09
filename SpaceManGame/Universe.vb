@@ -13,6 +13,11 @@
         Public regions As New Dictionary(Of PointI, region_class)()
         Public nebula As New Dictionary(Of Integer, Nebula)()
         Public Projectiles As New HashSet(Of Projectile)()
+
+        Public Ship_List As New Dictionary(Of Integer, Ship)(500)
+        Public Planet_List As New Dictionary(Of Integer, Planet)(150)
+        Public Crew_List As New Dictionary(Of Integer, Crew)()
+        Public Officer_List As New Dictionary(Of Integer, Officer)()
     End Class
 
     Sub generate()
@@ -199,23 +204,23 @@
         Dim p As Planet
         Select Case random(1, 3) + random(0, 4)
             Case 1 'Vacuum
-                p = New Planet(planet_type_enum.Vacuum, size, orbit, orbit_distance, orbits_planet, theta_offset)
+                p = New Planet(planetID, planet_type_enum.Vacuum, size, orbit, orbit_distance, orbits_planet, theta_offset)
             Case 2 'Inferno
-                p = New Planet(planet_type_enum.Inferno, size, orbit, orbit_distance, orbits_planet, theta_offset)
+                p = New Planet(planetID, planet_type_enum.Inferno, size, orbit, orbit_distance, orbits_planet, theta_offset)
             Case 3 'Desert
-                p = New Planet(planet_type_enum.Desert, size, orbit, orbit_distance, orbits_planet, theta_offset)
+                p = New Planet(planetID, planet_type_enum.Desert, size, orbit, orbit_distance, orbits_planet, theta_offset)
             Case 4 'Tropical
-                p = New Planet(planet_type_enum.Tropical, size, orbit, orbit_distance, orbits_planet, theta_offset)
+                p = New Planet(planetID, planet_type_enum.Tropical, size, orbit, orbit_distance, orbits_planet, theta_offset)
             Case 5 'Forest
-                p = New Planet(planet_type_enum.Forest, size, orbit, orbit_distance, orbits_planet, theta_offset)
+                p = New Planet(planetID, planet_type_enum.Forest, size, orbit, orbit_distance, orbits_planet, theta_offset)
             Case 6 'Swamp
-                p = New Planet(planet_type_enum.Swamp, size, orbit, orbit_distance, orbits_planet, theta_offset)
+                p = New Planet(planetID, planet_type_enum.Swamp, size, orbit, orbit_distance, orbits_planet, theta_offset)
             Case 7 'Ocean
-                p = New Planet(planet_type_enum.Ocean, size, orbit, orbit_distance, orbits_planet, theta_offset)
+                p = New Planet(planetID, planet_type_enum.Ocean, size, orbit, orbit_distance, orbits_planet, theta_offset)
             Case 8 'Ice
-                p = New Planet(planet_type_enum.Ice, size, orbit, orbit_distance, orbits_planet, theta_offset)
+                p = New Planet(planetID, planet_type_enum.Ice, size, orbit, orbit_distance, orbits_planet, theta_offset)
             Case Else
-                p = New Planet(planet_type_enum.Vacuum, size, orbit, orbit_distance, orbits_planet, theta_offset)
+                p = New Planet(planetID, planet_type_enum.Vacuum, size, orbit, orbit_distance, orbits_planet, theta_offset)
         End Select
         u.planets.Add(planetID, p)
     End Sub

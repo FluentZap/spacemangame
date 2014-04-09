@@ -120,8 +120,8 @@
         d3d_sprite.Transform = Matrix.Transformation2D(New Vector2(0, 0), 0, New Vector2(scale, scale), New Vector2(0, 0), 0, New Vector2(0, 0))
 
         'Render on ship
-        If Officer_List(player).region = Officer_location_enum.Ship Then
-            Dim ship As Ship = Ship_List(Officer_List(player).Location_ID)
+        If u.Officer_List(player).region = Officer_location_enum.Ship Then
+            Dim ship As Ship = u.Ship_List(u.Officer_List(player).Location_ID)
             render_personal_ship(player)
             d3d_sprite.Transform = Matrix.Transformation2D(New Vector2(0, 0), 0, New Vector2(scale, scale), New Vector2(0, 0), 0, New Vector2(0, 0))
             For Each officer In ship.Officer_List
@@ -134,16 +134,16 @@
             For Each crew In ship.Crew_list
                 pos.x = crew.Value.location.x - view_location_personal.x
                 pos.y = crew.Value.location.y - view_location_personal.y
-                Draw_Crew(crew.Value.SpriteSet, crew.Value.Get_Sprite, pos, Color.White)                
+                Draw_Crew(crew.Value.SpriteSet, crew.Value.Get_Sprite, pos, Color.White)
             Next
         End If
 
         'Render on planet
-        If Officer_List(player).region = Officer_location_enum.Planet Then
-            view_location_personal.x = Officer_List(current_player).GetLocationD.x + 16 - CInt((screen_size.x / 2) / personal_zoom)
-            view_location_personal.y = Officer_List(current_player).GetLocationD.y + 16 - CInt((screen_size.y / 2) / personal_zoom)
+        If u.Officer_List(player).region = Officer_location_enum.Planet Then
+            view_location_personal.x = u.Officer_List(current_player).GetLocationD.x + 16 - CInt((screen_size.x / 2) / personal_zoom)
+            view_location_personal.y = u.Officer_List(current_player).GetLocationD.y + 16 - CInt((screen_size.y / 2) / personal_zoom)
             'view_location_personal.x += 1
-            Dim planet As Planet = Planet_List(Officer_List(player).Location_ID)
+            Dim planet As Planet = u.Planet_List(u.Officer_List(player).Location_ID)
             'For a = 0 To 100
             render_personal_planet(player)
             'Next a
@@ -163,7 +163,7 @@
         End If
 
 
-        For Each Pro In Planet_List(Officer_List(player).Location_ID).Projectiles
+        For Each Pro In u.Planet_List(u.Officer_List(player).Location_ID).Projectiles
             Lights.Add(New Lights_Type(New PointD(Pro.Location.x - 128, Pro.Location.y - 128), Color.Red))
         Next
 
@@ -175,16 +175,15 @@
         draw_text("GST " + GST.ToString, New Rectangle(0, 0, 100, 20), CType(DrawTextFormat.Center + DrawTextFormat.VerticalCenter, DrawTextFormat), Color.White, d3d_font(d3d_font_enum.SB_small))
         draw_text("FPS " + FPS.ToString, New Rectangle(0, 50, 100, 20), CType(DrawTextFormat.Center + DrawTextFormat.VerticalCenter, DrawTextFormat), Color.White, d3d_font(d3d_font_enum.SB_small))
         draw_text("Logic  " + LPS.ToString, New Rectangle(0, 100, 100, 20), CType(DrawTextFormat.Center + DrawTextFormat.VerticalCenter, DrawTextFormat), Color.White, d3d_font(d3d_font_enum.SB_small))
-        render_personal_health_overlay(New PointI(256, screen_size.y - 96), Officer_List(current_player).Health)
+        render_personal_health_overlay(New PointI(256, screen_size.y - 96), u.Officer_List(current_player).Health)
 
-        If Crew_List.ContainsKey(Mouse_Target) Then
-            render_personal_health_overlay(New PointI(128, screen_size.y - 96), Crew_List(Mouse_Target).Health)
-            draw_text("Wealth " + Crew_List(Mouse_Target).Wealth.ToString, New Rectangle(0, 150, 100, 20), CType(DrawTextFormat.Center + DrawTextFormat.VerticalCenter, DrawTextFormat), Color.White, d3d_font(d3d_font_enum.SB_small))
+        If u.Crew_List.ContainsKey(Mouse_Target) Then
+            render_personal_health_overlay(New PointI(128, screen_size.y - 96), u.Crew_List(Mouse_Target).Health)
         End If
 
         If Tile_Target.x >= 0 AndAlso Tile_Target.y >= 0 AndAlso Tile_Target.x <= 512 AndAlso Tile_Target.y <= 512 Then
-            If Planet_List(Officer_List(player).Location_ID).Item_Point.ContainsKey(Tile_Target) Then
-                Dim tile As Item_Point_Type = Planet_List(Officer_List(player).Location_ID).Item_Point(Tile_Target)
+            If u.Planet_List(u.Officer_List(player).Location_ID).Item_Point.ContainsKey(Tile_Target) Then
+                Dim tile As Item_Point_Type = u.Planet_List(u.Officer_List(player).Location_ID).Item_Point(Tile_Target)
                 draw_text(tile.Item.ToString + " " + tile.Amount.ToString, New Rectangle(0, 180, 200, 20), CType(DrawTextFormat.Center + DrawTextFormat.VerticalCenter, DrawTextFormat), Color.White, d3d_font(d3d_font_enum.SB_small))
             End If
         End If
@@ -205,7 +204,7 @@
     Sub render_personal_ship(ByVal player As Integer)
         Dim atsize As Integer = CInt(32 * personal_zoom)
         Dim scale As Single = CSng(Math.Round(personal_zoom, 2))
-        Dim ship As Ship = Ship_List(Officer_List(player).Location_ID)
+        Dim ship As Ship = u.Ship_List(u.Officer_List(player).Location_ID)
         Dim TileMap(,) As Ship_tile
         TileMap = ship.tile_map
         Dim pos As PointD
@@ -237,7 +236,7 @@
     Sub render_personal_planet(ByVal player As Integer)
         Dim atsize As Integer = Convert.ToInt32(32 * personal_zoom)
         Dim scale As Single = CSng(personal_zoom)
-        Dim planet As Planet = Planet_List(Officer_List(player).Location_ID)
+        Dim planet As Planet = u.Planet_List(u.Officer_List(player).Location_ID)
         Dim TileMap(,) As Planet_tile
         TileMap = planet.tile_map
         Dim pos As PointD
@@ -250,7 +249,7 @@
         For Each item In planet.Building_List
             For Each building In item.Value.BuildingRect
                 Dim rect As New Rectangle(building.Value.X * 32, building.Value.Y * 32, building.Value.Width * 32, building.Value.Height * 32)
-                If rect.Contains(Officer_List(current_player).find_rect) Then InBuilding = building.Value : Exit For
+                If rect.Contains(u.Officer_List(current_player).find_rect) Then InBuilding = building.Value : Exit For
             Next
         Next
 
@@ -279,7 +278,7 @@
 
 
         For Each landed_ship In planet.landed_ships
-            Dim ship As Ship = Ship_List(landed_ship.Key)
+            Dim ship As Ship = u.Ship_List(landed_ship.Key)
 
             If landed_ship.Value.x + ship.shipsize.x > viewRect.X AndAlso landed_ship.Value.x < viewRect.Right Then
                 If landed_ship.Value.y + ship.shipsize.y > viewRect.Y AndAlso landed_ship.Value.y < viewRect.Bottom Then
@@ -406,7 +405,7 @@
     Sub render_personal_planetS(ByVal player As Integer)
         Dim atsize As Integer = Convert.ToInt32(32 * personal_zoom)
         Dim scale As Single = CSng(personal_zoom)
-        Dim planet As Planet = Planet_List(Officer_List(player).Location_ID)
+        Dim planet As Planet = u.Planet_List(u.Officer_List(player).Location_ID)
         Dim TileMap(,) As Planet_tile
         TileMap = planet.tile_map
         Dim pos As PointD
@@ -430,7 +429,7 @@
 
 
         For Each landed_ship In planet.landed_ships
-            Dim ship As Ship = Ship_List(landed_ship.Key)
+            Dim ship As Ship = u.Ship_List(landed_ship.Key)
 
             If landed_ship.Value.x + ship.shipsize.x > viewRect.X AndAlso landed_ship.Value.x < viewRect.Right Then
                 If landed_ship.Value.y + ship.shipsize.y > viewRect.Y AndAlso landed_ship.Value.y < viewRect.Bottom Then
@@ -525,10 +524,10 @@
         Dim backcolor As Color = Color.White
         For Each item In Player_Data.Officer_List
             If advance >= PLV__Officer_Scroll Then
-                draw_text(Officer_List(item).name, New Rectangle(pos.intX + 72, pos.intY, 100, 100), DrawTextFormat.Left, Color.White, d3d_font(d3d_font_enum.SB_small))
-                draw_text("Lvl " + Officer_List(item).GetCurrentClass.Level.ToString, New Rectangle(pos.intX + 72, pos.intY + 12, 100, 100), DrawTextFormat.Left, Color.SkyBlue, d3d_font(d3d_font_enum.SB_small))
-                draw_text("Exp " + Officer_List(item).GetCurrentClass.Experance.ToString + "/100", New Rectangle(pos.intX + 72, pos.intY + 24, 100, 100), DrawTextFormat.Left, Color.Green, d3d_font(d3d_font_enum.SB_small))
-                draw_text(Officer_List(item).Current_Class.ToString, New Rectangle(pos.intX + 72, pos.intY + 36, 100, 100), DrawTextFormat.Left, Color.Orange, d3d_font(d3d_font_enum.SB_small))
+                draw_text(u.Officer_List(item).name, New Rectangle(pos.intX + 72, pos.intY, 100, 100), DrawTextFormat.Left, Color.White, d3d_font(d3d_font_enum.SB_small))
+                draw_text("Lvl " + u.Officer_List(item).GetCurrentClass.Level.ToString, New Rectangle(pos.intX + 72, pos.intY + 12, 100, 100), DrawTextFormat.Left, Color.SkyBlue, d3d_font(d3d_font_enum.SB_small))
+                draw_text("Exp " + u.Officer_List(item).GetCurrentClass.Experance.ToString + "/100", New Rectangle(pos.intX + 72, pos.intY + 24, 100, 100), DrawTextFormat.Left, Color.Green, d3d_font(d3d_font_enum.SB_small))
+                draw_text(u.Officer_List(item).Current_Class.ToString, New Rectangle(pos.intX + 72, pos.intY + 36, 100, 100), DrawTextFormat.Left, Color.Orange, d3d_font(d3d_font_enum.SB_small))
 
                 If PLV__Selected_Officer = item Then backcolor = Color.LightGreen Else backcolor = Color.White
                 d3d_sprite.Transform = Matrix.Transformation2D(New Vector2(0, 0), 0, New Vector2(3, 3), New Vector2(0, 0), 0, New Vector2(0, 0))
@@ -555,7 +554,7 @@
         backcolor = Color.White
         Dim Class_Color As Color
         Dim Class_Color_2 As Color
-        For Each item In Officer_List(PLV__Selected_Officer).Officer_Classes
+        For Each item In u.Officer_List(PLV__Selected_Officer).Officer_Classes
             If Not item.ClassID = Class_List_Enum.Engineer AndAlso Not item.ClassID = Class_List_Enum.Security AndAlso Not item.ClassID = Class_List_Enum.Scientist AndAlso Not item.ClassID = Class_List_Enum.Aviator Then
                 If advance >= PLV__Class_Scroll Then
 
@@ -615,41 +614,41 @@
         'Draw Base Classes
         If PLV__Selected_Class = Class_List_Enum.Engineer Then d3d_sprite.Draw(button_texture(button_texture_enum.PLV__Base_Class_Frame), Vector3.Empty, New Vector3(pos.sngX - 2, pos.sngY - 2, 0), Color.White.ToArgb)
         d3d_sprite.Draw(button_texture(button_texture_enum.PLV__Base_Class), Vector3.Empty, New Vector3(pos.sngX, pos.sngY, 0), Color.Gray.ToArgb)
-        scale = CInt(96 * Officer_List(PLV__Selected_Officer).GetClass(Class_List_Enum.Engineer).Experance \ 100)
+        scale = CInt(96 * u.Officer_List(PLV__Selected_Officer).GetClass(Class_List_Enum.Engineer).Experance \ 100)
         d3d_sprite.Draw(button_texture(button_texture_enum.PLV__Base_Class), New Rectangle(0, 0, scale, 16), New Vector3(0, 0, 0), New Vector3(pos.sngX, pos.sngY, 0), Color.Orange.ToArgb)
-        If Officer_List(PLV__Selected_Officer).GetClass(Class_List_Enum.Engineer).Skill_Points > 0 Then d3d_sprite.Draw(button_texture(button_texture_enum.PLV__Level_Up), Vector3.Empty, New Vector3(pos.sngX - 54, pos.sngY, 0), Color.White.ToArgb)
-        draw_text("Lv " + Officer_List(PLV__Selected_Officer).GetClass(Class_List_Enum.Engineer).Level.ToString, New Rectangle(pos.intX - 32, pos.intY, 96, 16), DrawTextFormat.Left, Color.White, d3d_font(d3d_font_enum.SB_small))
+        If u.Officer_List(PLV__Selected_Officer).GetClass(Class_List_Enum.Engineer).Skill_Points > 0 Then d3d_sprite.Draw(button_texture(button_texture_enum.PLV__Level_Up), Vector3.Empty, New Vector3(pos.sngX - 54, pos.sngY, 0), Color.White.ToArgb)
+        draw_text("Lv " + u.Officer_List(PLV__Selected_Officer).GetClass(Class_List_Enum.Engineer).Level.ToString, New Rectangle(pos.intX - 32, pos.intY, 96, 16), DrawTextFormat.Left, Color.White, d3d_font(d3d_font_enum.SB_small))
         draw_text("Engineer", New Rectangle(pos.intX, pos.intY, 96, 16), DrawTextFormat.Center, Color.Black, d3d_font(d3d_font_enum.SB_small))
         pos.y += 32
 
         If PLV__Selected_Class = Class_List_Enum.Security Then d3d_sprite.Draw(button_texture(button_texture_enum.PLV__Base_Class_Frame), Vector3.Empty, New Vector3(pos.sngX - 2, pos.sngY - 2, 0), Color.White.ToArgb)
         d3d_sprite.Draw(button_texture(button_texture_enum.PLV__Base_Class), Vector3.Empty, New Vector3(pos.sngX, pos.sngY, 0), Color.Gray.ToArgb)
-        scale = CInt(96 * Officer_List(PLV__Selected_Officer).GetClass(Class_List_Enum.Security).Experance \ 100)
+        scale = CInt(96 * u.Officer_List(PLV__Selected_Officer).GetClass(Class_List_Enum.Security).Experance \ 100)
         d3d_sprite.Draw(button_texture(button_texture_enum.PLV__Base_Class), New Rectangle(0, 0, scale, 16), New Vector3(0, 0, 0), New Vector3(pos.sngX, pos.sngY, 0), Color.Red.ToArgb)
-        If Officer_List(PLV__Selected_Officer).GetClass(Class_List_Enum.Security).Skill_Points > 0 Then d3d_sprite.Draw(button_texture(button_texture_enum.PLV__Level_Up), Vector3.Empty, New Vector3(pos.sngX - 54, pos.sngY, 0), Color.White.ToArgb)
-        draw_text("Lv " + Officer_List(PLV__Selected_Officer).GetClass(Class_List_Enum.Security).Level.ToString, New Rectangle(pos.intX - 32, pos.intY, 96, 16), DrawTextFormat.Left, Color.White, d3d_font(d3d_font_enum.SB_small))
+        If u.Officer_List(PLV__Selected_Officer).GetClass(Class_List_Enum.Security).Skill_Points > 0 Then d3d_sprite.Draw(button_texture(button_texture_enum.PLV__Level_Up), Vector3.Empty, New Vector3(pos.sngX - 54, pos.sngY, 0), Color.White.ToArgb)
+        draw_text("Lv " + u.Officer_List(PLV__Selected_Officer).GetClass(Class_List_Enum.Security).Level.ToString, New Rectangle(pos.intX - 32, pos.intY, 96, 16), DrawTextFormat.Left, Color.White, d3d_font(d3d_font_enum.SB_small))
         draw_text("Security", New Rectangle(pos.intX, pos.intY, 96, 16), DrawTextFormat.Center, Color.Black, d3d_font(d3d_font_enum.SB_small))
         pos.y += 32
 
         If PLV__Selected_Class = Class_List_Enum.Scientist Then d3d_sprite.Draw(button_texture(button_texture_enum.PLV__Base_Class_Frame), Vector3.Empty, New Vector3(pos.sngX - 2, pos.sngY - 2, 0), Color.White.ToArgb)
         d3d_sprite.Draw(button_texture(button_texture_enum.PLV__Base_Class), Vector3.Empty, New Vector3(pos.sngX, pos.sngY, 0), Color.Gray.ToArgb)
-        scale = CInt(96 * Officer_List(PLV__Selected_Officer).GetClass(Class_List_Enum.Scientist).Experance \ 100)
+        scale = CInt(96 * u.Officer_List(PLV__Selected_Officer).GetClass(Class_List_Enum.Scientist).Experance \ 100)
         d3d_sprite.Draw(button_texture(button_texture_enum.PLV__Base_Class), New Rectangle(0, 0, scale, 16), New Vector3(0, 0, 0), New Vector3(pos.sngX, pos.sngY, 0), Color.LightBlue.ToArgb)
-        If Officer_List(PLV__Selected_Officer).GetClass(Class_List_Enum.Scientist).Skill_Points > 0 Then d3d_sprite.Draw(button_texture(button_texture_enum.PLV__Level_Up), Vector3.Empty, New Vector3(pos.sngX - 54, pos.sngY, 0), Color.White.ToArgb)
-        draw_text("Lv " + Officer_List(PLV__Selected_Officer).GetClass(Class_List_Enum.Scientist).Level.ToString, New Rectangle(pos.intX - 32, pos.intY, 96, 16), DrawTextFormat.Left, Color.White, d3d_font(d3d_font_enum.SB_small))
+        If u.Officer_List(PLV__Selected_Officer).GetClass(Class_List_Enum.Scientist).Skill_Points > 0 Then d3d_sprite.Draw(button_texture(button_texture_enum.PLV__Level_Up), Vector3.Empty, New Vector3(pos.sngX - 54, pos.sngY, 0), Color.White.ToArgb)
+        draw_text("Lv " + u.Officer_List(PLV__Selected_Officer).GetClass(Class_List_Enum.Scientist).Level.ToString, New Rectangle(pos.intX - 32, pos.intY, 96, 16), DrawTextFormat.Left, Color.White, d3d_font(d3d_font_enum.SB_small))
         draw_text("Scientist", New Rectangle(pos.intX, pos.intY, 96, 16), DrawTextFormat.Center, Color.Black, d3d_font(d3d_font_enum.SB_small))
         pos.y += 32
 
         If PLV__Selected_Class = Class_List_Enum.Aviator Then d3d_sprite.Draw(button_texture(button_texture_enum.PLV__Base_Class_Frame), Vector3.Empty, New Vector3(pos.sngX - 2, pos.sngY - 2, 0), Color.White.ToArgb)
         d3d_sprite.Draw(button_texture(button_texture_enum.PLV__Base_Class), Vector3.Empty, New Vector3(pos.sngX, pos.sngY, 0), Color.Gray.ToArgb)
-        scale = CInt(96 * Officer_List(PLV__Selected_Officer).GetClass(Class_List_Enum.Aviator).Experance \ 100)
+        scale = CInt(96 * u.Officer_List(PLV__Selected_Officer).GetClass(Class_List_Enum.Aviator).Experance \ 100)
         d3d_sprite.Draw(button_texture(button_texture_enum.PLV__Base_Class), New Rectangle(0, 0, scale, 16), New Vector3(0, 0, 0), New Vector3(pos.sngX, pos.sngY, 0), Color.Cyan.ToArgb)
-        If Officer_List(PLV__Selected_Officer).GetClass(Class_List_Enum.Aviator).Skill_Points > 0 Then d3d_sprite.Draw(button_texture(button_texture_enum.PLV__Level_Up), Vector3.Empty, New Vector3(pos.sngX - 54, pos.sngY, 0), Color.White.ToArgb)
-        draw_text("Lv " + Officer_List(PLV__Selected_Officer).GetClass(Class_List_Enum.Aviator).Level.ToString, New Rectangle(pos.intX - 32, pos.intY, 96, 16), DrawTextFormat.Left, Color.White, d3d_font(d3d_font_enum.SB_small))
+        If u.Officer_List(PLV__Selected_Officer).GetClass(Class_List_Enum.Aviator).Skill_Points > 0 Then d3d_sprite.Draw(button_texture(button_texture_enum.PLV__Level_Up), Vector3.Empty, New Vector3(pos.sngX - 54, pos.sngY, 0), Color.White.ToArgb)
+        draw_text("Lv " + u.Officer_List(PLV__Selected_Officer).GetClass(Class_List_Enum.Aviator).Level.ToString, New Rectangle(pos.intX - 32, pos.intY, 96, 16), DrawTextFormat.Left, Color.White, d3d_font(d3d_font_enum.SB_small))
         draw_text("Aviator", New Rectangle(pos.intX, pos.intY, 96, 16), DrawTextFormat.Center, Color.Black, d3d_font(d3d_font_enum.SB_small))
 
 
-        draw_text("Skill Points " + Officer_List(PLV__Selected_Officer).GetClass(PLV__Selected_Class).Skill_Points.ToString, New Rectangle(screen_size.x \ 2, 0, 96, 16), DrawTextFormat.Left, Color.White, d3d_font(d3d_font_enum.SB_small))
+        draw_text("Skill Points " + u.Officer_List(PLV__Selected_Officer).GetClass(PLV__Selected_Class).Skill_Points.ToString, New Rectangle(screen_size.x \ 2, 0, 96, 16), DrawTextFormat.Left, Color.White, d3d_font(d3d_font_enum.SB_small))
 
 
         For Each item In Menu_Items_Personal_Level
@@ -727,7 +726,7 @@
 
 
         Dim atsize As Integer = CInt(32 * Weapon_Control_zoom)
-        Dim ship As Ship = Ship_List(Officer_List(current_player).Location_ID)
+        Dim ship As Ship = u.Ship_List(u.Officer_List(current_player).Location_ID)
         Dim TileMap(,) As Ship_tile
         TileMap = ship.tile_map
         For x = (CInt(view_location_weapon_control.x * Weapon_Control_zoom) \ atsize) - 1 To (CInt(view_location_weapon_control.x * Weapon_Control_zoom) \ atsize) + (screen_size.x \ atsize) + 1
@@ -1120,7 +1119,7 @@
     Sub Render_Officer_Texture(ByVal OfficerID As Integer, ByVal Off_tex As Texture)
         d3d_sprite.End()
         Dim Sprite_Width As Integer = 640
-        Dim O As Officer = Officer_List(OfficerID)
+        Dim O As Officer = u.Officer_List(OfficerID)
         Dim BB As Surface
         Dim MatStore As Matrix
         BB = d3d_device.GetRenderTarget(0)
@@ -1206,7 +1205,7 @@
         End If
 
 
-        For Each Draw_Ship In Ship_List.Values
+        For Each Draw_Ship In u.Ship_List.Values
             If external_zoom > 0.25 Then
                 d3d_sprite.Transform = Matrix.Transformation2D(New Vector2(0, 0), 0, New Vector2(scale, scale), New Vector2((Draw_Ship.center_point.x * 32 + 16) * scale, (Draw_Ship.center_point.y * 32 + 16) * scale), CSng(Draw_Ship.rotation), New Vector2(CInt((Draw_Ship.location.x - view_location_external.x) * scale), CInt((Draw_Ship.location.y - view_location_external.y) * scale)))
                 Render_Ship_External_close(Draw_Ship)
@@ -1238,11 +1237,11 @@
         d3d_sprite.Draw(Ship_Map_Texture, Rectangle.Empty, New Vector3(0, 0, 0), New Vector3(screen_size.x - (Ship.shipsize.x + 1) * 4 - 20, 200, 0), Color.White)
 
         d3d_sprite.Transform = Matrix.Identity
-        draw_text(Ship_List(0).target_rotation.ToString, New Rectangle(20, 700, 160, 20), CType(DrawTextFormat.Center + DrawTextFormat.VerticalCenter, DrawTextFormat), Color.White, d3d_font(d3d_font_enum.SB_small))
-        draw_text("Turn point: " + Ship_List(0).Turn_Point.ToString, New Rectangle(20, 720, 160, 20), CType(DrawTextFormat.Center + DrawTextFormat.VerticalCenter, DrawTextFormat), Color.White, d3d_font(d3d_font_enum.SB_small))
-        draw_text("Turn Left: " + Ship_List(0).Turn_Left.ToString, New Rectangle(20, 740, 160, 20), CType(DrawTextFormat.Center + DrawTextFormat.VerticalCenter, DrawTextFormat), Color.White, d3d_font(d3d_font_enum.SB_small))
-        draw_text("Stop Rot: " + Ship_List(0).Stop_Rotation.ToString, New Rectangle(20, 760, 160, 20), CType(DrawTextFormat.Center + DrawTextFormat.VerticalCenter, DrawTextFormat), Color.White, d3d_font(d3d_font_enum.SB_small))
-        draw_text("AV: " + Ship_List(0).angular_velocity.ToString, New Rectangle(20, 780, 160, 20), CType(DrawTextFormat.Center + DrawTextFormat.VerticalCenter, DrawTextFormat), Color.White, d3d_font(d3d_font_enum.SB_small))
+        draw_text(u.Ship_List(0).target_rotation.ToString, New Rectangle(20, 700, 160, 20), CType(DrawTextFormat.Center + DrawTextFormat.VerticalCenter, DrawTextFormat), Color.White, d3d_font(d3d_font_enum.SB_small))
+        draw_text("Turn point: " + u.Ship_List(0).Turn_Point.ToString, New Rectangle(20, 720, 160, 20), CType(DrawTextFormat.Center + DrawTextFormat.VerticalCenter, DrawTextFormat), Color.White, d3d_font(d3d_font_enum.SB_small))
+        draw_text("Turn Left: " + u.Ship_List(0).Turn_Left.ToString, New Rectangle(20, 740, 160, 20), CType(DrawTextFormat.Center + DrawTextFormat.VerticalCenter, DrawTextFormat), Color.White, d3d_font(d3d_font_enum.SB_small))
+        draw_text("Stop Rot: " + u.Ship_List(0).Stop_Rotation.ToString, New Rectangle(20, 760, 160, 20), CType(DrawTextFormat.Center + DrawTextFormat.VerticalCenter, DrawTextFormat), Color.White, d3d_font(d3d_font_enum.SB_small))
+        draw_text("AV: " + u.Ship_List(0).angular_velocity.ToString, New Rectangle(20, 780, 160, 20), CType(DrawTextFormat.Center + DrawTextFormat.VerticalCenter, DrawTextFormat), Color.White, d3d_font(d3d_font_enum.SB_small))
         'draw_text(CInt(Distance_from).ToString, New Rectangle(0, 500, 100, 20), CType(DrawTextFormat.Center + DrawTextFormat.VerticalCenter, DrawTextFormat), Color.White, d3d_font(d3d_font_enum.SB_small))
 
         d3d_sprite.End()
@@ -1292,10 +1291,10 @@
         view_location_external.y = Ship.location.y - ((screen_size.y / 2) - (Ship.center_point.y * 32 + 16) * scale) / scale
 
 
-        Dim planet = Planet_List(Loaded_planet)
+        Dim planet = u.Planet_List(Loaded_planet)
         Dim planetpos As PointD        
         Dim pos As PointD
-        If Planet_List(Loaded_planet).orbits_planet = True Then
+        If u.Planet_List(Loaded_planet).orbits_planet = True Then
             'moons
             planetpos.x = u.stars(u.planets(planet.orbit_point).orbit_point).location.x + u.planets(planet.orbit_point).orbit_distance * Math.Cos((u.planets(planet.orbit_point).theta * planet_theta_offset) * 0.017453292519943295)
             planetpos.y = u.stars(u.planets(planet.orbit_point).orbit_point).location.y + u.planets(planet.orbit_point).orbit_distance * Math.Sin((u.planets(planet.orbit_point).theta * planet_theta_offset) * 0.017453292519943295)
@@ -1452,7 +1451,7 @@
         pos.y = (pos.y - view_location_external.y) * external_zoom
 
 
-        render_Vector_Circle(pos, New PointD(external_zoom * Planet_List(planetID).size.x * 32, external_zoom * Planet_List(planetID).size.x * 32), Planet_VB)
+        render_Vector_Circle(pos, New PointD(external_zoom * u.Planet_List(planetID).size.x * 32, external_zoom * u.Planet_List(planetID).size.x * 32), Planet_VB)
 
 
     End Sub
@@ -1487,8 +1486,8 @@
         End If
 
 
-        If Not Near_planet = Loaded_planet AndAlso Planet_List.ContainsKey(Near_planet) Then
-            Render_Planet_Texture(Planet_List(Near_planet), external_planet_texture, 8)
+        If Not Near_planet = Loaded_planet AndAlso u.Planet_List.ContainsKey(Near_planet) Then
+            Render_Planet_Texture(u.Planet_List(Near_planet), external_planet_texture, 8)
             Loaded_planet = Near_planet
         End If
 
@@ -1525,10 +1524,10 @@
         d3d_sprite.Transform = Matrix.Transformation2D(New Vector2(0, 0), 0, New Vector2(scale, scale), New Vector2(0, 0), 0, New Vector2(0, 0))
         'Draw planet
         If Loaded_planet > -1 Then
-            Dim planet = Planet_List(Loaded_planet)
+            Dim planet = u.Planet_List(Loaded_planet)
             Dim planetpos As PointD
             Dim drawpos As PointD
-            If Planet_List(Loaded_planet).orbits_planet = True Then
+            If u.Planet_List(Loaded_planet).orbits_planet = True Then
                 'moons
                 planetpos.x = u.stars(u.planets(planet.orbit_point).orbit_point).location.x + u.planets(planet.orbit_point).orbit_distance * Math.Cos((u.planets(planet.orbit_point).theta * planet_theta_offset) * 0.017453292519943295)
                 planetpos.y = u.stars(u.planets(planet.orbit_point).orbit_point).location.y + u.planets(planet.orbit_point).orbit_distance * Math.Sin((u.planets(planet.orbit_point).theta * planet_theta_offset) * 0.017453292519943295)
@@ -1564,7 +1563,7 @@
         'd3d_sprite.Transform = Matrix.Transformation2D(New Vector2(0, 0), 0, New Vector2(scale, scale), New Vector2(0, 0), 0, New Vector2(0, 0))
 
         'Draw 2nd ship
-        Dim ship2 As Ship = Ship_List(1)
+        Dim ship2 As Ship = u.Ship_List(1)
         d3d_sprite.Transform = Matrix.Transformation2D(New Vector2(0, 0), 0, New Vector2(scale, scale), New Vector2((ship2.center_point.x * 4 + 2) * scale, (ship2.center_point.y * 4 + 2) * scale), CSng(ship2.rotation), New Vector2(CSng(ship2.location.x * scale - view_location_external.x * scale), CSng(ship2.location.y * scale - view_location_external.y * scale)))
         d3d_sprite.Draw(Ship_Texture, Rectangle.Empty, New Vector3(0, 0, 0), New Vector3(0, 0, 0), Color.White)
         d3d_sprite.Transform = Matrix.Transformation2D(New Vector2(0, 0), 0, New Vector2(scale, scale), New Vector2(0, 0), 0, New Vector2(0, 0))
@@ -2004,7 +2003,7 @@
 
 
         Dim atsize As Integer = CInt(32 * Weapon_Control_zoom)
-        Dim ship As Ship = Ship_List(Officer_List(current_player).Location_ID)
+        Dim ship As Ship = u.Ship_List(u.Officer_List(current_player).Location_ID)
         Dim TileMap(,) As Ship_tile
         TileMap = ship.tile_map
         For x = (CInt(view_location_weapon_control.x * Weapon_Control_zoom) \ atsize) - 1 To (CInt(view_location_weapon_control.x * Weapon_Control_zoom) \ atsize) + (screen_size.x \ atsize) + 1
