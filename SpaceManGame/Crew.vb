@@ -125,7 +125,41 @@ End Enum
         End Sub
     End Class
 
+    <Serializable()> Public Class Command_Trans_Dropoff_Money
+        Inherits Crew_Command_script
+        Public ID As Integer
+        Sub New(ByVal Building_ID As Integer)
+            Me.ID = Building_ID
+            type = crew_script_enum.transport_dropoff_money
+        End Sub
+    End Class
+
+
+    <Serializable()> Public Class Command_Trans_Pickup_Exchange
+        Inherits Crew_Command_script        
+        Public ID As Integer
+        Sub New(ByVal Building_ID As Integer)
+            Me.ID = Building_ID
+            type = crew_script_enum.transport_pickup_exchange_money
+        End Sub
+    End Class
+
+
     <Serializable()> Public Class Command_Trans_Buy
+        Inherits Crew_Command_script
+        Public Amount As Integer
+        Public Item As Item_Enum        
+        Sub New(ByVal Amount As Integer, ByVal Item As Item_Enum)
+
+            Me.Amount = Amount
+            Me.Item = Item
+            type = crew_script_enum.transport_buy_goods
+        End Sub
+    End Class
+
+
+
+    <Serializable()> Public Class Command_Trans_Sell
         Inherits Crew_Command_script
         Public Amount As Integer
         Public Item As Item_Enum
@@ -134,9 +168,25 @@ End Enum
             Me.ID = Building_ID
             Me.Amount = Amount
             Me.Item = Item
-            type = crew_script_enum.transport_buy_goods
+            type = crew_script_enum.transport_sell_goods
         End Sub
     End Class
+
+
+    <Serializable()> Public Class Command_Trans_Pickup_Goods
+        Inherits Crew_Command_script
+        Public Amount As Integer
+        Public Item As Item_Enum
+        Public ID As Integer
+        Sub New(ByVal Building_ID As Integer, ByVal Amount As Integer, ByVal Item As Item_Enum)
+            Me.ID = Building_ID
+            Me.Amount = Amount
+            Me.Item = Item
+            type = crew_script_enum.transport_pickup_goods
+        End Sub
+    End Class
+
+
 
     <Serializable()> Public Class Command_Trans_Dropoff
         Inherits Crew_Command_script
@@ -180,8 +230,7 @@ End Enum
     Public WorkShift As Work_Shift_Enum
     Public Worker_Type As Worker_Type_Enum
     Public BankBuilding As Integer
-    Public PubBuilding As Integer
-    Public Wealth As Integer
+    Public PubBuilding As Integer    
     Public RemoveWhenDone As Boolean = False 'For Transporters
 
     'Public command_Queue As New LinkedList(Of crew_command_script)

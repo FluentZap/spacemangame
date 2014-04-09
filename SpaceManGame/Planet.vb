@@ -1,12 +1,63 @@
-﻿Public Class Item_Point_Type
+﻿
+
+Public Class Building_Count_Type
+    Public Mine As Integer
+    Public Farm As Integer
+    Public Factory As Integer
+    Public Refinery As Integer
+    Public Pub As Integer
+    Public Special As Integer
+
+    Public CMine As Integer
+    Public CFarm As Integer
+    Public CFactory As Integer
+    Public CRefinery As Integer
+    Public CPub As Integer
+    Public CSpecial As Integer
+
+    Sub SetLevel(ByVal Level As Planet_Level_Type)
+        Select Case Level
+            Case Is = Planet_Level_Type.Outpost
+                Mine = 1 : Farm = 1 : Factory = 1 : Refinery = 1 : Pub = 1 : Special = 1
+            Case Is = Planet_Level_Type.Village
+                Mine = 2 : Farm = 2 : Factory = 2 : Refinery = 2 : Pub = 2 : Special = 2
+            Case Is = Planet_Level_Type.Town
+                Mine = 2 : Farm = 3 : Factory = 2 : Refinery = 2 : Pub = 3 : Special = 6
+            Case Is = Planet_Level_Type.City
+                Mine = 3 : Farm = 4 : Factory = 3 : Refinery = 3 : Pub = 4 : Special = 7
+            Case Is = Planet_Level_Type.Metropolis
+                Mine = 4 : Farm = 5 : Factory = 4 : Refinery = 4 : Pub = 5 : Special = 10
+            Case Is = Planet_Level_Type.Empire
+                Mine = 4 : Farm = 6 : Factory = 5 : Refinery = 5 : Pub = 6 : Special = 14
+        End Select
+    End Sub
+
+
+
+    Function Building_Available() As Integer
+        Dim Available As Integer
+        Available += Mine - CMine
+        Available += Farm - CFarm
+        Available += Factory - CFactory
+        Available += Refinery - CRefinery
+        Available += Pub - CPub
+        Available += Special - CSpecial
+        Return Available
+    End Function
+
+
+End Class
+
+
+Public Class Item_Point_Type
     Public Amount As Integer
     Public Item As Item_Enum
-    
+
     Sub New(ByVal Amount As Integer, ByVal item As Item_Enum)
         Me.Amount = Amount
         Me.Item = item
     End Sub
-    
+
     Sub New()
     End Sub
 End Class
@@ -18,6 +69,7 @@ Public Enum Send_work_List_Enum
 End Enum
 
 Public Class Planet
+    Public ID As Integer
     Public orbits_planet As Boolean
     Public orbit_point As Integer
     Public orbit_distance As Integer
@@ -31,21 +83,34 @@ Public Class Planet
     Public Animation_Glow_subtract As Boolean
     Public Block_Map As HashSet(Of PointI) = New HashSet(Of PointI)
     Public Resource_Points As New Dictionary(Of PointI, Boolean)() 'Is true is resource point is taken
+    Public Farm_Points As New Dictionary(Of PointI, Boolean)() 'Is true is farm point is taken
+
     Public Building_List As New Dictionary(Of Integer, Planet_Building)()
 
-
     Public Send_List As New Dictionary(Of KeyValuePair(Of Integer, Crew), Send_work_List_Enum)()
-
 
     Public Item_Point As New Dictionary(Of PointI, Item_Point_Type)()
 
     Private path_find As Pathfind.Pathfind
 
+    Private BuilderSpawnCounter As Integer = 100
+    Private BuilderCount As Integer
+
+    Private Build_List As New Dictionary(Of Integer, HashSet(Of Build_Tiles))()
+
+    Public CitizensBuildingLimit As Integer
+    Public Citizens As Integer
+    Public CitizensMax As Integer
+    Public Building_Count As New Building_Count_Type()
     'trade route
     'available resources
     'regions
     Public tile_map(,) As Planet_tile
     'Dim crew_list As Crew_list
+
+    Public Exchange As New PlanetExchange
+
+    Public CapitalPoint As PointI
 
     Public type As planet_type_enum
     'ambient settings
@@ -57,10 +122,13 @@ Public Class Planet
     Public crew_list As New Dictionary(Of Integer, Crew)()
     Public officer_list As New Dictionary(Of Integer, Officer)()
 
-
     Public Projectiles As HashSet(Of Projectile) = New HashSet(Of Projectile)
 
-    Sub New(ByVal type As planet_type_enum, ByVal size As PointI, ByVal orbit_point As Integer, ByVal orbit_distance As Integer, ByVal orbits_planet As Boolean, ByVal theta_offset As Double)
+
+
+
+    Sub New(ByVal ID As Integer, ByVal type As planet_type_enum, ByVal size As PointI, ByVal orbit_point As Integer, ByVal orbit_distance As Integer, ByVal orbits_planet As Boolean, ByVal theta_offset As Double)
+        Me.ID = ID
         Me.type = type
         ReDim Me.tile_map(size.x, size.y)
         Me.size = size
@@ -70,6 +138,136 @@ Public Class Planet
         Me.theta = theta_offset
     End Sub
 
+
+
+    Sub Make_Building()
+
+        'tile_map(t.X + Pos.x, t.Y + Pos.y).sprite = t.Sprite
+        'tile_map(t.X + Pos.x, t.Y + Pos.y).sprite2 = t.Sprite2
+        'tile_map(t.X + Pos.x, t.Y + Pos.y).type = CType(t.Type, planet_tile_type_enum)
+        'tile_map(t.X + Pos.x, t.Y + Pos.y).walkable = CType(t.Walkable, walkable_type_enum)
+
+    End Sub
+
+
+
+
+    Sub Citizen_Build_Building(ByVal Owner As Integer)
+        Dim Mine, Farm, Factory, Refinery, Pub, Special As Double
+
+        Select Case officer_list(Owner).Personality.Dominant
+            Case Is = Personality_Type_Type.Aggressive
+                Mine += 6 : Farm += 1 : Factory += 4 : Refinery += 5 : Pub += 2 : Special += 3
+            Case Is = Personality_Type_Type.Sly
+                Mine += 2 : Farm += 1 : Factory += 4 : Refinery += 3 : Pub += 5 : Special += 6
+            Case Is = Personality_Type_Type.Conqueror
+                Mine += 3 : Farm += 1 : Factory += 6 : Refinery += 5 : Pub += 2 : Special += 4
+            Case Is = Personality_Type_Type.Political
+                Mine += 1 : Farm += 5 : Factory += 2 : Refinery += 3 : Pub += 4 : Special += 6
+            Case Is = Personality_Type_Type.Militaristic
+                Mine += 4 : Farm += 1 : Factory += 5 : Refinery += 6 : Pub += 2 : Special += 3
+        End Select
+
+        Mine *= 1.5 : Farm *= 1.5 : Factory *= 1.5 : Refinery *= 1.5 : Pub *= 1.5 : Special *= 1.5
+
+        Select Case officer_list(Owner).Personality.Recessive
+            Case Is = Personality_Type_Type.Aggressive
+                Mine += 6 : Farm += 1 : Factory += 4 : Refinery += 5 : Pub += 2 : Special += 3
+            Case Is = Personality_Type_Type.Sly
+                Mine += 2 : Farm += 1 : Factory += 4 : Refinery += 3 : Pub += 5 : Special += 6
+            Case Is = Personality_Type_Type.Conqueror
+                Mine += 3 : Farm += 1 : Factory += 6 : Refinery += 5 : Pub += 2 : Special += 4
+            Case Is = Personality_Type_Type.Political
+                Mine += 1 : Farm += 5 : Factory += 2 : Refinery += 3 : Pub += 4 : Special += 6
+            Case Is = Personality_Type_Type.Militaristic
+                Mine += 4 : Farm += 1 : Factory += 5 : Refinery += 6 : Pub += 2 : Special += 3
+        End Select
+        Dim list As New Dictionary(Of Integer, Double)()
+        Dim Highest As Integer = 0
+
+        If Building_Count.CMine < Mine Then list.Add(0, Mine) : Highest = 0
+        If Building_Count.CFarm < Farm Then list.Add(1, Farm) : Highest = 1
+        If Building_Count.CFactory < Factory Then list.Add(2, Factory) : Highest = 2
+        If Building_Count.CRefinery < Refinery Then list.Add(3, Refinery) : Highest = 3
+        If Building_Count.CPub < Pub Then list.Add(4, Pub) : Highest = 4
+        If Building_Count.CSpecial < Special Then list.Add(5, Special) : Highest = 5
+
+        For Each item In list
+            If item.Value > list(Highest) Then Highest = item.Key
+        Next
+        Select Case Highest
+            Case Is = 0
+                FindBestBuildingPos(building_type_enum.Mine)
+            Case Is = 1
+            Case Is = 2
+            Case Is = 3
+            Case Is = 4
+            Case Is = 5
+        End Select
+
+
+        Dim Building_tiles As HashSet(Of Build_Tiles)
+        Building_tiles = Load_Building("Desert_Outpost.bld")
+
+
+        Dim ID As Integer
+        For a = 0 To 100000
+            If Not Building_List.ContainsKey(a) Then ID = a : Exit For
+        Next
+        'Building_List.Add(ID, New Planet_Building(Owner, New Rectangle(Pos.x, Pos.y, 32, 32), Building))
+
+        Build_List.Add(ID, Building_tiles)
+    End Sub
+
+
+
+
+    Function FindBestBuildingPos(ByVal Building As building_type_enum) As PointI
+        Select Case Building
+            Case Is = building_type_enum.Mine
+                Dim point As PointI
+                For Each item In Resource_Points
+                    If item.Value = False Then point = item.Key : Exit For
+                Next
+                Resource_Points(point) = True
+                Return point
+
+            Case Is = building_type_enum.Farm
+                Dim point As PointI
+                For Each item In Farm_Points
+                    If item.Value = False Then point = item.Key : Exit For
+                Next
+                Farm_Points(point) = True
+                Return point
+
+            Case Is = building_type_enum.Factory
+                Return FindEmptyTile(CapitalPoint)                
+        End Select
+
+    End Function
+
+
+
+    Function FindEmptyTile(ByVal Position As PointI) As PointI
+        Dim pos As PointI
+        For a = 1 To 8
+            For y = -a To a
+                For x = -a To a
+                    pos.x = Position.x + x
+                    pos.y = Position.y + y
+                    If pos.x >= 0 AndAlso pos.x <= size.x AndAlso pos.y >= 0 AndAlso pos.y <= size.y Then
+                        If Not Block_Map.Contains(New PointI(pos.x, pos.y)) Then Return New PointI(pos.x, pos.y)
+                    End If
+                Next
+            Next
+        Next
+    End Function
+
+
+
+    Sub Start_Building()
+
+    End Sub
 
 
 
@@ -126,6 +324,9 @@ Public Class Planet
         Process_crew()
         Process_Work()
 
+        If GSTFrequency = 0 Then Process_Planet()
+        If GSTFrequency = 0 Then Process_Citizens()
+
         Update_Officers()
 
         Handle_Projectiles()
@@ -134,9 +335,62 @@ Public Class Planet
 
     End Sub
 
+
+
+    Sub Process_Citizens()
+        If GST = 1500 OrElse GST = 0 Then
+
+
+            For Each Cit In officer_list
+                Dim BuildBuilding As Boolean = False
+                If Cit.Value.Citizen_Rights.Contains(ID) Then
+                    If Cit.Value.Owned_Buildings.ContainsKey(ID) Then
+                        If Cit.Value.Owned_Buildings(ID).Count < CitizensBuildingLimit Then
+                            BuildBuilding = True
+                        End If
+                    Else
+                        Cit.Value.Owned_Buildings.Add(0, New HashSet(Of Integer))
+                        BuildBuilding = True
+                    End If
+                End If
+
+                If BuildBuilding = True AndAlso Building_Count.Building_Available > 0 Then
+
+                    If Cit.Value.Item_List.ContainsKey(Item_Enum.Refined_Crystal_Piece) Then
+                        If Cit.Value.Item_List(Item_Enum.Refined_Crystal_Piece) >= 10000 Then
+                            Cit.Value.Item_List(Item_Enum.Refined_Crystal_Piece) -= 10000
+                            Citizen_Build_Building(Cit.Key)
+                        End If
+                    End If
+
+                End If
+
+            Next
+        End If
+    End Sub
+
+
+
+    Sub Process_Planet()
+        If Citizens < CitizensMax Then
+            Dim Id As Integer
+            For Id = 0 To 10000
+                If Not u.Officer_List.ContainsKey(Id) Then Exit For
+            Next
+            Add_Officer(Id, New Officer(0, Id.ToString, Officer_location_enum.Planet, 0, New PointD(Building_List(0).PickupPoint.x * 32, Building_List(0).PickupPoint.y * 32), 1, 1, New Officer.sprite_list(character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head)))
+            u.Officer_List(Id).Item_List.Add(Item_Enum.Refined_Crystal_Piece, 10000)
+            Citizens += 1
+        End If
+    End Sub
+
+
+
+
+
+
     Sub Process_Work()
         If GSTFrequency = 0 AndAlso GST Mod 10 = 0 Then
-            For Each buiding In Building_List                
+            For Each buiding In Building_List
                 'Mine
                 If buiding.Value.Type = building_type_enum.Mine Then Process_Mine(buiding)
                 If buiding.Value.Type = building_type_enum.Refinery Then Process_Refinery(buiding)
@@ -182,8 +436,7 @@ Public Class Planet
                     If ipoint.Value.Input_Slot = True AndAlso Item_Point.ContainsKey(ipoint.Key) AndAlso Item_Point(ipoint.Key).Item = Item_Enum.Parts Then
                         If Item_Point(ipoint.Key).Amount >= 1 Then
                             If Safe_Point.Amount >= 1 Then
-                                Safe_Point.Amount -= 1
-                                crew_list(CrewID).Wealth += 1
+                                'Safe_Point.Amount -= 1                                
                                 Building.Value.Item_Build_Progress += 150
                                 Free_Slots -= 1.5
                                 Item_Point(ipoint.Key).Amount -= 1
@@ -196,11 +449,10 @@ Public Class Planet
                 Next
                 If processed = False Then
                     If Safe_Point.Amount >= 1 Then
-                        Safe_Point.Amount -= 1
-                        crew_list(CrewID).Wealth += 1
+                        'Safe_Point.Amount -= 1                        
                         Building.Value.Item_Build_Progress += 30
-                        Free_Slots -= 0.3                        
-                    End If                    
+                        Free_Slots -= 0.3
+                    End If
                 End If
 
             End If
@@ -227,26 +479,54 @@ Public Class Planet
         Loop
 
 
+
+        'Process Transporters Buy and Sell
         Dim Parts As Integer = Check_Resources(Building.Key, Item_Enum.Parts)
+        Dim Crystal As Integer = Check_Resources(Building.Key, Item_Enum.Crystal)
 
+        'Need to sell
+        Dim NeedToSell As Boolean = False
+        Dim NeedToBuy As Boolean = False
 
-        'Need to add to personality
-        If Parts < 400 Then
-            Dim Buy_amount As Integer = 800 - Parts
-            Dim Can_Affort As Integer = (Safe_Point.Amount - 500) \ 10
-            If Can_Affort < Buy_amount Then Buy_amount = Can_Affort
+        If Crystal >= 100 Then NeedToSell = True
+        If Parts <= 400 AndAlso Safe_Point.Amount > 500 Then NeedToBuy = True
 
+        Dim Buy_amount As Integer = 800 - Parts '800 is max hold amount
+        Dim Can_Affort As Integer = (Safe_Point.Amount - 500) \ 10 '10 is part cost
+        If Can_Affort < Buy_amount Then Buy_amount = Can_Affort
 
+        If NeedToSell = True AndAlso NeedToBuy = True Then
             If Building.Value.Available_Transporters.Count > 0 AndAlso Buy_amount >= 0 Then
-                Dim Id As Integer = GetNearistBuilding(building_type_enum.Factory, Safe_Location)
-                Dim Avilable As Integer = Check_Resources(Id, Item_Enum.Parts)
+                Dim Id As Integer = GetNearistBuilding(building_type_enum.Exchange, Safe_Location)
+                Dim Avilable As Integer = Exchange.Check_Exchange(Item_Enum.Parts)
                 If Avilable < Buy_amount Then Buy_amount = Avilable
-
-                If Id > -1 AndAlso Buy_amount > 100 Then
-                    Send_Transporter_Buy(crew_list(Building.Value.Available_Transporters.First), Item_Enum.Parts, Buy_amount * 10, Buy_amount, Safe_Location, Building_List(Id).PickupPoint, Id, Building.Value.PickupPoint, Building.Key)
+                If Id > -1 Then
+                    If Buy_amount > 100 Then
+                        Send_Transporter_BuySell(crew_list(Building.Value.Available_Transporters.First), Item_Enum.Crystal, (Crystal \ 100) * 100, Buy_amount * 10, Item_Enum.Parts, Buy_amount, Safe_Location, Building_List(Id).PickupPoint, Building.Value.PickupPoint, Building.Key)
+                        Building.Value.Available_Transporters.Remove(Building.Value.Available_Transporters.First)
+                    Else
+                        Send_Transporter_Sell(crew_list(Building.Value.Available_Transporters.First), Item_Enum.Crystal, (Crystal \ 100) * 100, Building_List(Id).PickupPoint, Safe_Location, Building.Value.PickupPoint, Building.Key)
+                        Building.Value.Available_Transporters.Remove(Building.Value.Available_Transporters.First)
+                    End If
+                End If
+            End If
+        ElseIf NeedToSell = True Then
+            If Building.Value.Available_Transporters.Count > 0 Then
+                Dim Id As Integer = GetNearistBuilding(building_type_enum.Exchange, Safe_Location)
+                If Id > -1 Then
+                    Send_Transporter_Sell(crew_list(Building.Value.Available_Transporters.First), Item_Enum.Crystal, (Crystal \ 100) * 100, Building_List(Id).PickupPoint, Safe_Location, Building.Value.PickupPoint, Building.Key)
                     Building.Value.Available_Transporters.Remove(Building.Value.Available_Transporters.First)
                 End If
-
+            End If
+        ElseIf NeedToBuy = True Then
+            If Building.Value.Available_Transporters.Count > 0 AndAlso Buy_amount >= 0 Then
+                Dim Id As Integer = GetNearistBuilding(building_type_enum.Exchange, Safe_Location)
+                Dim Avilable As Integer = Exchange.Check_Exchange(Item_Enum.Parts)
+                If Avilable < Buy_amount Then Buy_amount = Avilable
+                If Id > -1 AndAlso Buy_amount > 100 Then
+                    Send_Transporter_Buy(crew_list(Building.Value.Available_Transporters.First), Buy_amount * 10, Item_Enum.Parts, Buy_amount, Safe_Location, Building_List(Id).PickupPoint, Building.Value.PickupPoint, Building.Key)
+                    Building.Value.Available_Transporters.Remove(Building.Value.Available_Transporters.First)
+                End If
             End If
         End If
 
@@ -307,8 +587,7 @@ Public Class Planet
                         If Building.Value.Resource_Credit >= 1 OrElse Item_Point(ipoint.Key).Amount >= 1 Then
 
                             If Safe_Point.Amount >= 1 Then
-                                Safe_Point.Amount -= 1
-                                crew_list(CrewID).Wealth += 1
+                                'Safe_Point.Amount -= 1
                                 Building.Value.Item_Build_Progress += 100
                                 Free_Slots -= 1
                                 If Building.Value.Resource_Credit >= 1 Then
@@ -349,27 +628,57 @@ Public Class Planet
 
 
 
+        'Process Transporters Buy and Sell
         Dim Crystal As Integer = Check_Resources(Building.Key, Item_Enum.Crystal)
+        Dim RefinedCrystal As Integer = Check_Resources(Building.Key, Item_Enum.Refined_Crystal)
 
 
-        'Need to add to personality
-        If Crystal < 400 Then
-            Dim Buy_amount As Integer = 800 - Crystal
-            Dim Can_Affort As Integer = (Safe_Point.Amount - 500) \ 10
-            If Can_Affort < Buy_amount Then Buy_amount = Can_Affort
+        'Need to sell
+        Dim NeedToSell As Boolean = False
+        Dim NeedToBuy As Boolean = False
 
+        If RefinedCrystal >= 100 Then NeedToSell = True
+        If Crystal <= 400 AndAlso Safe_Point.Amount > 500 Then NeedToBuy = True
+
+        Dim Buy_amount As Integer = 800 - Crystal '800 is max hold amount
+        Dim Can_Affort As Integer = (Safe_Point.Amount - 500) \ 10 '10 is part cost
+        If Can_Affort < Buy_amount Then Buy_amount = Can_Affort
+
+        If NeedToSell = True AndAlso NeedToBuy = True Then
             If Building.Value.Available_Transporters.Count > 0 AndAlso Buy_amount >= 0 Then
-                Dim Id As Integer = GetNearistBuilding(building_type_enum.Mine, Safe_Location)
-                Dim Avilable As Integer = Check_Resources(Id, Item_Enum.Crystal)
+                Dim Id As Integer = GetNearistBuilding(building_type_enum.Exchange, Safe_Location)
+                Dim Avilable As Integer = Exchange.Check_Exchange(Item_Enum.Crystal)
                 If Avilable < Buy_amount Then Buy_amount = Avilable
-
-                If Id > -1 AndAlso Buy_amount > 100 Then
-                    Send_Transporter_Buy(crew_list(Building.Value.Available_Transporters.First), Item_Enum.Crystal, Buy_amount * 10, Buy_amount, Safe_Location, Building_List(Id).PickupPoint, Id, Building.Value.PickupPoint, Building.Key)
+                If Id > -1 Then
+                    If Buy_amount > 100 Then
+                        Send_Transporter_BuySell(crew_list(Building.Value.Available_Transporters.First), Item_Enum.Refined_Crystal, (RefinedCrystal \ 100) * 100, Buy_amount * 10, Item_Enum.Crystal, Buy_amount, Safe_Location, Building_List(Id).PickupPoint, Building.Value.PickupPoint, Building.Key)
+                        Building.Value.Available_Transporters.Remove(Building.Value.Available_Transporters.First)
+                    Else
+                        Send_Transporter_Sell(crew_list(Building.Value.Available_Transporters.First), Item_Enum.Refined_Crystal, (RefinedCrystal \ 100) * 100, Building_List(Id).PickupPoint, Safe_Location, Building.Value.PickupPoint, Building.Key)
+                        Building.Value.Available_Transporters.Remove(Building.Value.Available_Transporters.First)
+                    End If
+                End If
+            End If
+        ElseIf NeedToSell = True Then
+            If Building.Value.Available_Transporters.Count > 0 Then
+                Dim Id As Integer = GetNearistBuilding(building_type_enum.Exchange, Safe_Location)
+                If Id > -1 Then
+                    Send_Transporter_Sell(crew_list(Building.Value.Available_Transporters.First), Item_Enum.Refined_Crystal, (RefinedCrystal \ 100) * 100, Building_List(Id).PickupPoint, Safe_Location, Building.Value.PickupPoint, Building.Key)
                     Building.Value.Available_Transporters.Remove(Building.Value.Available_Transporters.First)
                 End If
-
+            End If
+        ElseIf NeedToBuy = True Then
+            If Building.Value.Available_Transporters.Count > 0 AndAlso Buy_amount >= 0 Then
+                Dim Id As Integer = GetNearistBuilding(building_type_enum.Exchange, Safe_Location)
+                Dim Avilable As Integer = Exchange.Check_Exchange(Item_Enum.Crystal)
+                If Avilable < Buy_amount Then Buy_amount = Avilable
+                If Id > -1 AndAlso Buy_amount > 100 Then
+                    Send_Transporter_Buy(crew_list(Building.Value.Available_Transporters.First), Buy_amount * 10, Item_Enum.Crystal, Buy_amount, Safe_Location, Building_List(Id).PickupPoint, Building.Value.PickupPoint, Building.Key)
+                    Building.Value.Available_Transporters.Remove(Building.Value.Available_Transporters.First)
+                End If
             End If
         End If
+
 
 
 
@@ -411,8 +720,7 @@ Public Class Planet
                         If Building.Value.Resource_Credit >= 1 OrElse Item_Point(ipoint.Key).Amount >= 1 Then
 
                             If Safe_Point.Amount >= 1 Then
-                                Safe_Point.Amount -= 1
-                                crew_list(CrewID).Wealth += 1
+                                'Safe_Point.Amount -= 1
                                 Building.Value.Item_Build_Progress += 100
                                 Free_Slots -= 1
                                 If Building.Value.Resource_Credit >= 1 Then
@@ -452,26 +760,55 @@ Public Class Planet
         Loop
 
 
-        Dim RCrystal As Integer = Check_Resources(Building.Key, Item_Enum.Refined_Crystal)
-
-        'Need to add to personality
-        If RCrystal < 400 Then
-
-            Dim Buy_amount As Integer = 800 - RCrystal
-            Dim Can_Affort As Integer = (Safe_Point.Amount - 500) \ 10
-            If Can_Affort < Buy_amount Then Buy_amount = Can_Affort
+        'Process Transporters Buy and Sell
+        Dim RefinedCrystal As Integer = Check_Resources(Building.Key, Item_Enum.Refined_Crystal)
+        Dim Parts As Integer = Check_Resources(Building.Key, Item_Enum.Parts)
 
 
+
+        'Need to sell
+        Dim NeedToSell As Boolean = False
+        Dim NeedToBuy As Boolean = False
+
+        If Parts >= 100 Then NeedToSell = True
+        If RefinedCrystal <= 400 AndAlso Safe_Point.Amount > 500 Then NeedToBuy = True
+
+        Dim Buy_amount As Integer = 800 - RefinedCrystal '800 is max hold amount
+        Dim Can_Affort As Integer = (Safe_Point.Amount - 500) \ 10 '10 is part cost
+        If Can_Affort < Buy_amount Then Buy_amount = Can_Affort
+
+        If NeedToSell = True AndAlso NeedToBuy = True Then
             If Building.Value.Available_Transporters.Count > 0 AndAlso Buy_amount >= 0 Then
-                Dim Id As Integer = GetNearistBuilding(building_type_enum.Refinery, Safe_Location)
-                Dim Avilable As Integer = Check_Resources(Id, Item_Enum.Refined_Crystal)
+                Dim Id As Integer = GetNearistBuilding(building_type_enum.Exchange, Safe_Location)
+                Dim Avilable As Integer = Exchange.Check_Exchange(Item_Enum.Refined_Crystal)
                 If Avilable < Buy_amount Then Buy_amount = Avilable
-
-                If Id > -1 AndAlso Buy_amount > 100 Then
-                    Send_Transporter_Buy(crew_list(Building.Value.Available_Transporters.First), Item_Enum.Refined_Crystal, Buy_amount * 10, Buy_amount, Safe_Location, Building_List(Id).PickupPoint, Id, Building.Value.PickupPoint, Building.Key)
+                If Id > -1 Then
+                    If Buy_amount > 100 Then
+                        Send_Transporter_BuySell(crew_list(Building.Value.Available_Transporters.First), Item_Enum.Parts, (Parts \ 100) * 100, Buy_amount * 10, Item_Enum.Refined_Crystal, Buy_amount, Safe_Location, Building_List(Id).PickupPoint, Building.Value.PickupPoint, Building.Key)
+                        Building.Value.Available_Transporters.Remove(Building.Value.Available_Transporters.First)
+                    Else
+                        Send_Transporter_Sell(crew_list(Building.Value.Available_Transporters.First), Item_Enum.Parts, (Parts \ 100) * 100, Building_List(Id).PickupPoint, Safe_Location, Building.Value.PickupPoint, Building.Key)
+                        Building.Value.Available_Transporters.Remove(Building.Value.Available_Transporters.First)
+                    End If
+                End If
+            End If
+        ElseIf NeedToSell = True Then
+            If Building.Value.Available_Transporters.Count > 0 Then
+                Dim Id As Integer = GetNearistBuilding(building_type_enum.Exchange, Safe_Location)
+                If Id > -1 Then
+                    Send_Transporter_Sell(crew_list(Building.Value.Available_Transporters.First), Item_Enum.Parts, (Parts \ 100) * 100, Building_List(Id).PickupPoint, Safe_Location, Building.Value.PickupPoint, Building.Key)
                     Building.Value.Available_Transporters.Remove(Building.Value.Available_Transporters.First)
                 End If
-
+            End If
+        ElseIf NeedToBuy = True Then
+            If Building.Value.Available_Transporters.Count > 0 AndAlso Buy_amount >= 0 Then
+                Dim Id As Integer = GetNearistBuilding(building_type_enum.Exchange, Safe_Location)
+                Dim Avilable As Integer = Exchange.Check_Exchange(Item_Enum.Refined_Crystal)
+                If Avilable < Buy_amount Then Buy_amount = Avilable
+                If Id > -1 AndAlso Buy_amount > 100 Then
+                    Send_Transporter_Buy(crew_list(Building.Value.Available_Transporters.First), Buy_amount * 10, Item_Enum.Refined_Crystal, Buy_amount, Safe_Location, Building_List(Id).PickupPoint, Building.Value.PickupPoint, Building.Key)
+                    Building.Value.Available_Transporters.Remove(Building.Value.Available_Transporters.First)
+                End If
             End If
         End If
 
@@ -513,7 +850,7 @@ Public Class Planet
         Return 0
     End Function
 
-    
+
     Sub Process_crew()
         If GSTFrequency = 0 Then
             'Send Crew to work
@@ -524,7 +861,7 @@ Public Class Planet
 
 
             'Send to work
-            If GST = 800 Then                
+            If GST = 800 Then
                 For Each Crew In crew_list
                     If Crew.Value.WorkBuilding > -1 AndAlso Crew.Value.WorkShift = Work_Shift_Enum.Morning Then
                         Send_List.Add(Crew, Send_work_List_Enum.Work)
@@ -566,26 +903,42 @@ Public Class Planet
             End If
 
 
-        End If
+            If Send_List.Count > 0 Then
+
+                Select Case Send_List.First.Value
+
+                    Case Is = Send_work_List_Enum.Work
+                        Send_Crew_ToWork(Send_List.First.Key)
+                        Send_List.Remove(Send_List.First.Key)
+
+                    Case Is = Send_work_List_Enum.Home
+                        Send_Crew_Home(Send_List.First.Key)
+                        Send_List.Remove(Send_List.First.Key)
+
+                End Select
+
+            End If
 
 
-        If Send_List.Count > 0 Then
 
-            Select Case Send_List.First.Value
+            If BuilderSpawnCounter <= 0 AndAlso BuilderCount < 2 Then
+                BuilderCount += 1
+                Dim Id As Integer
+                For Id = 0 To 10000
+                    If Not crew_list.ContainsKey(Id) Then Exit For
+                Next
+                crew_list.Add(Id, New Crew(0, New PointD(0, 0), 0, Officer_location_enum.Planet, 1, character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head, New crew_resource_type(0, 0)))
+                crew_list(Id).Worker_Type = Worker_Type_Enum.Builder
+            End If
+            If BuilderSpawnCounter > 0 Then BuilderSpawnCounter -= 1
 
-                Case Is = Send_work_List_Enum.Work
-                    Send_Crew_ToWork(Send_List.First.Key)
-                    Send_List.Remove(Send_List.First.Key)
-
-                Case Is = Send_work_List_Enum.Home
-                    Send_Crew_Home(Send_List.First.Key)
-                    Send_List.Remove(Send_List.First.Key)
-
-            End Select
 
         End If
 
     End Sub
+
+
+
 
 
     Sub Send_Crew_ToWork(ByVal Crew As KeyValuePair(Of Integer, Crew))
@@ -656,7 +1009,7 @@ Public Class Planet
 
                     Dim tile As PointI = Crew.Value.find_tile
 
-                    path_find.Standard_Pathfind(tile, work_Point)
+                    path_find.Standard_Pathfind(tile, point)
 
                     If path_find.Found_State = Pathfind.Pathfind.PFState.Found Then
                         Dim list As LinkedList(Of PointI)
@@ -728,7 +1081,7 @@ Public Class Planet
                 'Pathfind
                 crew.Value.RemoveWhenDone = True
                 'If Not tile_map(Crew.Value.find_tile.x, Crew.Value.find_tile.y).walkable = walkable_type_enum.Walkable Then Exit For
-
+                crew.Value.command_queue.Enqueue(New Crew.Command_Trans_Start())
 
 
                 Dim End_Point As PointI
@@ -750,7 +1103,7 @@ Public Class Planet
 
 
         End If
-         
+
 
     End Sub
 
@@ -781,11 +1134,11 @@ Public Class Planet
                 Found_Bank_AP = False
                 Building_List(Crew.BankBuilding).access_point(Bank_Point).Used = True
 
-                
+
                 path_find.Standard_Pathfind(tile, Bank_Point)
                 If path_find.Found_State = Pathfind.Pathfind.PFState.Found Then
 
-                
+
                     If Crew.command_queue.Any Then
                         Crew.command_queue.Clear()
                     End If
@@ -821,21 +1174,15 @@ Public Class Planet
             'Set NextUp to work to true
             Building_List(Crew.PubBuilding).access_point(Pub_Point).Used = True
             'Pathfind
-           
+
             path_find.Standard_Pathfind(tile, Pub_Point)
             If path_find.Found_State = Pathfind.Pathfind.PFState.Found Then
-
-
-                If Crew.command_queue.Any Then
-                    Crew.command_queue.Clear()
-                End If
 
                 Building_List(Crew.PubBuilding).Assigned_crew_list.Add(ID)
                 Dim list As LinkedList(Of PointI)
                 list = path_find.Path
 
-                'Need to add wait for finish
-                Crew.command_queue.Clear()
+                'Need to add wait for finish                
                 For Each dest In list
                     Crew.command_queue.Enqueue(New Crew.Command_move(New PointD(dest.x * 32, dest.y * 32)))
                 Next
@@ -852,7 +1199,7 @@ Public Class Planet
 
     End Function
 
-    Sub Send_Transporter_Buy(ByVal Crew As Crew, ByVal Type As Item_Enum, ByVal Cash As Integer, ByVal Amount As Integer, ByVal Safe_Point As PointI, ByVal Buy_Point As PointI, ByVal DestanationID As Integer, ByVal Dropoff_Point As PointI, ByVal DropoffID As Integer)
+    Sub Send_Transporter_Buy(ByVal Crew As Crew, ByVal PickupCash As Integer, ByVal BuyType As Item_Enum, ByVal BuyAmount As Integer, ByVal Safe_Point As PointI, ByVal Exchange_Point As PointI, ByVal Building_Point As PointI, ByVal BuildingID As Integer)
 
 
         'Goto Safe Point
@@ -861,48 +1208,124 @@ Public Class Planet
 
         Crew.command_queue.Clear()
 
-        path_find.Standard_Pathfind(tile, Safe_Point)
-        If path_find.Found_State = Pathfind.Pathfind.PFState.Found Then
-
-            Dim list As LinkedList(Of PointI)
-            list = path_find.Path
-
-            For Each dest In list
-                Crew.command_queue.Enqueue(New Crew.Command_move(New PointD(dest.x * 32, dest.y * 32)))
-            Next
-        End If
+        MoveCrewTo(tile, Safe_Point, Crew)
 
         'Pickup Money
-        Crew.command_queue.Enqueue(New Crew.Command_Trans_Pickup(Cash))
+        Crew.command_queue.Enqueue(New Crew.Command_Trans_Pickup(PickupCash))
 
         'Send To Buy Point
-        path_find.Standard_Pathfind(Safe_Point, Buy_Point)
-        If path_find.Found_State = Pathfind.Pathfind.PFState.Found Then
-            Dim list As LinkedList(Of PointI)
-            list = path_find.Path
-
-            For Each dest In list
-                Crew.command_queue.Enqueue(New Crew.Command_move(New PointD(dest.x * 32, dest.y * 32)))
-            Next
-        End If
+        MoveCrewTo(Safe_Point, Exchange_Point, Crew)
 
         'Buy Goods
-        Crew.command_queue.Enqueue(New Crew.Command_Trans_Buy(DestanationID, Amount, Type))
+        Crew.command_queue.Enqueue(New Crew.Command_Trans_Buy(BuyAmount, BuyType))
+
+        'Pickup Any Exchange money
+        Crew.command_queue.Enqueue(New Crew.Command_Trans_Pickup_Exchange(BuildingID))
 
         'Send To Drop Off Point
-        path_find.Standard_Pathfind(Buy_Point, Dropoff_Point)
-        If path_find.Found_State = Pathfind.Pathfind.PFState.Found Then
-            Dim list As LinkedList(Of PointI)
-            list = path_find.Path
-
-
-            For Each dest In list
-                Crew.command_queue.Enqueue(New Crew.Command_move(New PointD(dest.x * 32, dest.y * 32)))
-            Next
-        End If
+        MoveCrewTo(Exchange_Point, Building_Point, Crew)
 
         'Drop Off Goods
-        Crew.command_queue.Enqueue(New Crew.Command_Trans_Dropoff(DropoffID, Amount, Type))
+        Crew.command_queue.Enqueue(New Crew.Command_Trans_Dropoff(BuildingID, BuyAmount, BuyType))
+
+        'Send To Safe Point
+        MoveCrewTo(Building_Point, Safe_Point, Crew)
+
+        'Dropoff Money
+        Crew.command_queue.Enqueue(New Crew.Command_Trans_Dropoff_Money(BuildingID))
+
+        'Add to workers
+        Crew.command_queue.Enqueue(New Crew.Command_Trans_Start())
+    End Sub
+
+
+
+    Sub Send_Transporter_Sell(ByVal Crew As Crew, ByVal SellType As Item_Enum, ByVal SellAmount As Integer, ByVal Exchange_Point As PointI, ByVal Safe_Point As PointI, ByVal Building_Point As PointI, ByVal BuildingID As Integer)
+
+
+        'Goto Safe Point
+        If Not tile_map(Crew.find_tile.x, Crew.find_tile.y).walkable = walkable_type_enum.Walkable Then Exit Sub
+        Dim tile As PointI = Crew.find_tile
+
+        Crew.command_queue.Clear()
+
+        'Send To Point to pickup
+        MoveCrewTo(tile, Building_Point, Crew)
+
+        'Pickup Goods
+        Crew.command_queue.Enqueue(New Crew.Command_Trans_Pickup_Goods(BuildingID, SellAmount, SellType))
+
+        'Send To Buy Point
+        MoveCrewTo(Building_Point, Exchange_Point, Crew)
+
+        'Sell Goods
+        Crew.command_queue.Enqueue(New Crew.Command_Trans_Sell(BuildingID, SellAmount, SellType))
+
+        'Pickup Any Exchange money
+        Crew.command_queue.Enqueue(New Crew.Command_Trans_Pickup_Exchange(BuildingID))
+
+        'Send To Safe Point
+        MoveCrewTo(Exchange_Point, Safe_Point, Crew)
+
+        'Dropoff Money
+        Crew.command_queue.Enqueue(New Crew.Command_Trans_Dropoff_Money(BuildingID))
+
+        'Send To Drop Off Point
+        MoveCrewTo(Safe_Point, Building_Point, Crew)
+
+        'Add to workers
+        Crew.command_queue.Enqueue(New Crew.Command_Trans_Start())
+    End Sub
+
+
+    Sub Send_Transporter_BuySell(ByVal Crew As Crew, ByVal SellType As Item_Enum, ByVal SellAmount As Integer, ByVal PickupCash As Integer, ByVal BuyType As Item_Enum, ByVal BuyAmount As Integer, ByVal Safe_Point As PointI, ByVal Exchange_Point As PointI, ByVal Building_Point As PointI, ByVal BuildingID As Integer)
+
+
+        'Goto Safe Point
+        If Not tile_map(Crew.find_tile.x, Crew.find_tile.y).walkable = walkable_type_enum.Walkable Then Exit Sub
+        Dim tile As PointI = Crew.find_tile
+
+        Crew.command_queue.Clear()
+
+        MoveCrewTo(tile, Safe_Point, Crew)
+
+        'Pickup Money
+        Crew.command_queue.Enqueue(New Crew.Command_Trans_Pickup(PickupCash))
+
+
+        'Send To Point to pickup
+        MoveCrewTo(Safe_Point, Building_Point, Crew)
+
+        'Pickup Goods
+        Crew.command_queue.Enqueue(New Crew.Command_Trans_Pickup_Goods(BuildingID, SellAmount, SellType))
+
+        'Send To Buy Point
+        MoveCrewTo(Building_Point, Exchange_Point, Crew)
+
+        'Buy Goods
+        Crew.command_queue.Enqueue(New Crew.Command_Trans_Buy(BuyAmount, BuyType))
+
+        'Sell Goods
+        Crew.command_queue.Enqueue(New Crew.Command_Trans_Sell(BuildingID, SellAmount, SellType))
+
+        'Pickup Any Exchange money
+        Crew.command_queue.Enqueue(New Crew.Command_Trans_Pickup_Exchange(BuildingID))
+
+        'Send To Drop Off Point
+        MoveCrewTo(Exchange_Point, Building_Point, Crew)
+
+        'Drop Off Goods
+        Crew.command_queue.Enqueue(New Crew.Command_Trans_Dropoff(BuildingID, BuyAmount, BuyType))
+
+        'Send To Safe Point
+        MoveCrewTo(Building_Point, Safe_Point, Crew)
+
+        'Dropoff Money
+        Crew.command_queue.Enqueue(New Crew.Command_Trans_Dropoff_Money(BuildingID))
+
+        'Send To Drop Off Point
+        MoveCrewTo(Safe_Point, Building_Point, Crew)
+
         'Add to workers
         Crew.command_queue.Enqueue(New Crew.Command_Trans_Start())
     End Sub
@@ -1029,14 +1452,14 @@ Public Class Planet
             Next
         Next
 
-        For Each Crew In remove_List            
+        For Each Crew In remove_List
             crew_list.Remove(Crew)
             For Each building In Building_List
                 If building.Value.Working_crew_list.Contains(Crew) Then building.Value.Working_crew_list.Remove(Crew)
                 If building.Value.Assigned_crew_list.Contains(Crew) Then building.Value.Assigned_crew_list.Remove(Crew)
                 If building.Value.Available_Transporters.Contains(Crew) Then building.Value.Available_Transporters.Remove(Crew)
             Next
-        Next        
+        Next
         remove_List.Clear()
 
     End Sub
@@ -1051,10 +1474,27 @@ Public Class Planet
 
 
 
+    Function MoveCrewTo(ByVal StartPoint As PointI, ByVal EndPoint As PointI, ByVal Crew As Crew) As Boolean
+
+        path_find.Standard_Pathfind(StartPoint, EndPoint)
+        If path_find.Found_State = Pathfind.Pathfind.PFState.Found Then
+            Dim list As LinkedList(Of PointI)
+            list = path_find.Path
+
+            For Each dest In list
+                Crew.command_queue.Enqueue(New Crew.Command_move(New PointD(dest.x * 32, dest.y * 32)))
+            Next
+        Else
+            Return False
+        End If
+        Return True
+    End Function
 
 
 
 
 
-
+    Protected Overrides Sub Finalize()
+        MyBase.Finalize()
+    End Sub
 End Class

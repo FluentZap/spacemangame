@@ -36,47 +36,50 @@
         Next
         P.Resource_Points.Clear()
 
-        For x = 0 To 14 Step 2
-            For y = 1 To 14 Step 2
-                P.Resource_Points.Add(New PointI(x, y), False)
-            Next
-        Next
+        'P.Resource_Points.Add(New PointI(1, 1), False)
 
-        'P.Resource_Points.Add(New PointI(2, 2), False)
+        'P.Resource_Points.Add(New PointI(3, 1), False)
+
+        P.Resource_Points.Add(New PointI(5, 1), False)
+        P.Farm_Points.Add(New PointI(4, 4), False)
 
         Create_Resource_Points()
 
-        Build_AppartmentH(New PointI(32, 0))
-        Build_PubH(New PointI(32, 16))
 
-        Dim CID As Integer
-        Dim BID As Integer = 2
-        For Each Point In P.Resource_Points
+        Build_Outpost(New PointI(32 * 2, 32 * 2))
+        P.CapitalPoint = New PointI(2, 2)
 
-            Build_Mine(New PointI(Point.Key.x * 32, Point.Key.y * 32))
-            CID = AddTestWorkforce(BID, CID)
-            BID += 1
+        'Build_AppartmentH(New PointI(32, 0))
+        'Build_PubH(New PointI(32, 16))
 
-            Build_RefineryH(New PointI(Point.Key.x * 32 + 32, Point.Key.y * 32))
-            CID = AddTestWorkforce(BID, CID)
-            BID += 1
+        'Dim CID As Integer
+        'Dim BID As Integer = 2
+        'For Each Point In P.Resource_Points
 
-            Build_FactoryH(New PointI(Point.Key.x * 32 + 32, Point.Key.y * 32 + 16))
-            CID = AddTestWorkforce(BID, CID)
-            BID += 1
+        'Build_Mine(New PointI(Point.Key.x * 32, Point.Key.y * 32))
+        'CID = AddTestWorkforce(BID, CID)
+        'BID += 1
 
+        'Build_RefineryH(New PointI(Point.Key.x * 32 + 32, Point.Key.y * 32))
+        'CID = AddTestWorkforce(BID, CID)
+        'BID += 1
 
-            Build_RefineryH(New PointI(Point.Key.x * 32, Point.Key.y * 32 + 32))
-            CID = AddTestWorkforce(BID, CID)
-            BID += 1
-
-            Build_FactoryH(New PointI(Point.Key.x * 32, Point.Key.y * 32 + 48))
-            CID = AddTestWorkforce(BID, CID)
-            BID += 1
+        'Build_FactoryH(New PointI(Point.Key.x * 32 + 32, Point.Key.y * 32 + 16))
+        'CID = AddTestWorkforce(BID, CID)
+        'BID += 1
 
 
-        Next
+        'Build_RefineryH(New PointI(Point.Key.x * 32, Point.Key.y * 32 + 32))
+        'CID = AddTestWorkforce(BID, CID)
+        'BID += 1
 
+        'Build_FactoryH(New PointI(Point.Key.x * 32, Point.Key.y * 32 + 48))
+        'CID = AddTestWorkforce(BID, CID)
+        'BID += 1
+
+
+        'Next
+        'Build_Exchange(New PointI(32 * 3, 32 * 1))
 
         'Build_Mine(New PointI(0, 0))
 
@@ -93,6 +96,9 @@
 
         'Create_City()
 
+        P.CitizensMax = 2
+        P.Citizens = 0
+        P.Building_Count.SetLevel(Planet_Level_Type.Outpost)        
     End Sub
 
     Function AddTestWorkforce(ByVal BID As Integer, ByVal CID As Integer) As Integer
@@ -342,6 +348,68 @@
 
     End Sub
 
+
+
+    Sub Build_Exchange(ByVal pos As PointI)
+        Dim Building_tiles As HashSet(Of Build_Tiles)
+
+        Building_tiles = Load_Building("Desert_Exchange.bld")
+
+        For Each t In Building_tiles
+            P.tile_map(t.X + pos.x, t.Y + pos.y).sprite = t.Sprite
+            P.tile_map(t.X + pos.x, t.Y + pos.y).sprite2 = t.Sprite2
+            P.tile_map(t.X + pos.x, t.Y + pos.y).type = CType(t.Type, planet_tile_type_enum)
+            P.tile_map(t.X + pos.x, t.Y + pos.y).walkable = CType(t.Walkable, walkable_type_enum)
+        Next
+
+
+
+        Dim ID As Integer
+        For a = 0 To 100000
+            If Not P.Building_List.ContainsKey(a) Then ID = a : Exit For
+        Next
+        P.Building_List.Add(ID, New Planet_Building(0, New Rectangle(pos.x, pos.y, 32, 32), building_type_enum.Exchange))
+
+
+        P.Building_List(ID).PickupPoint = New PointI(pos.x + 5, pos.y + 13)
+
+        'P.Building_List(ID).access_point.Add(New PointI(pos.x + 6, pos.y + 9), New Building_Access_Point_Type(BAP_Type.Worker))
+
+        'P.Building_List(ID).access_point.Add(New PointI(pos.x + 1, pos.y + 1), New Building_Access_Point_Type(BAP_Type.Transporter))
+
+        For x = 3 To 28
+            P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + x, pos.y + 3), New Item_Slots_Type(False))
+            P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + x, pos.y + 4), New Item_Slots_Type(False))
+        Next
+
+        'P.Item_Point.Add(New PointI(pos.x + 4, pos.y + 2), New Item_Point_Type(100, Item_Enum.Crystal))
+        'P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + 4, pos.y + 4), New Item_Slots_Type(True))
+        'P.Item_Point.Add(New PointI(pos.x + 4, pos.y + 4), New Item_Point_Type(2000, Item_Enum.Refined_Crystal_Piece))
+
+    End Sub
+
+
+
+
+    Sub Build_Outpost(ByVal pos As PointI)
+        Dim Building_tiles As HashSet(Of Build_Tiles)
+
+        Building_tiles = Load_Building("Desert_Outpost.bld")
+
+        For Each t In Building_tiles
+            P.tile_map(t.X + pos.x, t.Y + pos.y).sprite = t.Sprite
+            P.tile_map(t.X + pos.x, t.Y + pos.y).sprite2 = t.Sprite2
+            P.tile_map(t.X + pos.x, t.Y + pos.y).type = CType(t.Type, planet_tile_type_enum)
+            P.tile_map(t.X + pos.x, t.Y + pos.y).walkable = CType(t.Walkable, walkable_type_enum)
+        Next
+
+        Dim ID As Integer
+        For a = 0 To 100000
+            If Not P.Building_List.ContainsKey(a) Then ID = a : Exit For
+        Next
+        P.Building_List.Add(ID, New Planet_Building(0, New Rectangle(pos.x, pos.y, 32, 32), building_type_enum.Outpost))
+        P.Building_List(ID).PickupPoint = New PointI(pos.x + 15, pos.y + 15)
+    End Sub
 
     Sub Create_Resource_Points()
 

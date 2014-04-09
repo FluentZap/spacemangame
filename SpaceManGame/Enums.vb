@@ -223,9 +223,12 @@
 
         transport_start
         transport_pickup_money
-        transport_buy_goods        
+        transport_dropoff_money
+        transport_pickup_exchange_money
+        transport_buy_goods
+        transport_sell_goods
         transport_dropoff_goods
-
+        transport_pickup_goods
     End Enum
     Enum ship_class_enum As Byte
         fighterW
@@ -516,12 +519,15 @@
     End Enum
 
     Enum building_type_enum
+        Outpost
         'Industrial
         Factory
         Refinery
         Mine
         Laboratory
+        Farm
         'Commercial
+        Exchange
         Shop
         Pub
         Faction_Office
@@ -530,6 +536,27 @@
         House
         Apartment
     End Enum
+
+    Enum Planet_Level_Type
+        Outpost
+        Village
+        Town
+        City
+        Metropolis
+        Empire
+    End Enum
+
+
+    Enum Personality_Type_Type
+        Aggressive
+        Sly
+        Conqueror
+        Political
+        Militaristic
+    End Enum
+
+
+
 
     Enum d3d_font_enum
         Big_Button
@@ -559,6 +586,7 @@
         Worker
         Transporter
         Gaurd
+        Builder
     End Enum
 
 
