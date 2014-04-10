@@ -1,4 +1,4 @@
-﻿Module BuildingLoader
+﻿Public Module BuildingLoader
 
     <Serializable()> Class Build_Tiles
         Public X As Byte

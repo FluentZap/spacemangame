@@ -75,6 +75,14 @@
         End Operator
 
 
+        Public Shared Operator *(ByVal P As PointI, ByVal I As Integer) As PointI            
+            Return New PointI(P.x * I, P.y * I)
+        End Operator
+
+        Public Shared Operator \(ByVal P As PointI, ByVal I As Integer) As PointI
+            Return New PointI(P.x \ I, P.y \ I)
+        End Operator
+
     End Structure
 
 
@@ -229,6 +237,10 @@
         transport_sell_goods
         transport_dropoff_goods
         transport_pickup_goods
+
+
+        builder_build_tile
+        builder_start_work
     End Enum
     Enum ship_class_enum As Byte
         fighterW
@@ -535,6 +547,7 @@
         'Residential
         House
         Apartment
+        Specials
     End Enum
 
     Enum Planet_Level_Type
