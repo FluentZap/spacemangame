@@ -275,7 +275,7 @@
     Public Drag As Double = 0.02
     Public Near_planet As Integer
     Public Loaded_planet As Integer
-    Public GST As Integer = 1795
+    Public GST As Integer = 2800
     Public GSTFrequency As Integer
 
     Public external_planet_texture(15) As Texture

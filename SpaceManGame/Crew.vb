@@ -202,6 +202,31 @@ End Enum
         End Sub
     End Class
 
+
+
+
+    <Serializable()> Public Class Command_Builder_Build_Tile
+        Inherits Crew_Command_script
+        Public Time As Integer
+        Public Tile As Build_Tiles
+
+        Sub New(ByVal Time As Integer, ByVal Tile As Build_Tiles)
+            Me.Time = Time
+            Me.Tile = Tile
+            type = crew_script_enum.builder_build_tile
+        End Sub
+    End Class
+
+
+    <Serializable()> Public Class Command_Builder_Start_Work
+        Inherits Crew_Command_script
+        
+        Sub New()
+            type = crew_script_enum.builder_start_work
+        End Sub
+    End Class
+
+
 #End Region
 
 

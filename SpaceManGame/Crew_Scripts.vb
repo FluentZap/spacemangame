@@ -46,6 +46,11 @@
                     Case crew_script_enum.transport_start : crew_script_transport_start_work(Crew_List(key), key)
 
 
+
+                    Case crew_script_enum.builder_build_tile : crew_script_builder_build_tile(Crew_List(key), key)
+                    Case crew_script_enum.builder_start_work : crew_script_builder_start_work(Crew_List(key), key)
+
+
                 End Select
                 If Crew_List(key).command_queue.First.status = script_status_enum.complete Then Crew_List(key).command_queue.Dequeue()
             End If
@@ -492,6 +497,35 @@
 
 
     End Sub
+
+
+
+
+
+
+
+    Public Sub crew_script_builder_build_tile(ByVal crew_member As Crew, ByVal id As Integer)
+        Dim command As Crew.Command_Builder_Build_Tile = DirectCast(crew_member.command_queue.First, Crew.Command_Builder_Build_Tile)
+        'Only programed for planets
+        Dim planet As Planet = u.Planet_List(crew_member.Location_ID)
+        If command.Time <= 0 Then
+            planet.Build_Tile(command.Tile)
+            crew_member.command_queue.First.status = script_status_enum.complete
+        Else
+            command.Time -= 1
+        End If
+    End Sub
+
+
+    Public Sub crew_script_builder_start_work(ByVal crew_member As Crew, ByVal id As Integer)
+        Dim command As Crew.Command_Builder_Start_Work = DirectCast(crew_member.command_queue.First, Crew.Command_Builder_Start_Work)
+        'Only programed for planets
+        Dim planet As Planet = u.Planet_List(crew_member.Location_ID)
+        If planet.Build_List.Count <= 0 Then planet.MoveCrewTo(crew_member.find_tile, planet.CapitalPoint * 32, crew_member)
+        planet.Builder_List.Add(id)
+        crew_member.command_queue.First.status = script_status_enum.complete
+    End Sub
+
 
 #End Region
 

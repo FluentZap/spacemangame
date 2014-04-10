@@ -15,20 +15,28 @@ Public Class Building_Count_Type
     Public CPub As Integer
     Public CSpecial As Integer
 
+    Public CitizensBuildingLimit As Integer
+
     Sub SetLevel(ByVal Level As Planet_Level_Type)
         Select Case Level
             Case Is = Planet_Level_Type.Outpost
                 Mine = 1 : Farm = 1 : Factory = 1 : Refinery = 1 : Pub = 1 : Special = 1
+                CitizensBuildingLimit = 2
             Case Is = Planet_Level_Type.Village
                 Mine = 2 : Farm = 2 : Factory = 2 : Refinery = 2 : Pub = 2 : Special = 2
+                CitizensBuildingLimit = 3
             Case Is = Planet_Level_Type.Town
                 Mine = 2 : Farm = 3 : Factory = 2 : Refinery = 2 : Pub = 3 : Special = 6
+                CitizensBuildingLimit = 3
             Case Is = Planet_Level_Type.City
                 Mine = 3 : Farm = 4 : Factory = 3 : Refinery = 3 : Pub = 4 : Special = 7
+                CitizensBuildingLimit = 4
             Case Is = Planet_Level_Type.Metropolis
                 Mine = 4 : Farm = 5 : Factory = 4 : Refinery = 4 : Pub = 5 : Special = 10
+                CitizensBuildingLimit = 4
             Case Is = Planet_Level_Type.Empire
                 Mine = 4 : Farm = 6 : Factory = 5 : Refinery = 5 : Pub = 6 : Special = 14
+                CitizensBuildingLimit = 5
         End Select
     End Sub
 
@@ -69,7 +77,7 @@ Public Enum Send_work_List_Enum
 End Enum
 
 Public Class Planet
-    Public ID As Integer
+    Public PlanetID As Integer
     Public orbits_planet As Boolean
     Public orbit_point As Integer
     Public orbit_distance As Integer
@@ -81,7 +89,7 @@ Public Class Planet
 
     Public Animation_Glow As Single
     Public Animation_Glow_subtract As Boolean
-    Public Block_Map As HashSet(Of PointI) = New HashSet(Of PointI)
+    Public Block_Map As New Dictionary(Of PointI, Boolean)()
     Public Resource_Points As New Dictionary(Of PointI, Boolean)() 'Is true is resource point is taken
     Public Farm_Points As New Dictionary(Of PointI, Boolean)() 'Is true is farm point is taken
 
@@ -95,10 +103,10 @@ Public Class Planet
 
     Private BuilderSpawnCounter As Integer = 100
     Private BuilderCount As Integer
+    Public Builder_List As New HashSet(Of Integer)()
 
-    Private Build_List As New Dictionary(Of Integer, HashSet(Of Build_Tiles))()
+    Public Build_List As New Dictionary(Of Integer, HashSet(Of Build_Tiles))()
 
-    Public CitizensBuildingLimit As Integer
     Public Citizens As Integer
     Public CitizensMax As Integer
     Public Building_Count As New Building_Count_Type()
@@ -128,7 +136,7 @@ Public Class Planet
 
 
     Sub New(ByVal ID As Integer, ByVal type As planet_type_enum, ByVal size As PointI, ByVal orbit_point As Integer, ByVal orbit_distance As Integer, ByVal orbits_planet As Boolean, ByVal theta_offset As Double)
-        Me.ID = ID
+        Me.PlanetID = ID
         Me.type = type
         ReDim Me.tile_map(size.x, size.y)
         Me.size = size
@@ -136,17 +144,26 @@ Public Class Planet
         Me.orbit_distance = orbit_distance
         Me.orbits_planet = orbits_planet
         Me.theta = theta_offset
+
+        'Add Block Map (Tells weather the block is built on or not)        
     End Sub
 
 
 
-    Sub Make_Building()
 
-        'tile_map(t.X + Pos.x, t.Y + Pos.y).sprite = t.Sprite
-        'tile_map(t.X + Pos.x, t.Y + Pos.y).sprite2 = t.Sprite2
-        'tile_map(t.X + Pos.x, t.Y + Pos.y).type = CType(t.Type, planet_tile_type_enum)
-        'tile_map(t.X + Pos.x, t.Y + Pos.y).walkable = CType(t.Walkable, walkable_type_enum)
+    Sub Build_Tile(ByVal T As Build_Tiles)
+        tile_map(T.X, T.Y).sprite = T.Sprite
+        tile_map(T.X, T.Y).sprite2 = T.Sprite2
+        tile_map(T.X, T.Y).type = CType(T.Type, planet_tile_type_enum)
+        tile_map(T.X, T.Y).walkable = CType(T.Walkable, walkable_type_enum)
+    End Sub
 
+
+    Sub Start_Building_Constuction(ByVal ID As Integer, ByVal Build_Tiles As HashSet(Of Build_Tiles))
+        If Not Build_List.ContainsKey(ID) Then Build_List.Add(ID, New HashSet(Of Build_Tiles)())
+        For Each t In Build_Tiles
+            Build_List(ID).Add(t)
+        Next
     End Sub
 
 
@@ -183,40 +200,50 @@ Public Class Planet
                 Mine += 4 : Farm += 1 : Factory += 5 : Refinery += 6 : Pub += 2 : Special += 3
         End Select
         Dim list As New Dictionary(Of Integer, Double)()
-        Dim Highest As Integer = 0
+        Dim Highest As Integer = -1
+        list.Add(-1, -1)
 
-        If Building_Count.CMine < Mine Then list.Add(0, Mine) : Highest = 0
-        If Building_Count.CFarm < Farm Then list.Add(1, Farm) : Highest = 1
-        If Building_Count.CFactory < Factory Then list.Add(2, Factory) : Highest = 2
-        If Building_Count.CRefinery < Refinery Then list.Add(3, Refinery) : Highest = 3
-        If Building_Count.CPub < Pub Then list.Add(4, Pub) : Highest = 4
-        If Building_Count.CSpecial < Special Then list.Add(5, Special) : Highest = 5
+        If Building_Count.CMine < Building_Count.Mine AndAlso Building_Count.CMine < Resource_Points.Count Then list.Add(0, Mine)
+        If Building_Count.CFarm < Building_Count.Farm AndAlso Building_Count.CFarm < Farm_Points.Count Then list.Add(1, Farm)
+        If Building_Count.CFactory < Building_Count.Factory Then list.Add(2, Factory)
+        If Building_Count.CRefinery < Building_Count.Refinery Then list.Add(3, Refinery)
+        If Building_Count.CPub < Building_Count.Pub Then list.Add(4, Pub)
+
+        ''If Building_Count.CSpecial < Special Then list.Add(5, Special) : Highest = 5
 
         For Each item In list
             If item.Value > list(Highest) Then Highest = item.Key
         Next
+
+        Dim pos As PointI
+        Dim Id As Integer = GetEmptyBuildingID()
         Select Case Highest
+            Case Is = -1
+
             Case Is = 0
-                FindBestBuildingPos(building_type_enum.Mine)
+                pos = FindBestBuildingPos(building_type_enum.Mine) * 32
+                PlanetGenerator.Build_Mine(Id, Owner, pos, Me, False)
+                Start_Building_Constuction(Id, Build_From_File(building_type_enum.Mine, Me, pos, True))
             Case Is = 1
+                'pos = FindBestBuildingPos(building_type_enum.Farm) * 32
+                'PlanetGenerator.Build_FactoryH(Id, Owner, pos, Me, True)
+                'Start_Building_Constuction(Id, Build_From_File(building_type_enum.Farm, Me, pos, True))
             Case Is = 2
-            Case Is = 3
+                pos = FindBestBuildingPos(building_type_enum.Factory) * 32
+                PlanetGenerator.Build_FactoryH(Id, Owner, pos, Me, False)
+                Start_Building_Constuction(Id, Build_From_File(building_type_enum.Factory, Me, pos, True))
+            Case Is = 3                
+                pos = FindBestBuildingPos(building_type_enum.Refinery) * 32
+                PlanetGenerator.Build_RefineryH(Id, Owner, pos, Me, False)
+                Start_Building_Constuction(Id, Build_From_File(building_type_enum.Refinery, Me, pos, True))
             Case Is = 4
+                pos = FindBestBuildingPos(building_type_enum.Pub) * 32
+                PlanetGenerator.Build_PubH(Id, Owner, pos, Me, False)
+                Start_Building_Constuction(Id, Build_From_File(building_type_enum.Pub, Me, pos, True))
             Case Is = 5
         End Select
 
 
-        Dim Building_tiles As HashSet(Of Build_Tiles)
-        Building_tiles = Load_Building("Desert_Outpost.bld")
-
-
-        Dim ID As Integer
-        For a = 0 To 100000
-            If Not Building_List.ContainsKey(a) Then ID = a : Exit For
-        Next
-        'Building_List.Add(ID, New Planet_Building(Owner, New Rectangle(Pos.x, Pos.y, 32, 32), Building))
-
-        Build_List.Add(ID, Building_tiles)
     End Sub
 
 
@@ -241,11 +268,14 @@ Public Class Planet
                 Return point
 
             Case Is = building_type_enum.Factory
-                Return FindEmptyTile(CapitalPoint)                
+                Return FindEmptyTile(CapitalPoint)
+            Case Is = building_type_enum.Refinery
+                Return FindEmptyTile(CapitalPoint)
+            Case Is = building_type_enum.Pub
+                Return FindEmptyTile(CapitalPoint)
         End Select
 
     End Function
-
 
 
     Function FindEmptyTile(ByVal Position As PointI) As PointI
@@ -256,18 +286,20 @@ Public Class Planet
                     pos.x = Position.x + x
                     pos.y = Position.y + y
                     If pos.x >= 0 AndAlso pos.x <= size.x AndAlso pos.y >= 0 AndAlso pos.y <= size.y Then
-                        If Not Block_Map.Contains(New PointI(pos.x, pos.y)) Then Return New PointI(pos.x, pos.y)
+                        If Not Block_Map.ContainsKey(pos) AndAlso Not Resource_Points.ContainsKey(pos) AndAlso Not Farm_Points.ContainsKey(pos) Then Return New PointI(pos.x, pos.y)
                     End If
                 Next
             Next
         Next
     End Function
 
-
-
-    Sub Start_Building()
-
-    End Sub
+    Function GetEmptyBuildingID() As Integer
+        Dim ID As Integer
+        For a = 0 To 100000
+            If Not Building_List.ContainsKey(a) Then ID = a : Exit For
+        Next
+        Return ID
+    End Function
 
 
 
@@ -343,9 +375,9 @@ Public Class Planet
 
             For Each Cit In officer_list
                 Dim BuildBuilding As Boolean = False
-                If Cit.Value.Citizen_Rights.Contains(ID) Then
-                    If Cit.Value.Owned_Buildings.ContainsKey(ID) Then
-                        If Cit.Value.Owned_Buildings(ID).Count < CitizensBuildingLimit Then
+                If Cit.Value.Citizen_Rights.Contains(PlanetID) Then
+                    If Cit.Value.Owned_Buildings.ContainsKey(PlanetID) Then
+                        If Cit.Value.Owned_Buildings(PlanetID).Count < Building_Count.CitizensBuildingLimit Then
                             BuildBuilding = True
                         End If
                     Else
@@ -379,8 +411,42 @@ Public Class Planet
             Next
             Add_Officer(Id, New Officer(0, Id.ToString, Officer_location_enum.Planet, 0, New PointD(Building_List(0).PickupPoint.x * 32, Building_List(0).PickupPoint.y * 32), 1, 1, New Officer.sprite_list(character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head)))
             u.Officer_List(Id).Item_List.Add(Item_Enum.Refined_Crystal_Piece, 10000)
+            u.Officer_List(Id).Citizen_Rights.Add(PlanetID)
             Citizens += 1
         End If
+
+
+        If BuilderSpawnCounter <= 0 AndAlso BuilderCount < 2 Then
+            BuilderCount += 1
+            Dim Id As Integer
+            For Id = 0 To 10000
+                If Not crew_list.ContainsKey(Id) Then Exit For
+            Next
+            crew_list.Add(Id, New Crew(0, New PointD(0, 0), 0, Officer_location_enum.Planet, 3, character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head, New crew_resource_type(0, 0)))
+            crew_list(Id).Worker_Type = Worker_Type_Enum.Builder
+            Builder_List.Add(Id)
+        End If
+        If BuilderSpawnCounter > 0 Then BuilderSpawnCounter -= 1
+
+
+
+        If Build_List.Count > 0 AndAlso Builder_List.Count > 0 Then
+            Dim crew As Crew = crew_list(Builder_List.First)
+            Dim Last As PointI = crew.find_tile()
+            For Each Tile In Build_List.First.Value
+                MoveCrewTo(Last, New PointI(Tile.X, Tile.Y), crew)
+                Last = New PointI(Tile.X, Tile.Y)
+                crew.command_queue.Enqueue(New Crew.Command_Builder_Build_Tile(100, Tile))
+            Next
+            crew.command_queue.Enqueue(New Crew.Command_Builder_Start_Work())
+            Build_List.Remove(Build_List.First.Key)
+            Builder_List.Remove(Builder_List.First)
+        End If
+
+
+
+
+
     End Sub
 
 
@@ -918,20 +984,6 @@ Public Class Planet
                 End Select
 
             End If
-
-
-
-            If BuilderSpawnCounter <= 0 AndAlso BuilderCount < 2 Then
-                BuilderCount += 1
-                Dim Id As Integer
-                For Id = 0 To 10000
-                    If Not crew_list.ContainsKey(Id) Then Exit For
-                Next
-                crew_list.Add(Id, New Crew(0, New PointD(0, 0), 0, Officer_location_enum.Planet, 1, character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head, New crew_resource_type(0, 0)))
-                crew_list(Id).Worker_Type = Worker_Type_Enum.Builder
-            End If
-            If BuilderSpawnCounter > 0 Then BuilderSpawnCounter -= 1
-
 
         End If
 
