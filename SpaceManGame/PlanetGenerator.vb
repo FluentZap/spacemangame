@@ -96,7 +96,7 @@
 
         'Create_City()
 
-        P.CitizensMax = 100
+        P.CitizensMax = 2
         P.Citizens = 0
         P.Building_Count.SetLevel(Planet_Level_Type.Outpost)
     End Sub

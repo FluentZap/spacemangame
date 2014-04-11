@@ -103,9 +103,9 @@ Public Class Planet
 
     Private BuilderSpawnCounter As Integer = 100
     Private BuilderCount As Integer
-    Public Builder_List As New HashSet(Of Integer)()
+    Public Builder_List As New Dictionary(Of Integer, Integer)()
 
-    Public Build_List As New Dictionary(Of Integer, HashSet(Of Build_Tiles))()
+    Public Build_List As New Dictionary(Of Integer, Dictionary(Of PointI, Byte))()
 
     Public Citizens As Integer
     Public CitizensMax As Integer
@@ -159,11 +159,21 @@ Public Class Planet
     End Sub
 
 
-    Sub Start_Building_Constuction(ByVal ID As Integer, ByVal Build_Tiles As HashSet(Of Build_Tiles))
-        If Not Build_List.ContainsKey(ID) Then Build_List.Add(ID, New HashSet(Of Build_Tiles)())
-        For Each t In Build_Tiles
-            Build_List(ID).Add(t)
+    Sub Start_Building_Constuction(ByVal ID As Integer, ByVal Pos As PointI)
+        If Not Build_List.ContainsKey(ID) Then Build_List.Add(ID, New Dictionary(Of PointI, Byte)())
+
+        'For y = Pos.y To Pos.y + 32
+        'For x = Pos.x To Pos.x + 32
+        'Build_List(ID).Add(New PointI(x, y), 0)
+        'Next
+        'Next
+
+        For Each item In Build_From_File(building_type_enum.Exchange, Me, Pos, True)
+
+            Build_List(ID).Add(New PointI(item.X, item.Y), 0)
+
         Next
+
     End Sub
 
 
@@ -222,8 +232,9 @@ Public Class Planet
 
             Case Is = 0
                 pos = FindBestBuildingPos(building_type_enum.Mine) * 32
-                PlanetGenerator.Build_Mine(Id, Owner, pos, Me, False)
-                Start_Building_Constuction(Id, Build_From_File(building_type_enum.Mine, Me, pos, True))
+
+                'PlanetGenerator.Build_Mine(Id, Owner, pos, Me, False)
+                Start_Building_Constuction(Id, pos)
             Case Is = 1
                 'pos = FindBestBuildingPos(building_type_enum.Farm) * 32
                 'PlanetGenerator.Build_FactoryH(Id, Owner, pos, Me, True)
@@ -231,15 +242,15 @@ Public Class Planet
             Case Is = 2
                 pos = FindBestBuildingPos(building_type_enum.Factory) * 32
                 PlanetGenerator.Build_FactoryH(Id, Owner, pos, Me, False)
-                Start_Building_Constuction(Id, Build_From_File(building_type_enum.Factory, Me, pos, True))
+                Start_Building_Constuction(Id, pos)
             Case Is = 3                
                 pos = FindBestBuildingPos(building_type_enum.Refinery) * 32
                 PlanetGenerator.Build_RefineryH(Id, Owner, pos, Me, False)
-                Start_Building_Constuction(Id, Build_From_File(building_type_enum.Refinery, Me, pos, True))
+                Start_Building_Constuction(Id, pos)
             Case Is = 4
                 pos = FindBestBuildingPos(building_type_enum.Pub) * 32
                 PlanetGenerator.Build_PubH(Id, Owner, pos, Me, False)
-                Start_Building_Constuction(Id, Build_From_File(building_type_enum.Pub, Me, pos, True))
+                Start_Building_Constuction(Id, pos)
             Case Is = 5
         End Select
 
@@ -424,28 +435,59 @@ Public Class Planet
             Next
             crew_list.Add(Id, New Crew(0, New PointD(0, 0), 0, Officer_location_enum.Planet, 3, character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head, New crew_resource_type(0, 0)))
             crew_list(Id).Worker_Type = Worker_Type_Enum.Builder
-            Builder_List.Add(Id)
+            Builder_List.Add(Id, -1)
         End If
         If BuilderSpawnCounter > 0 Then BuilderSpawnCounter -= 1
 
 
+        If Build_List.Count > 0 Then
 
-        If Build_List.Count > 0 AndAlso Builder_List.Count > 0 Then
-            Dim crew As Crew = crew_list(Builder_List.First)
-            Dim Last As PointI = crew.find_tile()
-            For Each Tile In Build_List.First.Value
-                MoveCrewTo(Last, New PointI(Tile.X, Tile.Y), crew)
-                Last = New PointI(Tile.X, Tile.Y)
-                crew.command_queue.Enqueue(New Crew.Command_Builder_Build_Tile(100, Tile))
+            Dim BuildPriority As New Dictionary(Of Integer, HashSet(Of Integer))()
+            Dim FreeBuilders As New HashSet(Of Integer)()
+
+            'Get builder count
+            For Each builder In Builder_List
+                If builder.Value = -1 Then FreeBuilders.Add(builder.Key)
             Next
-            crew.command_queue.Enqueue(New Crew.Command_Builder_Start_Work())
-            Build_List.Remove(Build_List.First.Key)
-            Builder_List.Remove(Builder_List.First)
+
+
+            If FreeBuilders.Count > 0 Then
+                Dim Count As Integer = 0
+                For Each building In Build_List
+
+                    For Each builder In Builder_List
+                        If builder.Value = building.Key Then Count += 1
+                    Next
+                    If Not BuildPriority.ContainsKey(Count) Then BuildPriority.Add(Count, New HashSet(Of Integer))
+                    BuildPriority(Count).Add(building.Key)
+                Next
+
+
+                Dim crew As Crew = crew_list(FreeBuilders.First)
+
+                Dim Last As PointI = crew.find_tile()
+                Dim List As Integer
+
+                If BuildPriority.Count > 1 Then
+                    List = BuildPriority.Min.Value.First
+                    Count = BuildPriority.Min.Key
+                Else
+                    List = BuildPriority.First.Value.First
+                    Count = BuildPriority.First.Key
+                End If
+
+
+                For Each Tile In If((Count Mod 2) = 0, Build_List(List), Build_List(List).Reverse)
+                    MoveCrewTo(Last, New PointI(Tile.Key.x, Tile.Key.y), crew)
+                    Last = New PointI(Tile.Key.x, Tile.Key.y)
+                    crew.command_queue.Enqueue(New Crew.Command_Builder_Build_Tile(10, BuildPriority.Min.Value.First, Tile.Key))
+                Next
+                crew.command_queue.Enqueue(New Crew.Command_Builder_Start_Work())
+                'Build_List.Remove(Build_List.First.Key)
+                Builder_List(FreeBuilders.First) = BuildPriority.Min.Value.First
+
+            End If
         End If
-
-
-
-
 
     End Sub
 

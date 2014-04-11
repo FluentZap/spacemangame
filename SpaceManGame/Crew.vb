@@ -207,12 +207,16 @@ End Enum
 
     <Serializable()> Public Class Command_Builder_Build_Tile
         Inherits Crew_Command_script
+        Public Countdown As Integer
         Public Time As Integer
-        Public Tile As Build_Tiles
+        Public BuildingID As Integer
+        Public Position As PointI
 
-        Sub New(ByVal Time As Integer, ByVal Tile As Build_Tiles)
+        Sub New(ByVal Time As Integer, ByVal BuildingID As Integer, ByVal Position As PointI)
             Me.Time = Time
-            Me.Tile = Tile
+            Me.Countdown = Time
+            Me.BuildingID = BuildingID
+            Me.Position = Position
             type = crew_script_enum.builder_build_tile
         End Sub
     End Class
