@@ -313,6 +313,7 @@
         House
         House_Inside
 
+        BuildingBuildOverlay
         empty = 255
     End Enum
 

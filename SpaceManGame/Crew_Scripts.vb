@@ -508,12 +508,21 @@
         Dim command As Crew.Command_Builder_Build_Tile = DirectCast(crew_member.command_queue.First, Crew.Command_Builder_Build_Tile)
         'Only programed for planets
         Dim planet As Planet = u.Planet_List(crew_member.Location_ID)
-        If command.Time <= 0 Then
-            planet.Build_Tile(command.Tile)
-            crew_member.command_queue.First.status = script_status_enum.complete
+
+        If command.Countdown <= 0 Then
+            If planet.Build_List.ContainsKey(command.BuildingID) AndAlso planet.Build_List(command.BuildingID).ContainsKey(command.Position) Then
+
+                planet.Build_List(command.BuildingID)(command.Position) += CByte(1)
+                If planet.Build_List(command.BuildingID)(command.Position) >= 5 Then planet.Build_List(command.BuildingID)(command.Position) = 5 : crew_member.command_queue.First.status = script_status_enum.complete
+                command.Countdown = command.Time
+            Else
+                crew_member.command_queue.First.status = script_status_enum.complete
+            End If
         Else
-            command.Time -= 1
+            command.Countdown -= 1
         End If
+
+
     End Sub
 
 
@@ -522,7 +531,7 @@
         'Only programed for planets
         Dim planet As Planet = u.Planet_List(crew_member.Location_ID)
         If planet.Build_List.Count <= 0 Then planet.MoveCrewTo(crew_member.find_tile, planet.CapitalPoint * 32, crew_member)
-        planet.Builder_List.Add(id)
+        planet.Builder_List(id) = -1
         crew_member.command_queue.First.status = script_status_enum.complete
     End Sub
 
