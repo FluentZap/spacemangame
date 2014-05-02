@@ -83,6 +83,10 @@
             Return New PointI(P.x \ I, P.y \ I)
         End Operator
 
+        Public Shared Operator +(ByVal P1 As PointI, ByVal P2 As PointI) As PointI
+            Return New PointI(P1.x + P2.x, P1.y + P2.y)
+        End Operator
+
     End Structure
 
 

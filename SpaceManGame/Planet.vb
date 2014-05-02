@@ -76,6 +76,111 @@ Public Enum Send_work_List_Enum
     Work
 End Enum
 
+
+
+Public Class Build_List_Type
+    Public Tile_List As New Dictionary(Of PointI, Byte)()
+    Public Build_Progress As Integer
+    Public Builders As Integer
+    Public Compleated As Boolean
+    Public OwnerID As Integer
+    Public Type As building_type_enum
+    Public BlockType As Block_Return_Type_Enum
+    Public Pos As PointI
+End Class
+
+Public Enum Block_Type_Enum
+    Horizontal
+    Vertical
+    Small
+    Large
+    HorV
+End Enum
+
+Public Enum Block_Return_Type_Enum As Byte
+    None = 0
+    TopL
+    TopR
+    BotL
+    BotR
+    WholeTile
+    HorizontalTop
+    HorizontalBot
+    VerticalL
+    VerticalR
+End Enum
+
+
+Public Class Block_type
+    Public TopL As Boolean
+    Public TopR As Boolean
+    Public BotL As Boolean
+    Public BotR As Boolean
+
+    Sub SetAll(ByVal Value As Boolean)
+        TopL = Value
+        TopR = Value
+        BotL = Value
+        BotR = Value
+    End Sub
+
+
+End Class
+
+
+Public Class Block_Return_Type_Class
+    Public Pos As PointI
+    Public Type As Block_Return_Type_Enum
+
+    Sub New(ByVal Pos As PointI, ByVal Type As Block_Return_Type_Enum)
+        Me.Pos = Pos
+        Me.Type = Type
+    End Sub
+
+
+End Class
+
+
+Public Class Block_Map_Type
+    Public Block As New Dictionary(Of PointI, Block_type)()
+
+    Function Get_Block(ByVal Position As PointI, ByVal Type As Block_Type_Enum) As Block_Return_Type_Enum
+        If Not Block.ContainsKey(Position) Then Block.Add(Position, New Block_type)
+        Dim B As Block_type = Block(Position)
+
+        Select Case Type
+            Case Is = Block_Type_Enum.Small
+                If B.TopL = False Then Return Block_Return_Type_Enum.TopL
+                If B.TopR = False Then Return Block_Return_Type_Enum.TopR
+                If B.BotL = False Then Return Block_Return_Type_Enum.BotL
+                If B.BotR = False Then Return Block_Return_Type_Enum.BotR
+            Case Is = Block_Type_Enum.Large
+                If B.TopL = False AndAlso B.TopR = False AndAlso B.BotL = False AndAlso B.BotR = False Then Return Block_Return_Type_Enum.WholeTile
+            Case Is = Block_Type_Enum.Horizontal
+                If B.TopL = False AndAlso B.TopR = False Then Return Block_Return_Type_Enum.HorizontalTop
+                If B.BotL = False AndAlso B.BotR = False Then Return Block_Return_Type_Enum.HorizontalBot
+            Case Is = Block_Type_Enum.Vertical
+                If B.TopL = False AndAlso B.BotL = False Then Return Block_Return_Type_Enum.VerticalL
+                If B.TopR = False AndAlso B.BotR = False Then Return Block_Return_Type_Enum.VerticalR
+            Case Is = Block_Type_Enum.HorV
+                If random(0, 1) = 0 Then
+                    If B.TopL = False AndAlso B.TopR = False Then Return Block_Return_Type_Enum.HorizontalTop
+                    If B.BotL = False AndAlso B.BotR = False Then Return Block_Return_Type_Enum.HorizontalBot
+                    If B.TopL = False AndAlso B.BotL = False Then Return Block_Return_Type_Enum.VerticalL
+                    If B.TopR = False AndAlso B.BotR = False Then Return Block_Return_Type_Enum.VerticalR
+                Else
+                    If B.TopL = False AndAlso B.BotL = False Then Return Block_Return_Type_Enum.VerticalL
+                    If B.TopR = False AndAlso B.BotR = False Then Return Block_Return_Type_Enum.VerticalR
+                    If B.TopL = False AndAlso B.TopR = False Then Return Block_Return_Type_Enum.HorizontalTop
+                    If B.BotL = False AndAlso B.BotR = False Then Return Block_Return_Type_Enum.HorizontalBot
+                End If
+        End Select
+
+        Return Block_Return_Type_Enum.None
+    End Function
+
+End Class
+
 Public Class Planet
     Public PlanetID As Integer
     Public orbits_planet As Boolean
@@ -89,7 +194,11 @@ Public Class Planet
 
     Public Animation_Glow As Single
     Public Animation_Glow_subtract As Boolean
-    Public Block_Map As New Dictionary(Of PointI, Boolean)()
+
+
+    Public Block_Map As New Block_Map_Type()
+
+
     Public Resource_Points As New Dictionary(Of PointI, Boolean)() 'Is true is resource point is taken
     Public Farm_Points As New Dictionary(Of PointI, Boolean)() 'Is true is farm point is taken
 
@@ -105,7 +214,7 @@ Public Class Planet
     Private BuilderCount As Integer
     Public Builder_List As New Dictionary(Of Integer, Integer)()
 
-    Public Build_List As New Dictionary(Of Integer, Dictionary(Of PointI, Byte))()
+    Public Build_List As New Dictionary(Of Integer, Build_List_Type)()
 
     Public Citizens As Integer
     Public CitizensMax As Integer
@@ -159,19 +268,17 @@ Public Class Planet
     End Sub
 
 
-    Sub Start_Building_Constuction(ByVal ID As Integer, ByVal Pos As PointI)
-        If Not Build_List.ContainsKey(ID) Then Build_List.Add(ID, New Dictionary(Of PointI, Byte)())
+    Sub Start_Building_Constuction(ByVal ID As Integer, ByVal OwnerID As Integer, ByVal Type As building_type_enum, ByVal Pos As PointI, ByVal Block_Type As Block_Return_Type_Enum)
+        If Not Build_List.ContainsKey(ID) Then Build_List.Add(ID, New Build_List_Type)
 
-        'For y = Pos.y To Pos.y + 32
-        'For x = Pos.x To Pos.x + 32
-        'Build_List(ID).Add(New PointI(x, y), 0)
-        'Next
-        'Next
-
-        For Each item In Build_From_File(building_type_enum.Exchange, Me, Pos, True)
-
-            Build_List(ID).Add(New PointI(item.X, item.Y), 0)
-
+        Dim tiles As HashSet(Of Build_Tiles) = Build_From_File(Type, Block_Type, Me, Pos, True)
+        Build_List(ID).Build_Progress = tiles.Count
+        Build_List(ID).Type = Type
+        Build_List(ID).OwnerID = OwnerID
+        Build_List(ID).Pos = Pos
+        Build_List(ID).BlockType = Block_Type
+        For Each item In tiles
+            Build_List(ID).Tile_List.Add(New PointI(item.X, item.Y), 0)
         Next
 
     End Sub
@@ -225,32 +332,41 @@ Public Class Planet
             If item.Value > list(Highest) Then Highest = item.Key
         Next
 
-        Dim pos As PointI
+        Dim Return_Type As Block_Return_Type_Class
         Dim Id As Integer = GetEmptyBuildingID()
         Select Case Highest
             Case Is = -1
 
             Case Is = 0
-                pos = FindBestBuildingPos(building_type_enum.Mine) * 32
+                Return_Type = FindBestBuildingPos(building_type_enum.Mine)
+                AddPlanetBlock(Return_Type.Pos, Return_Type.Type, Me)
+                Building_Count.CMine += 1
+                Start_Building_Constuction(Id, Owner, building_type_enum.Mine, Return_Type.Pos * 32, Return_Type.Type)
 
-                'PlanetGenerator.Build_Mine(Id, Owner, pos, Me, False)
-                Start_Building_Constuction(Id, pos)
             Case Is = 1
                 'pos = FindBestBuildingPos(building_type_enum.Farm) * 32
-                'PlanetGenerator.Build_FactoryH(Id, Owner, pos, Me, True)
-                'Start_Building_Constuction(Id, Build_From_File(building_type_enum.Farm, Me, pos, True))
+                'AddPlanetBlock(pos \ 32, Me)
+                'Building_Count.CFarm += 1
+                'Start_Building_Constuction(Id, Owner, building_type_enum.Farm, pos)
+
             Case Is = 2
-                pos = FindBestBuildingPos(building_type_enum.Factory) * 32
-                PlanetGenerator.Build_FactoryH(Id, Owner, pos, Me, False)
-                Start_Building_Constuction(Id, pos)
-            Case Is = 3                
-                pos = FindBestBuildingPos(building_type_enum.Refinery) * 32
-                PlanetGenerator.Build_RefineryH(Id, Owner, pos, Me, False)
-                Start_Building_Constuction(Id, pos)
+                Return_Type = FindBestBuildingPos(building_type_enum.Factory)
+                AddPlanetBlock(Return_Type.Pos, Return_Type.Type, Me)
+                Building_Count.CFactory += 1
+                Start_Building_Constuction(Id, Owner, building_type_enum.Factory, Return_Type.Pos * 32, Return_Type.Type)
+
+            Case Is = 3
+                Return_Type = FindBestBuildingPos(building_type_enum.Refinery)
+                AddPlanetBlock(Return_Type.Pos, Return_Type.Type, Me)
+                Building_Count.CRefinery += 1
+                Start_Building_Constuction(Id, Owner, building_type_enum.Refinery, Return_Type.Pos * 32, Return_Type.Type)
+
             Case Is = 4
-                pos = FindBestBuildingPos(building_type_enum.Pub) * 32
-                PlanetGenerator.Build_PubH(Id, Owner, pos, Me, False)
-                Start_Building_Constuction(Id, pos)
+                Return_Type = FindBestBuildingPos(building_type_enum.Pub)
+                AddPlanetBlock(Return_Type.Pos, Return_Type.Type, Me)
+                Building_Count.CPub += 1
+                Start_Building_Constuction(Id, Owner, building_type_enum.Pub, Return_Type.Pos * 32, Return_Type.Type)
+
             Case Is = 5
         End Select
 
@@ -260,54 +376,62 @@ Public Class Planet
 
 
 
-    Function FindBestBuildingPos(ByVal Building As building_type_enum) As PointI
+    Function FindBestBuildingPos(ByVal Building As building_type_enum) As Block_Return_Type_Class
+        Dim Return_Type As New Block_Return_Type_Class(New PointI(0, 0), Block_Return_Type_Enum.None)
         Select Case Building
             Case Is = building_type_enum.Mine
-                Dim point As PointI
                 For Each item In Resource_Points
-                    If item.Value = False Then point = item.Key : Exit For
+                    If item.Value = False Then Return_Type.Pos = item.Key : Exit For
                 Next
-                Resource_Points(point) = True
-                Return point
+                Resource_Points(Return_Type.Pos) = True
+                Return_Type.Type = Block_Return_Type_Enum.WholeTile
+                Return Return_Type
 
-            Case Is = building_type_enum.Farm
-                Dim point As PointI
+            Case Is = building_type_enum.Farm                
                 For Each item In Farm_Points
-                    If item.Value = False Then point = item.Key : Exit For
+                    If item.Value = False Then Return_Type.Pos = item.Key : Exit For
                 Next
-                Farm_Points(point) = True
-                Return point
+                Farm_Points(Return_Type.Pos) = True
+                Return_Type.Type = Block_Return_Type_Enum.WholeTile
+                Return Return_Type
 
             Case Is = building_type_enum.Factory
-                Return FindEmptyTile(CapitalPoint)
+                Return FindEmptyTile(CapitalPoint, Block_Type_Enum.HorV)
             Case Is = building_type_enum.Refinery
-                Return FindEmptyTile(CapitalPoint)
+                Return FindEmptyTile(CapitalPoint, Block_Type_Enum.HorV)
             Case Is = building_type_enum.Pub
-                Return FindEmptyTile(CapitalPoint)
+                Return FindEmptyTile(CapitalPoint, Block_Type_Enum.HorV)
+            Case Is = building_type_enum.Exchange
+                Return FindEmptyTile(CapitalPoint, Block_Type_Enum.Large)
+            Case Is = building_type_enum.Apartment
+                Return FindEmptyTile(CapitalPoint, Block_Type_Enum.HorV)
         End Select
 
+        Return Return_Type
     End Function
 
 
-    Function FindEmptyTile(ByVal Position As PointI) As PointI
-        Dim pos As PointI
+    Function FindEmptyTile(ByVal Position As PointI, ByVal Type As Block_Type_Enum) As Block_Return_Type_Class
+        Dim pos As PointI        
         For a = 1 To 8
             For y = -a To a
                 For x = -a To a
                     pos.x = Position.x + x
                     pos.y = Position.y + y
                     If pos.x >= 0 AndAlso pos.x <= size.x AndAlso pos.y >= 0 AndAlso pos.y <= size.y Then
-                        If Not Block_Map.ContainsKey(pos) AndAlso Not Resource_Points.ContainsKey(pos) AndAlso Not Farm_Points.ContainsKey(pos) Then Return New PointI(pos.x, pos.y)
+                        Dim Return_Type As Block_Return_Type_Enum = Block_Map.Get_Block(pos, Type)
+                        If Not Return_Type = Block_Return_Type_Enum.None AndAlso Not Resource_Points.ContainsKey(pos) AndAlso Not Farm_Points.ContainsKey(pos) Then Return New Block_Return_Type_Class(pos, Return_Type)
                     End If
                 Next
             Next
         Next
+        Return New Block_Return_Type_Class(New PointI(0, 0), Block_Return_Type_Enum.None)
     End Function
 
     Function GetEmptyBuildingID() As Integer
         Dim ID As Integer
         For a = 0 To 100000
-            If Not Building_List.ContainsKey(a) Then ID = a : Exit For
+            If Not Build_List.ContainsKey(a) AndAlso Not Building_List.ContainsKey(a) Then ID = a : Exit For
         Next
         Return ID
     End Function
@@ -427,67 +551,75 @@ Public Class Planet
         End If
 
 
-        If BuilderSpawnCounter <= 0 AndAlso BuilderCount < 2 Then
+        If BuilderSpawnCounter <= 0 AndAlso BuilderCount < 4 Then
             BuilderCount += 1
             Dim Id As Integer
             For Id = 0 To 10000
                 If Not crew_list.ContainsKey(Id) Then Exit For
             Next
-            crew_list.Add(Id, New Crew(0, New PointD(0, 0), 0, Officer_location_enum.Planet, 3, character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head, New crew_resource_type(0, 0)))
+            crew_list.Add(Id, New Crew(0, New PointD(0, 0), 0, Officer_location_enum.Planet, 10, character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head, New crew_resource_type(0, 0)))
             crew_list(Id).Worker_Type = Worker_Type_Enum.Builder
             Builder_List.Add(Id, -1)
         End If
         If BuilderSpawnCounter > 0 Then BuilderSpawnCounter -= 1
 
 
-        If Build_List.Count > 0 Then
+        'Assign new builders
 
-            Dim BuildPriority As New Dictionary(Of Integer, HashSet(Of Integer))()
-            Dim FreeBuilders As New HashSet(Of Integer)()
+        Dim FreeBuilders As New HashSet(Of Integer)()
+        'Get builder count
+        For Each builder In Builder_List
+            If builder.Value = -1 Then FreeBuilders.Add(builder.Key)
+        Next
 
-            'Get builder count
-            For Each builder In Builder_List
-                If builder.Value = -1 Then FreeBuilders.Add(builder.Key)
+        If FreeBuilders.Count > 0 Then
+            Dim BuildID As Integer = -1
+            For Each item In Build_List
+                If item.Value.Compleated = False AndAlso item.Value.Builders = 0 Then
+                    BuildID = item.Key
+                    Exit For
+                End If
             Next
 
-
-            If FreeBuilders.Count > 0 Then
-                Dim Count As Integer = 0
-                For Each building In Build_List
-
-                    For Each builder In Builder_List
-                        If builder.Value = building.Key Then Count += 1
-                    Next
-                    If Not BuildPriority.ContainsKey(Count) Then BuildPriority.Add(Count, New HashSet(Of Integer))
-                    BuildPriority(Count).Add(building.Key)
+            If BuildID = -1 Then
+                For Each item In Build_List
+                    If item.Value.Compleated = False AndAlso item.Value.Builders = 1 Then
+                        BuildID = item.Key
+                        Exit For
+                    End If
                 Next
+            End If
 
+            If BuildID > -1 Then
 
                 Dim crew As Crew = crew_list(FreeBuilders.First)
-
                 Dim Last As PointI = crew.find_tile()
-                Dim List As Integer
+                Dim tile_time As Integer = CInt(500 / Build_List(BuildID).Tile_List.Count)
+                crew.command_queue.Clear()
 
-                If BuildPriority.Count > 1 Then
-                    List = BuildPriority.Min.Value.First
-                    Count = BuildPriority.Min.Key
-                Else
-                    List = BuildPriority.First.Value.First
-                    Count = BuildPriority.First.Key
-                End If
-
-
-                For Each Tile In If((Count Mod 2) = 0, Build_List(List), Build_List(List).Reverse)
+                For Each Tile In If((Build_List(BuildID).Builders Mod 2) = 0, Build_List(BuildID).Tile_List, Build_List(BuildID).Tile_List.Reverse)
                     MoveCrewTo(Last, New PointI(Tile.Key.x, Tile.Key.y), crew)
                     Last = New PointI(Tile.Key.x, Tile.Key.y)
-                    crew.command_queue.Enqueue(New Crew.Command_Builder_Build_Tile(10, BuildPriority.Min.Value.First, Tile.Key))
+                    crew.command_queue.Enqueue(New Crew.Command_Builder_Build_Tile(tile_time, BuildID, Tile.Key))
                 Next
                 crew.command_queue.Enqueue(New Crew.Command_Builder_Start_Work())
-                'Build_List.Remove(Build_List.First.Key)
-                Builder_List(FreeBuilders.First) = BuildPriority.Min.Value.First
-
+                Builder_List(FreeBuilders.First) = BuildID
+                Build_List(BuildID).Builders += 1
             End If
+
         End If
+
+
+        Dim Remove_List As New HashSet(Of Integer)()
+        For Each item In Build_List
+            If item.Value.Compleated = True Then
+                PlanetGenerator.Build_Building(item.Value.Type, item.Key, item.Value.OwnerID, Me, New Block_Return_Type_Class(item.Value.Pos, item.Value.BlockType))
+                Remove_List.Add(item.Key)
+            End If
+        Next
+        For Each item In Remove_List
+            Build_List.Remove(item)
+        Next
 
     End Sub
 

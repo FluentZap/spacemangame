@@ -270,7 +270,7 @@
 
                         For Each building In planet.Build_List
                             'Draw build Build overlay
-                            If building.Value.ContainsKey(New PointI(x, y)) AndAlso building.Value(New PointI(x, y)) > 0 Then Draw_Planet_Tile(planet_tile_type_enum.BuildingBuildOverlay, building.Value(New PointI(x, y)) - 1, pos, Color.FromArgb(255, 255, 255, 255))
+                            If building.Value.Tile_List.ContainsKey(New PointI(x, y)) AndAlso building.Value.Tile_List(New PointI(x, y)) > 0 Then Draw_Planet_Tile(planet_tile_type_enum.BuildingBuildOverlay, building.Value.Tile_List(New PointI(x, y)) - 1, pos, Color.FromArgb(255, 255, 255, 255))
                         Next
 
                         If TileMap(x, y).type = 1 AndAlso TileMap(x, y).sprite = 2 Then Lights.Add(New Lights_Type(New PointD(x * 32 - 112, y * 32 - 112), Set_Brighness(Color.Green, planet.Animation_Glow)))
