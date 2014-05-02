@@ -45,9 +45,18 @@
 
         Create_Resource_Points(P)
 
+        Build_Building(building_type_enum.Outpost, P.GetEmptyBuildingID, 0, P, New Block_Return_Type_Class(New PointI(0, 0), Block_Return_Type_Enum.WholeTile))
+        'Build_Outpost(P.GetEmptyBuildingID, 0, New PointI(32 * 2, 32 * 2), P, True)
 
-        Build_Outpost(P.GetEmptyBuildingID, 0, New PointI(32 * 2, 32 * 2), P, True)
         P.CapitalPoint = New PointI(2, 2)
+
+
+        Build_Building(building_type_enum.Exchange, P.GetEmptyBuildingID, 0, P)
+
+        For a = 0 To 30
+            Build_Building(building_type_enum.Apartment, P.GetEmptyBuildingID, 0, P)
+        Next
+
 
         'Build_AppartmentH(New PointI(32, 0))
         'Build_PubH(New PointI(32, 16))
@@ -96,7 +105,7 @@
 
         'Create_City()
 
-        P.CitizensMax = 2
+        P.CitizensMax = 6
         P.Citizens = 0
         P.Building_Count.SetLevel(Planet_Level_Type.Outpost)
     End Sub
@@ -135,17 +144,38 @@
     End Sub
 
 
-    Sub AddPlanetBlock(ByVal Pos As PointI, ByVal P As Planet)
-        If P.Block_Map.ContainsKey(Pos) Then
-            P.Block_Map(Pos) = True
-        Else
-            P.Block_Map.Add(Pos, True)
-        End If
+    Sub AddPlanetBlock(ByVal Position As PointI, ByVal Type As Block_Return_Type_Enum, ByVal P As Planet)
+        If Not P.Block_Map.Block.ContainsKey(Position) Then P.Block_Map.Block.Add(Position, New Block_type)
+        Dim B As Block_type = P.Block_Map.Block(Position)
+
+        Select Case Type
+            Case Is = Block_Return_Type_Enum.WholeTile
+                B.SetAll(True)
+            Case Is = Block_Return_Type_Enum.TopL
+                B.TopL = True
+            Case Is = Block_Return_Type_Enum.TopR
+                B.TopR = True
+            Case Is = Block_Return_Type_Enum.BotL
+                B.BotL = True
+            Case Is = Block_Return_Type_Enum.BotR
+                B.BotR = True
+            Case Is = Block_Return_Type_Enum.HorizontalTop
+                B.TopL = True
+                B.TopR = True
+            Case Is = Block_Return_Type_Enum.HorizontalBot
+                B.BotL = True
+                B.BotR = True
+            Case Is = Block_Return_Type_Enum.VerticalL
+                B.TopL = True
+                B.BotL = True
+            Case Is = Block_Return_Type_Enum.VerticalR
+                B.TopR = True
+                B.BotR = True
+        End Select
     End Sub
 
-    Sub Build_Mine(ByVal ID As Integer, ByVal OwnerID As Integer, ByVal pos As PointI, ByVal P As Planet, ByVal BuildTiles As Boolean)
-        If BuildTiles = True Then Build_From_File(building_type_enum.Mine, P, pos, False)
-        AddPlanetBlock(pos \ 32, P)
+    Sub Build_Mine(ByVal ID As Integer, ByVal OwnerID As Integer, ByVal pos As PointI, ByVal P As Planet)
+        Build_From_File(building_type_enum.Mine, Block_Return_Type_Enum.WholeTile, P, pos, False)
         P.Building_Count.CMine += 1
 
         P.Building_List.Add(ID, New Planet_Building(OwnerID, New Rectangle(pos.x, pos.y, 32, 32), building_type_enum.Mine))
@@ -188,9 +218,8 @@
 
     End Sub
 
-    Sub Build_RefineryH(ByVal ID As Integer, ByVal OwnerID As Integer, ByVal pos As PointI, ByVal P As Planet, ByVal BuildTiles As Boolean)
-        If BuildTiles = True Then Build_From_File(building_type_enum.Refinery, P, pos)
-        AddPlanetBlock(pos \ 32, P)
+    Sub Build_RefineryH(ByVal ID As Integer, ByVal OwnerID As Integer, ByVal pos As PointI, ByVal P As Planet)
+        Build_From_File(building_type_enum.Refinery, Block_Return_Type_Enum.HorizontalTop, P, pos)
         P.Building_Count.CRefinery += 1
 
         P.Building_List.Add(ID, New Planet_Building(OwnerID, New Rectangle(pos.x, pos.y, 32, 32), building_type_enum.Refinery))
@@ -218,9 +247,38 @@
 
     End Sub
 
-    Sub Build_FactoryH(ByVal ID As Integer, ByVal OwnerID As Integer, ByVal pos As PointI, ByVal P As Planet, ByVal BuildTiles As Boolean)
-        If BuildTiles = True Then Build_From_File(building_type_enum.Factory, P, pos, False)
-        AddPlanetBlock(pos \ 32, P)
+    Sub Build_RefineryV(ByVal ID As Integer, ByVal OwnerID As Integer, ByVal pos As PointI, ByVal P As Planet)
+        Build_From_File(building_type_enum.Refinery, Block_Return_Type_Enum.VerticalL, P, pos)
+        P.Building_Count.CRefinery += 1
+
+        P.Building_List.Add(ID, New Planet_Building(OwnerID, New Rectangle(pos.x, pos.y, 32, 32), building_type_enum.Refinery))
+
+
+        P.Building_List(ID).PickupPoint = New PointI(pos.x + 15, pos.y + 8)
+
+        P.Building_List(ID).access_point.Add(New PointI(pos.x + 6, pos.y + 9), New Building_Access_Point_Type(BAP_Type.Worker))
+        P.Building_List(ID).access_point.Add(New PointI(pos.x + 14, pos.y + 9), New Building_Access_Point_Type(BAP_Type.Worker))
+        P.Building_List(ID).access_point.Add(New PointI(pos.x + 17, pos.y + 9), New Building_Access_Point_Type(BAP_Type.Worker))
+        P.Building_List(ID).access_point.Add(New PointI(pos.x + 25, pos.y + 9), New Building_Access_Point_Type(BAP_Type.Worker))
+
+
+        P.Building_List(ID).access_point.Add(New PointI(pos.x + 1, pos.y + 1), New Building_Access_Point_Type(BAP_Type.Transporter))
+
+        For x = 4 To 27
+            P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + x, pos.y + 2), New Item_Slots_Type(True))
+            P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + x, pos.y + 3), New Item_Slots_Type(False))
+        Next
+
+        P.Item_Point.Add(New PointI(pos.x + 4, pos.y + 2), New Item_Point_Type(100, Item_Enum.Crystal))
+
+        P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + 4, pos.y + 4), New Item_Slots_Type(True))
+        P.Item_Point.Add(New PointI(pos.x + 4, pos.y + 4), New Item_Point_Type(2000, Item_Enum.Refined_Crystal_Piece))
+
+    End Sub
+
+    Sub Build_FactoryH(ByVal ID As Integer, ByVal OwnerID As Integer, ByVal pos As PointI, ByVal P As Planet)
+        Build_From_File(building_type_enum.Factory, Block_Return_Type_Enum.HorizontalTop, P, pos, False)
+
         P.Building_Count.CFactory += 1
 
         P.Building_List.Add(ID, New Planet_Building(OwnerID, New Rectangle(pos.x, pos.y, 32, 32), building_type_enum.Factory))
@@ -252,9 +310,77 @@
 
     End Sub
 
-    Sub Build_AppartmentH(ByVal ID As Integer, ByVal OwnerID As Integer, ByVal pos As PointI, ByVal P As Planet, ByVal BuildTiles As Boolean)
-        If BuildTiles = True Then Build_From_File(building_type_enum.Apartment, P, pos, False)
-        AddPlanetBlock(pos \ 32, P)
+
+    Sub Build_FactoryV(ByVal ID As Integer, ByVal OwnerID As Integer, ByVal pos As PointI, ByVal P As Planet)
+        Build_From_File(building_type_enum.Factory, Block_Return_Type_Enum.VerticalL, P, pos, False)
+
+        P.Building_Count.CFactory += 1
+
+        P.Building_List.Add(ID, New Planet_Building(OwnerID, New Rectangle(pos.x, pos.y, 32, 32), building_type_enum.Factory))
+
+        P.Building_List(ID).PickupPoint = New PointI(pos.x + 15, pos.y + 7)
+
+        P.Building_List(ID).access_point.Add(New PointI(pos.x + 9, pos.y + 8), New Building_Access_Point_Type(BAP_Type.Worker))
+        P.Building_List(ID).access_point.Add(New PointI(pos.x + 13, pos.y + 8), New Building_Access_Point_Type(BAP_Type.Worker))
+        P.Building_List(ID).access_point.Add(New PointI(pos.x + 18, pos.y + 8), New Building_Access_Point_Type(BAP_Type.Worker))
+        P.Building_List(ID).access_point.Add(New PointI(pos.x + 22, pos.y + 8), New Building_Access_Point_Type(BAP_Type.Worker))
+
+
+        For x = 1 To 3
+            P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + x, pos.y + 1), New Item_Slots_Type(True))
+            P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + x, pos.y + 2), New Item_Slots_Type(True))
+            P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + x, pos.y + 3), New Item_Slots_Type(True))
+        Next
+
+        For x = 28 To 30
+            P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + x, pos.y + 1), New Item_Slots_Type(False))
+            P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + x, pos.y + 2), New Item_Slots_Type(False))
+            P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + x, pos.y + 3), New Item_Slots_Type(False))
+        Next
+        P.Item_Point.Add(New PointI(pos.x + 1, pos.y + 1), New Item_Point_Type(100, Item_Enum.Refined_Crystal))
+
+
+        P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + 10, pos.y + 10), New Item_Slots_Type(True))
+        P.Item_Point.Add(New PointI(pos.x + 10, pos.y + 10), New Item_Point_Type(2000, Item_Enum.Refined_Crystal_Piece))
+
+    End Sub
+
+    Sub Build_Building(ByVal Type As building_type_enum, ByVal ID As Integer, ByVal OwnerID As Integer, ByVal P As Planet, Optional ByVal Block_Pos As Block_Return_Type_Class = Nothing)
+        If Block_Pos Is Nothing Then Block_Pos = P.FindBestBuildingPos(Type)
+        AddPlanetBlock(Block_Pos.Pos, Block_Pos.Type, P)
+        Select Case Type
+            Case Is = building_type_enum.Exchange : Build_Exchange(ID, OwnerID, Block_Pos.Pos * 32, P)            
+            Case Is = building_type_enum.Mine : Build_Mine(ID, OwnerID, Block_Pos.Pos * 32, P)
+            Case Is = building_type_enum.Outpost : Build_Outpost(ID, OwnerID, Block_Pos.Pos * 32, P)
+
+            Case Is = building_type_enum.Apartment
+                If Block_Pos.Type = Block_Return_Type_Enum.HorizontalTop Then Build_AppartmentH(ID, OwnerID, Block_Pos.Pos * 32, P)
+                If Block_Pos.Type = Block_Return_Type_Enum.HorizontalBot Then Build_AppartmentH(ID, OwnerID, Block_Pos.Pos * 32 + New PointI(0, 16), P)
+                If Block_Pos.Type = Block_Return_Type_Enum.VerticalL Then Build_AppartmentV(ID, OwnerID, Block_Pos.Pos * 32, P)
+                If Block_Pos.Type = Block_Return_Type_Enum.VerticalR Then Build_AppartmentV(ID, OwnerID, Block_Pos.Pos * 32 + New PointI(16, 0), P)
+            Case Is = building_type_enum.Refinery
+                If Block_Pos.Type = Block_Return_Type_Enum.HorizontalTop Then Build_RefineryH(ID, OwnerID, Block_Pos.Pos * 32, P)
+                If Block_Pos.Type = Block_Return_Type_Enum.HorizontalBot Then Build_RefineryH(ID, OwnerID, Block_Pos.Pos * 32 + New PointI(0, 16), P)
+                If Block_Pos.Type = Block_Return_Type_Enum.VerticalL Then Build_RefineryV(ID, OwnerID, Block_Pos.Pos * 32, P)
+                If Block_Pos.Type = Block_Return_Type_Enum.VerticalR Then Build_RefineryV(ID, OwnerID, Block_Pos.Pos * 32 + New PointI(16, 0), P)
+            Case Is = building_type_enum.Factory
+                If Block_Pos.Type = Block_Return_Type_Enum.HorizontalTop Then Build_FactoryH(ID, OwnerID, Block_Pos.Pos * 32, P)
+                If Block_Pos.Type = Block_Return_Type_Enum.HorizontalBot Then Build_FactoryH(ID, OwnerID, Block_Pos.Pos * 32 + New PointI(0, 16), P)
+                If Block_Pos.Type = Block_Return_Type_Enum.VerticalL Then Build_FactoryV(ID, OwnerID, Block_Pos.Pos * 32, P)
+                If Block_Pos.Type = Block_Return_Type_Enum.VerticalR Then Build_FactoryV(ID, OwnerID, Block_Pos.Pos * 32 + New PointI(16, 0), P)
+            Case Is = building_type_enum.Pub
+                If Block_Pos.Type = Block_Return_Type_Enum.HorizontalTop Then Build_PubH(ID, OwnerID, Block_Pos.Pos * 32, P)
+                If Block_Pos.Type = Block_Return_Type_Enum.HorizontalBot Then Build_PubH(ID, OwnerID, Block_Pos.Pos * 32 + New PointI(0, 16), P)
+                If Block_Pos.Type = Block_Return_Type_Enum.VerticalL Then Build_PubV(ID, OwnerID, Block_Pos.Pos * 32, P)
+                If Block_Pos.Type = Block_Return_Type_Enum.VerticalR Then Build_PubV(ID, OwnerID, Block_Pos.Pos * 32 + New PointI(16, 0), P)
+
+        End Select
+
+
+    End Sub
+
+    Sub Build_AppartmentH(ByVal ID As Integer, ByVal OwnerID As Integer, ByVal pos As PointI, ByVal P As Planet)
+        Build_From_File(building_type_enum.Apartment, Block_Return_Type_Enum.HorizontalTop, P, pos, False)
 
         P.Building_List.Add(ID, New Planet_Building(OwnerID, New Rectangle(pos.x, pos.y, 32, 16), building_type_enum.Apartment))
         P.Building_List(ID).BuildingRect.Add(0, New Rectangle(pos.x + 3, pos.y + 3, 7, 10))
@@ -264,9 +390,19 @@
 
     End Sub
 
-    Sub Build_PubH(ByVal ID As Integer, ByVal OwnerID As Integer, ByVal pos As PointI, ByVal P As Planet, ByVal BuildTiles As Boolean)
-        If BuildTiles = True Then Build_From_File(building_type_enum.Pub, P, pos, False)
-        AddPlanetBlock(pos \ 32, P)
+    Sub Build_AppartmentV(ByVal ID As Integer, ByVal OwnerID As Integer, ByVal pos As PointI, ByVal P As Planet)
+        Build_From_File(building_type_enum.Apartment, Block_Return_Type_Enum.VerticalL, P, pos, False)
+
+        P.Building_List.Add(ID, New Planet_Building(OwnerID, New Rectangle(pos.x, pos.y, 32, 16), building_type_enum.Apartment))
+        P.Building_List(ID).BuildingRect.Add(0, New Rectangle(pos.x + 3, pos.y + 3, 7, 10))
+        P.Building_List(ID).BuildingRect.Add(1, New Rectangle(pos.x + 9, pos.y + 3, 7, 10))
+        P.Building_List(ID).BuildingRect.Add(2, New Rectangle(pos.x + 16, pos.y + 3, 7, 10))
+        P.Building_List(ID).BuildingRect.Add(3, New Rectangle(pos.x + 22, pos.y + 3, 7, 10))
+
+    End Sub
+
+    Sub Build_PubH(ByVal ID As Integer, ByVal OwnerID As Integer, ByVal pos As PointI, ByVal P As Planet)
+        Build_From_File(building_type_enum.Pub, Block_Return_Type_Enum.HorizontalTop, P, pos, False)
         P.Building_Count.CPub += 1
 
         P.Building_List.Add(ID, New Planet_Building(OwnerID, New Rectangle(pos.x, pos.y, 32, 16), building_type_enum.Pub))
@@ -282,9 +418,26 @@
 
     End Sub
 
-    Sub Build_Exchange(ByVal ID As Integer, ByVal OwnerID As Integer, ByVal pos As PointI, ByVal P As Planet, ByVal BuildTiles As Boolean)
-        If BuildTiles = True Then Build_From_File(building_type_enum.Exchange, P, pos, False)
-        AddPlanetBlock(pos \ 32, P)
+    Sub Build_PubV(ByVal ID As Integer, ByVal OwnerID As Integer, ByVal pos As PointI, ByVal P As Planet)
+        Build_From_File(building_type_enum.Pub, Block_Return_Type_Enum.VerticalL, P, pos, False)
+        P.Building_Count.CPub += 1
+
+        P.Building_List.Add(ID, New Planet_Building(OwnerID, New Rectangle(pos.x, pos.y, 32, 16), building_type_enum.Pub))
+        P.Building_List(ID).BuildingRect.Add(0, New Rectangle(pos.x + 4, pos.y + 3, 24, 10))
+
+        For y = 5 To 13 Step 2
+            For x = 5 To 27 Step 2
+
+                P.Building_List(ID).access_point.Add(New PointI(pos.x + x, pos.y + y), New Building_Access_Point_Type(BAP_Type.Customer))
+
+            Next
+        Next
+
+    End Sub
+
+    Sub Build_Exchange(ByVal ID As Integer, ByVal OwnerID As Integer, ByVal pos As PointI, ByVal P As Planet)
+        Build_From_File(building_type_enum.Exchange, Block_Return_Type_Enum.WholeTile, P, pos, False)
+
 
         P.Building_List.Add(ID, New Planet_Building(OwnerID, New Rectangle(pos.x, pos.y, 32, 32), building_type_enum.Exchange))
 
@@ -306,11 +459,8 @@
 
     End Sub
 
-    Sub Build_Outpost(ByVal ID As Integer, ByVal OwnerID As Integer, ByVal pos As PointI, ByVal P As Planet, ByVal BuildTiles As Boolean)
-        If BuildTiles = True Then Build_From_File(building_type_enum.Outpost, P, pos, False)
-        AddPlanetBlock(pos \ 32, P)
-
-
+    Sub Build_Outpost(ByVal ID As Integer, ByVal OwnerID As Integer, ByVal pos As PointI, ByVal P As Planet)
+        Build_From_File(building_type_enum.Outpost, Block_Return_Type_Enum.WholeTile, P, pos, False)
         P.Building_List.Add(ID, New Planet_Building(OwnerID, New Rectangle(pos.x, pos.y, 32, 32), building_type_enum.Outpost))
         P.Building_List(ID).PickupPoint = New PointI(pos.x + 15, pos.y + 15)
     End Sub
@@ -318,7 +468,7 @@
 
 
 
-    Public Function Build_From_File(ByVal Building As building_type_enum, ByVal P As Planet, ByVal Pos As PointI, Optional ByVal ToBuffer As Boolean = False) As HashSet(Of Build_Tiles)
+    Public Function Build_From_File(ByVal Building As building_type_enum, ByVal Block_Type As Block_Return_Type_Enum, ByVal P As Planet, ByVal Pos As PointI, Optional ByVal ToBuffer As Boolean = False) As HashSet(Of Build_Tiles)
         Dim Building_tiles As New HashSet(Of Build_Tiles)
         Select Case Building
             Case Is = building_type_enum.Outpost : Building_tiles = Load_Building("Desert_Outpost.bld")
@@ -327,7 +477,9 @@
             Case Is = building_type_enum.Mine : Building_tiles = Load_Building("Desert_Mine.bld")
             Case Is = building_type_enum.Exchange : Building_tiles = Load_Building("Desert_Exchange.bld")
             Case Is = building_type_enum.Pub : Building_tiles = Load_Building("Desert_PubH.bld")
-            Case Is = building_type_enum.Apartment : Building_tiles = Load_Building("Desert_AppartmentH.bld")
+            Case Is = building_type_enum.Apartment
+                If Block_Type = Block_Return_Type_Enum.HorizontalTop OrElse Block_Type = Block_Return_Type_Enum.HorizontalBot Then Building_tiles = Load_Building("Desert_AppartmentH.bld")
+                If Block_Type = Block_Return_Type_Enum.VerticalL OrElse Block_Type = Block_Return_Type_Enum.VerticalR Then Building_tiles = Load_Building("Desert_AppartmentV.bld")
         End Select
 
         If ToBuffer = False Then
@@ -414,17 +566,7 @@
     End Sub
 
 
-    Enum Block_Type_enum
-        Big
-        Quad
-        DoubleH
-        DoubleV
-        Three1
-        Three2
-        Three3
-        Three4
-    End Enum
-
+    
     Enum building_size_enum
         Big
         Small
@@ -466,12 +608,12 @@
         Build_Blocks(Capital, 9, P)
 
         For a = 0 To 10
-            Dim blocks(P.Block_Map.Count - 1) As PointI
+            'Dim blocks(P.Block_Map.Count - 1) As PointI
             '            P.Block_Map.CopyTo(blocks, 0)
 
-            For Each item In blocks
-                Build_Blocks(item, 9, P)
-            Next
+            'For Each item In blocks
+            ' Build_Blocks(item, 9, P)
+            'Next
         Next
 
         Draw_Street(New PointI(0, 0), New PointI(16, 16), P)
@@ -503,56 +645,7 @@
                     'If Not P.Block_Map.Contains(New PointI(x, y)) AndAlso Not P.Resource_Points.ContainsKey(New PointI(x, y)) Then
                     block_Type = CType(random(0, 7), Block_Type_enum)
 
-                    Select Case block_Type
-                        Case Is = Block_Type_enum.Big
-                            Draw_Street(New PointI(x * 32, y * 32), New PointI(32, 32), P)
-                        Case Is = Block_Type_enum.DoubleH
-                            Draw_Street(New PointI(x * 32, y * 32), New PointI(32, 16), P)
-                            Draw_Street(New PointI(x * 32, y * 32 + 16), New PointI(32, 16), P)
-                        Case Is = Block_Type_enum.DoubleV
-                            Draw_Street(New PointI(x * 32, y * 32), New PointI(16, 32), P)
-                            Draw_Street(New PointI(x * 32 + 16, y * 32), New PointI(16, 32), P)
-                        Case Is = Block_Type_enum.Quad
-                            Draw_Street(New PointI(x * 32, y * 32), New PointI(16, 16), P)
-                            Draw_Street(New PointI(x * 32 + 16, y * 32), New PointI(16, 16), P)
-                            Draw_Street(New PointI(x * 32, y * 32 + 16), New PointI(16, 16), P)
-                            Draw_Street(New PointI(x * 32 + 16, y * 32 + 16), New PointI(16, 16), P)
-
-                            Build_Building(New PointI(x * 32, y * 32), building_type_enum.House, P)
-                            Build_Building(New PointI(x * 32 + 16, y * 32), building_type_enum.House, P)
-                            Build_Building(New PointI(x * 32, y * 32 + 16), building_type_enum.House, P)
-                            Build_Building(New PointI(x * 32 + 16, y * 32 + 16), building_type_enum.House, P)
-
-                        Case Is = Block_Type_enum.Three1
-                            Draw_Street(New PointI(x * 32, y * 32), New PointI(16, 32), P)
-                            Draw_Street(New PointI(x * 32 + 16, y * 32), New PointI(16, 16), P)
-                            Draw_Street(New PointI(x * 32 + 16, y * 32 + 16), New PointI(16, 16), P)
-
-                            Build_Building(New PointI(x * 32 + 16, y * 32), building_type_enum.House, P)
-                            Build_Building(New PointI(x * 32 + 16, y * 32 + 16), building_type_enum.House, P)
-                        Case Is = Block_Type_enum.Three2
-                            Draw_Street(New PointI(x * 32, y * 32), New PointI(32, 16), P)
-                            Draw_Street(New PointI(x * 32, y * 32 + 16), New PointI(16, 16), P)
-                            Draw_Street(New PointI(x * 32 + 16, y * 32 + 16), New PointI(16, 16), P)
-
-                            Build_Building(New PointI(x * 32, y * 32 + 16), building_type_enum.House, P)
-                            Build_Building(New PointI(x * 32 + 16, y * 32 + 16), building_type_enum.House, P)
-                        Case Is = Block_Type_enum.Three3
-                            Draw_Street(New PointI(x * 32 + 16, y * 32), New PointI(16, 32), P)
-                            Draw_Street(New PointI(x * 32, y * 32), New PointI(16, 16), P)
-                            Draw_Street(New PointI(x * 32, y * 32 + 16), New PointI(16, 16), P)
-
-                            Build_Building(New PointI(x * 32, y * 32), building_type_enum.House, P)
-                            Build_Building(New PointI(x * 32, y * 32 + 16), building_type_enum.House, P)
-                        Case Is = Block_Type_enum.Three4
-                            Draw_Street(New PointI(x * 32, y * 32 + 16), New PointI(32, 16), P)
-                            Draw_Street(New PointI(x * 32, y * 32), New PointI(16, 16), P)
-                            Draw_Street(New PointI(x * 32 + 16, y * 32), New PointI(16, 16), P)
-
-                            Build_Building(New PointI(x * 32, y * 32), building_type_enum.House, P)
-                            Build_Building(New PointI(x * 32 + 16, y * 32), building_type_enum.House, P)
-                    End Select
-
+                    
 
                     'P.Block_Map.Add(New PointI(x, y))
                     Built += 1
