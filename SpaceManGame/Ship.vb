@@ -512,7 +512,8 @@ Public Class Ship
                         If Crew_list(Crew).Get_points.engineering > 0 AndAlso Me.Faction = Crew_list(Crew).Faction Then
                             send_crew_towork(Crew, room.Key)
                             idle_list.Remove(Crew)
-                            'Exit For
+                            'Need to make remove list
+                            Exit For
                         End If
                     Next
                 End If
@@ -637,8 +638,8 @@ Public Class Ship
         End If
         'Move Ship
 
-        location.x += vector_velocity.x
-        location.y += vector_velocity.y
+        location.x += vector_velocity.x * 20
+        location.y += vector_velocity.y * 20
         rotation += angular_velocity
 
         'vector_velocity.x = 0

@@ -275,7 +275,7 @@
     Public Drag As Double = 0.02
     Public Near_planet As Integer
     Public Loaded_planet As Integer
-    Public GST As Integer = 2800
+    Public GST As Integer = 2750
     Public GSTFrequency As Integer
 
     Public external_planet_texture(15) As Texture
@@ -1108,15 +1108,24 @@
 
         If pressedkeys.Contains(Keys.Space) Then
             'Dim pos As PointD = New PointD(Ship_List(0).center_point.x * 32, Ship_List(0).center_point.y * 32)
-            Dim pos As New PointD(16 * 32, 16 * 32)
-            Dim id As Integer
-            For id = 0 To 500
-                If Not u.Crew_List.ContainsKey(id) Then Exit For
-            Next
-            Add_Crew(id, New Crew(0, pos, 0, Officer_location_enum.Ship, 1, character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head, New crew_resource_type(10, 10)))
+
+            'Dim pos As PointD = (u.Ship_List(0).center_point * 32).ToPointD
+            'Dim id As Integer
+            'For id = 0 To 500
+            '    If Not u.Crew_List.ContainsKey(id) Then Exit For
+            'Next
+            'Add_Crew(id, New Crew(0, pos, 0, Officer_location_enum.Ship, 1, character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head, New crew_resource_type(10, 10)))
             'Ship_List(0).Crew_list.Add(id, New Crew(0, pos, 1, character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head, New crew_resource_type(10, 10)))
             'ship1.Crew_list.Add(0, New Crew(pos, 1, 100, character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head, New crew_resource_type(10, 10)))
+
+
+            Dim Return_Type As Block_Return_Type_Class
+            Return_Type = u.Planet_List(0).FindBestBuildingPos(building_type_enum.Apartment)
+            AddPlanetBlock(Return_Type.Pos, Return_Type.Type, u.Planet_List(0))            
+            u.Planet_List(0).Start_Building_Constuction(u.Planet_List(0).GetEmptyBuildingID, 0, building_type_enum.Apartment, Return_Type.Pos * 32, Return_Type.Type)
+
             pressedkeys.Remove(Keys.Space)
+
         End If
 
 
@@ -1892,7 +1901,7 @@
 
     Sub update_Planet_Movements()
 
-        planet_theta_offset += 0.05
+        planet_theta_offset += 0.0005
         planet_cloud_theta += 0.0001
     End Sub
 
@@ -1926,7 +1935,7 @@
 
 
         GSTFrequency += 1
-        If GSTFrequency = 5 Then
+        If GSTFrequency = 10 Then
             GSTFrequency = 0
             GST += 1
             If GST > 3000 Then GST = 0
