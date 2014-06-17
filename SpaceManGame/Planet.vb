@@ -7,6 +7,7 @@ Public Class Building_Count_Type
     Public Refinery As Integer
     Public Pub As Integer
     Public Special As Integer
+    Public SpacePort As Integer
 
     Public CMine As Integer
     Public CFarm As Integer
@@ -14,29 +15,37 @@ Public Class Building_Count_Type
     Public CRefinery As Integer
     Public CPub As Integer
     Public CSpecial As Integer
+    Public CSpacePort As Integer
 
     Public CitizensBuildingLimit As Integer
+    Public CitizensMax As Integer
 
     Sub SetLevel(ByVal Level As Planet_Level_Type)
         Select Case Level
             Case Is = Planet_Level_Type.Outpost
                 Mine = 1 : Farm = 1 : Factory = 1 : Refinery = 1 : Pub = 1 : Special = 1
                 CitizensBuildingLimit = 2
+                CitizensMax = 3
             Case Is = Planet_Level_Type.Village
                 Mine = 2 : Farm = 2 : Factory = 2 : Refinery = 2 : Pub = 2 : Special = 2
                 CitizensBuildingLimit = 3
+                CitizensMax = 4
             Case Is = Planet_Level_Type.Town
                 Mine = 2 : Farm = 3 : Factory = 2 : Refinery = 2 : Pub = 3 : Special = 6
                 CitizensBuildingLimit = 3
+                CitizensMax = 6
             Case Is = Planet_Level_Type.City
                 Mine = 3 : Farm = 4 : Factory = 3 : Refinery = 3 : Pub = 4 : Special = 7
                 CitizensBuildingLimit = 4
+                CitizensMax = 6
             Case Is = Planet_Level_Type.Metropolis
                 Mine = 4 : Farm = 5 : Factory = 4 : Refinery = 4 : Pub = 5 : Special = 10
                 CitizensBuildingLimit = 4
+                CitizensMax = 8
             Case Is = Planet_Level_Type.Empire
                 Mine = 4 : Farm = 6 : Factory = 5 : Refinery = 5 : Pub = 6 : Special = 14
                 CitizensBuildingLimit = 5
+                CitizensMax = 8
         End Select
     End Sub
 
@@ -181,13 +190,42 @@ Public Class Block_Map_Type
 
 End Class
 
+Public Class Job_List_Type
+    Public Type As Worker_Type_Enum    
+    Public SlotID As Integer
+
+
+    Sub New(ByVal Type As Worker_Type_Enum, ByVal SlotID As Integer)
+        Me.Type = Type
+        Me.SlotID = SlotID
+    End Sub
+
+End Class
+
+
+
+Public Class Housing_List_Type    
+    Public SlotID As Integer
+    Public BuildingID As Integer
+
+    Sub New(ByVal SlotID As Integer, ByVal BuildingID As Integer)
+        Me.SlotID = SlotID
+        Me.BuildingID = BuildingID
+    End Sub
+
+
+End Class
+
 Public Class Planet
     Public PlanetID As Integer
     Public orbits_planet As Boolean
     Public orbit_point As Integer
     Public orbit_distance As Integer
     Public radius As Integer
+
     Public population As Integer
+    Public populationMax As Integer
+
     Public theta As Double
     Public size As PointI
     Public landed_ships As New Dictionary(Of Integer, PointI)()
@@ -198,7 +236,6 @@ Public Class Planet
 
     Public Block_Map As New Block_Map_Type()
 
-
     Public Resource_Points As New Dictionary(Of PointI, Boolean)() 'Is true is resource point is taken
     Public Farm_Points As New Dictionary(Of PointI, Boolean)() 'Is true is farm point is taken
 
@@ -207,6 +244,15 @@ Public Class Planet
     Public Send_List As New Dictionary(Of KeyValuePair(Of Integer, Crew), Send_work_List_Enum)()
 
     Public Item_Point As New Dictionary(Of PointI, Item_Point_Type)()
+
+
+    Public Free_Job_List As New Dictionary(Of Integer, HashSet(Of Job_List_Type))()
+
+    Public Free_Housing_List As New HashSet(Of Housing_List_Type)()
+
+    Public Free_Job_List_Count As Integer
+
+
 
     Private path_find As Pathfind.Pathfind
 
@@ -257,8 +303,13 @@ Public Class Planet
         'Add Block Map (Tells weather the block is built on or not)        
     End Sub
 
-
-
+    Sub Set_Population()
+        population = crew_list.Count - BuilderCount
+        populationMax = 0
+        For Each item In Building_List
+            If item.Value.Type = building_type_enum.Apartment Then populationMax += 4
+        Next
+    End Sub
 
     Sub Build_Tile(ByVal T As Build_Tiles)
         tile_map(T.X, T.Y).sprite = T.Sprite
@@ -271,7 +322,21 @@ Public Class Planet
     Sub Start_Building_Constuction(ByVal ID As Integer, ByVal OwnerID As Integer, ByVal Type As building_type_enum, ByVal Pos As PointI, ByVal Block_Type As Block_Return_Type_Enum)
         If Not Build_List.ContainsKey(ID) Then Build_List.Add(ID, New Build_List_Type)
 
-        Dim tiles As HashSet(Of Build_Tiles) = Build_From_File(Type, Block_Type, Me, Pos, True)
+
+        Dim Adjusted_Pos As PointI = Pos
+        Select Case Block_Type
+            Case Is = Block_Return_Type_Enum.WholeTile : Adjusted_Pos = Pos
+            Case Is = Block_Return_Type_Enum.HorizontalTop : Adjusted_Pos = Pos
+            Case Is = Block_Return_Type_Enum.HorizontalBot : Adjusted_Pos = Pos + New PointI(0, 16)
+            Case Is = Block_Return_Type_Enum.VerticalL : Adjusted_Pos = Pos
+            Case Is = Block_Return_Type_Enum.VerticalR : Adjusted_Pos = Pos + New PointI(16, 0)
+            Case Is = Block_Return_Type_Enum.TopL : Adjusted_Pos = Pos
+            Case Is = Block_Return_Type_Enum.TopR : Adjusted_Pos = Pos + New PointI(16, 0)
+            Case Is = Block_Return_Type_Enum.BotL : Adjusted_Pos = Pos + New PointI(0, 16)
+            Case Is = Block_Return_Type_Enum.BotR : Adjusted_Pos = Pos + New PointI(16, 16)
+        End Select
+
+        Dim tiles As HashSet(Of Build_Tiles) = Build_From_File(Type, Block_Type, Me, Adjusted_Pos, True)
         Build_List(ID).Build_Progress = tiles.Count
         Build_List(ID).Type = Type
         Build_List(ID).OwnerID = OwnerID
@@ -344,10 +409,10 @@ Public Class Planet
                 Start_Building_Constuction(Id, Owner, building_type_enum.Mine, Return_Type.Pos * 32, Return_Type.Type)
 
             Case Is = 1
-                'pos = FindBestBuildingPos(building_type_enum.Farm) * 32
-                'AddPlanetBlock(pos \ 32, Me)
-                'Building_Count.CFarm += 1
-                'Start_Building_Constuction(Id, Owner, building_type_enum.Farm, pos)
+                Return_Type = FindBestBuildingPos(building_type_enum.Farm)
+                AddPlanetBlock(Return_Type.Pos, Return_Type.Type, Me)
+                Building_Count.CFarm += 1
+                Start_Building_Constuction(Id, Owner, building_type_enum.Farm, Return_Type.Pos * 32, Return_Type.Type)
 
             Case Is = 2
                 Return_Type = FindBestBuildingPos(building_type_enum.Factory)
@@ -405,6 +470,10 @@ Public Class Planet
                 Return FindEmptyTile(CapitalPoint, Block_Type_Enum.Large)
             Case Is = building_type_enum.Apartment
                 Return FindEmptyTile(CapitalPoint, Block_Type_Enum.HorV)
+            Case Is = building_type_enum.Bank
+                Return FindEmptyTile(CapitalPoint, Block_Type_Enum.Large)
+            Case Is = building_type_enum.Specials
+                Return FindEmptyTile(CapitalPoint, Block_Type_Enum.Small)
         End Select
 
         Return Return_Type
@@ -412,7 +481,7 @@ Public Class Planet
 
 
     Function FindEmptyTile(ByVal Position As PointI, ByVal Type As Block_Type_Enum) As Block_Return_Type_Class
-        Dim pos As PointI        
+        Dim pos As PointI
         For a = 1 To 8
             For y = -a To a
                 For x = -a To a
@@ -420,7 +489,9 @@ Public Class Planet
                     pos.y = Position.y + y
                     If pos.x >= 0 AndAlso pos.x <= size.x AndAlso pos.y >= 0 AndAlso pos.y <= size.y Then
                         Dim Return_Type As Block_Return_Type_Enum = Block_Map.Get_Block(pos, Type)
-                        If Not Return_Type = Block_Return_Type_Enum.None AndAlso Not Resource_Points.ContainsKey(pos) AndAlso Not Farm_Points.ContainsKey(pos) Then Return New Block_Return_Type_Class(pos, Return_Type)
+                        If Not Return_Type = Block_Return_Type_Enum.None AndAlso Not Resource_Points.ContainsKey(pos) AndAlso Not Farm_Points.ContainsKey(pos) Then                            
+                            Return New Block_Return_Type_Class(pos, Return_Type)
+                        End If
                     End If
                 Next
             Next
@@ -436,6 +507,13 @@ Public Class Planet
         Return ID
     End Function
 
+    Function GetEmptyCrewID() As Integer
+        Dim ID As Integer
+        For a = 0 To 100000
+            If Not crew_list.ContainsKey(a) Then ID = a : Exit For
+        Next
+        Return ID
+    End Function
 
 
     Sub MoveOfficer(ByVal Id As Integer, ByRef vector As PointD)
@@ -516,7 +594,7 @@ Public Class Planet
                             BuildBuilding = True
                         End If
                     Else
-                        Cit.Value.Owned_Buildings.Add(0, New HashSet(Of Integer))
+                        Cit.Value.Owned_Buildings.Add(PlanetID, New HashSet(Of Integer))
                         BuildBuilding = True
                     End If
                 End If
@@ -537,8 +615,7 @@ Public Class Planet
     End Sub
 
 
-
-    Sub Process_Planet()
+    Sub Check_Citizen()
         If Citizens < CitizensMax Then
             Dim Id As Integer
             For Id = 0 To 10000
@@ -549,15 +626,71 @@ Public Class Planet
             u.Officer_List(Id).Citizen_Rights.Add(PlanetID)
             Citizens += 1
         End If
+    End Sub
 
 
+    Sub Check_Workers()
+        Dim count = 0
+
+        If Free_Job_List.Count > 0 AndAlso population < populationMax AndAlso Free_Housing_List.Count > 0 Then
+            If Free_Job_List_Count > Free_Job_List.Count - 1 Then Free_Job_List_Count = 0
+            count = 0
+            'Dim Slots As New KeyValuePair(Of Integer, HashSet(Of Job_List_Type))()
+            Dim Id As Integer
+            For Each item In Free_Job_List
+                If count = Free_Job_List_Count Then Id = item.Key : Exit For
+                count += 1
+            Next
+
+
+
+            Dim CrewID As Integer = GetEmptyCrewID()
+            Dim SpawnPoint = New PointD(Building_List(0).PickupPoint.x * 32, Building_List(0).PickupPoint.y * 32)
+            Building_List(Id).Work_Slots.Slots(Free_Job_List(Id).First.SlotID).ID = CrewID            
+            'CrewAdd
+            crew_list.Add(CrewID, New Crew(0, SpawnPoint, 0, Officer_location_enum.Planet, 10, character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head, New crew_resource_type(0, 0)))
+            crew_list(CrewID).Worker_Type = Free_Job_List(Id).First.Type
+            crew_list(CrewID).HomeBuilding = Free_Housing_List.First.BuildingID
+            crew_list(CrewID).HomeSpace = Free_Housing_List.First.SlotID
+            crew_list(CrewID).WorkShift = Work_Shift_Enum.Night  'CType(random(0, 2), Work_Shift_Enum)
+            crew_list(CrewID).PubBuilding = -1
+            crew_list(CrewID).WorkBuilding = Id
+            'Remove House listing
+            Building_List(Free_Housing_List.First.BuildingID).Tennent_Slots.Slots(Free_Housing_List.First.SlotID).CrewID = CrewID
+            Free_Job_List_Count += 1
+        End If
+
+
+        'RebuildJobList / Housing List
+        Free_Job_List.Clear()
+        For Each Item In Building_List            
+            count = 0
+            For Each slot In Item.Value.Work_Slots.Slots
+                If slot.ID = -1 Then
+                    If Not Free_Job_List.ContainsKey(Item.Key) Then Free_Job_List.Add(Item.Key, New HashSet(Of Job_List_Type))
+                    Free_Job_List(Item.Key).Add(New Job_List_Type(slot.Type, count))
+                End If
+                count += 1
+            Next
+        Next
+
+        Free_Housing_List.Clear()
+        For Each Item In Building_List
+            For Each slot In Item.Value.Tennent_Slots.Slots
+                If slot.CrewID = -1 Then
+                    Free_Housing_List.Add(New Housing_List_Type(slot.SlotID, Item.Key))
+                End If
+            Next
+        Next
+
+
+    End Sub
+
+    Sub Check_Builders()
         If BuilderSpawnCounter <= 0 AndAlso BuilderCount < 4 Then
             BuilderCount += 1
-            Dim Id As Integer
-            For Id = 0 To 10000
-                If Not crew_list.ContainsKey(Id) Then Exit For
-            Next
-            crew_list.Add(Id, New Crew(0, New PointD(0, 0), 0, Officer_location_enum.Planet, 10, character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head, New crew_resource_type(0, 0)))
+            Dim Id As Integer = GetEmptyCrewID()
+            crew_list.Add(Id, New Crew(0, New PointD((CapitalPoint.x * 32 + 15) * 32, (CapitalPoint.y * 32 + 15) * 32), 0, Officer_location_enum.Planet, 10, character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head, New crew_resource_type(0, 0)))
             crew_list(Id).Worker_Type = Worker_Type_Enum.Builder
             Builder_List.Add(Id, -1)
         End If
@@ -565,7 +698,6 @@ Public Class Planet
 
 
         'Assign new builders
-
         Dim FreeBuilders As New HashSet(Of Integer)()
         'Get builder count
         For Each builder In Builder_List
@@ -574,17 +706,17 @@ Public Class Planet
 
         If FreeBuilders.Count > 0 Then
             Dim BuildID As Integer = -1
-            For Each item In Build_List
-                If item.Value.Compleated = False AndAlso item.Value.Builders = 0 Then
-                    BuildID = item.Key
+            For Each Item In Build_List
+                If Item.Value.Compleated = False AndAlso Item.Value.Builders = 0 Then
+                    BuildID = Item.Key
                     Exit For
                 End If
             Next
 
             If BuildID = -1 Then
-                For Each item In Build_List
-                    If item.Value.Compleated = False AndAlso item.Value.Builders = 1 Then
-                        BuildID = item.Key
+                For Each Item In Build_List
+                    If Item.Value.Compleated = False AndAlso Item.Value.Builders = 1 Then
+                        BuildID = Item.Key
                         Exit For
                     End If
                 Next
@@ -608,17 +740,24 @@ Public Class Planet
             End If
 
         End If
+    End Sub
 
-
+    Sub Process_Planet()
+        Set_Population()
+        Check_Citizen()
+        Check_Workers()
+        Check_Builders()
+        
+        'Remove_Compleated_Buildings
         Dim Remove_List As New HashSet(Of Integer)()
-        For Each item In Build_List
-            If item.Value.Compleated = True Then
-                PlanetGenerator.Build_Building(item.Value.Type, item.Key, item.Value.OwnerID, Me, New Block_Return_Type_Class(item.Value.Pos, item.Value.BlockType))
-                Remove_List.Add(item.Key)
+        For Each Item In Build_List
+            If Item.Value.Compleated = True Then
+                PlanetGenerator.Build_Building(Item.Value.Type, Item.Key, Item.Value.OwnerID, Me, New Block_Return_Type_Class(Item.Value.Pos \ 32, Item.Value.BlockType))
+                Remove_List.Add(Item.Key)
             End If
         Next
-        For Each item In Remove_List
-            Build_List.Remove(item)
+        For Each Item In Remove_List
+            Build_List.Remove(Item)
         Next
 
     End Sub
@@ -1180,12 +1319,24 @@ Public Class Planet
                 If Crew.Value.Worker_Type = Worker_Type_Enum.Worker Then
                     'Find AP in building
                     For Each AP In Building_List(Crew.Value.WorkBuilding).access_point
-                        If AP.Value.Type = BAP_Type.Worker AndAlso AP.Value.NextUp = False Then
+                        If AP.Value.Type = BAP_Type.Worker AndAlso AP.Value.Used = False AndAlso AP.Value.NextUp = False Then
                             work_Point = AP.Key
                             Found_AP = True
                             Exit For
                         End If
                     Next
+
+                    If Found_AP = False Then
+                        For Each AP In Building_List(Crew.Value.WorkBuilding).access_point
+                            If AP.Value.Type = BAP_Type.Worker AndAlso AP.Value.NextUp = False Then
+                                work_Point = AP.Key
+                                Found_AP = True
+                                Exit For
+                            End If
+                        Next
+                    End If
+
+
                     'If Open access point is found send crew to work
                     If Found_AP = True Then
                         Found_AP = False
@@ -1352,74 +1503,83 @@ Public Class Planet
         Dim Bank_Point As PointI
 
         If GotoBank = True Then
-            For Each AP In Building_List(Crew.BankBuilding).access_point
-                If AP.Value.Type = BAP_Type.Customer AndAlso AP.Value.Used = False Then Bank_Point = AP.Key : Found_Bank_AP = True : Exit For
-            Next
-
-            If Found_Bank_AP = True Then
-                Found_Bank_AP = False
-                Building_List(Crew.BankBuilding).access_point(Bank_Point).Used = True
+            'Need to add find new bank code
+            If Crew.BankBuilding = -1 Then
 
 
-                path_find.Standard_Pathfind(tile, Bank_Point)
-                If path_find.Found_State = Pathfind.Pathfind.PFState.Found Then
+            Else
+                'If crew has a bank
+                For Each AP In Building_List(Crew.BankBuilding).access_point
+                    If AP.Value.Type = BAP_Type.Customer AndAlso AP.Value.Used = False Then Bank_Point = AP.Key : Found_Bank_AP = True : Exit For
+                Next
+
+                If Found_Bank_AP = True Then
+                    Found_Bank_AP = False
+                    Building_List(Crew.BankBuilding).access_point(Bank_Point).Used = True
 
 
-                    If Crew.command_queue.Any Then
+                    path_find.Standard_Pathfind(tile, Bank_Point)
+                    If path_find.Found_State = Pathfind.Pathfind.PFState.Found Then
+
+
+                        If Crew.command_queue.Any Then
+                            Crew.command_queue.Clear()
+                        End If
+
+                        Building_List(Crew.BankBuilding).Assigned_crew_list.Add(ID)
+                        Dim list As LinkedList(Of PointI)
+                        list = path_find.Path
+
+                        'Need to add wait for finish
                         Crew.command_queue.Clear()
+                        For Each dest In list
+                            Crew.command_queue.Enqueue(New Crew.Command_move(New PointD(dest.x * 32, dest.y * 32)))
+                        Next
+                        Crew.command_queue.Enqueue(New Crew.Command_Pub_Start(Bank_Point, Pub_Time))
+                        Return Bank_Point
                     End If
-
-                    Building_List(Crew.BankBuilding).Assigned_crew_list.Add(ID)
-                    Dim list As LinkedList(Of PointI)
-                    list = path_find.Path
-
-                    'Need to add wait for finish
-                    Crew.command_queue.Clear()
-                    For Each dest In list
-                        Crew.command_queue.Enqueue(New Crew.Command_move(New PointD(dest.x * 32, dest.y * 32)))
-                    Next
-                    Crew.command_queue.Enqueue(New Crew.Command_Pub_Start(Bank_Point, Pub_Time))
-                    Return Bank_Point
                 End If
             End If
         End If
 
+        'Need to add find new pub code
+        If Crew.PubBuilding = -1 Then
 
 
-        Pub_Time = random(100, 200)
+        Else
 
+            Pub_Time = random(100, 200)
+            Dim Found_AP As Boolean
+            Dim Pub_Point As PointI
+            For Each AP In Building_List(Crew.PubBuilding).access_point
+                If AP.Value.Type = BAP_Type.Customer AndAlso AP.Value.Used = False Then Pub_Point = AP.Key : Found_AP = True : Exit For
+            Next
 
-        Dim Found_AP As Boolean
-        Dim Pub_Point As PointI
-        For Each AP In Building_List(Crew.PubBuilding).access_point
-            If AP.Value.Type = BAP_Type.Customer AndAlso AP.Value.Used = False Then Pub_Point = AP.Key : Found_AP = True : Exit For
-        Next
+            If Found_AP = True Then
+                Found_AP = False
+                'Set NextUp to work to true
+                Building_List(Crew.PubBuilding).access_point(Pub_Point).Used = True
+                'Pathfind
 
-        If Found_AP = True Then
-            Found_AP = False
-            'Set NextUp to work to true
-            Building_List(Crew.PubBuilding).access_point(Pub_Point).Used = True
-            'Pathfind
+                path_find.Standard_Pathfind(tile, Pub_Point)
+                If path_find.Found_State = Pathfind.Pathfind.PFState.Found Then
 
-            path_find.Standard_Pathfind(tile, Pub_Point)
-            If path_find.Found_State = Pathfind.Pathfind.PFState.Found Then
+                    Building_List(Crew.PubBuilding).Assigned_crew_list.Add(ID)
+                    Dim list As LinkedList(Of PointI)
+                    list = path_find.Path
 
-                Building_List(Crew.PubBuilding).Assigned_crew_list.Add(ID)
-                Dim list As LinkedList(Of PointI)
-                list = path_find.Path
-
-                'Need to add wait for finish                
-                For Each dest In list
-                    Crew.command_queue.Enqueue(New Crew.Command_move(New PointD(dest.x * 32, dest.y * 32)))
-                Next
-                Crew.command_queue.Enqueue(New Crew.Command_Pub_Start(Pub_Point, Pub_Time))
-                Return Pub_Point
+                    'Need to add wait for finish                
+                    For Each dest In list
+                        Crew.command_queue.Enqueue(New Crew.Command_move(New PointD(dest.x * 32, dest.y * 32)))
+                    Next
+                    Crew.command_queue.Enqueue(New Crew.Command_Pub_Start(Pub_Point, Pub_Time))
+                    Return Pub_Point
+                End If
             End If
+
+
+
         End If
-
-
-
-
 
 
 
