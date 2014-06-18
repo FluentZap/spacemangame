@@ -20,77 +20,62 @@
     End Class
 
 
-    Public Tile_Map(31, 31) As Build_Tiles
-    Public Tile_active(31, 31) As Boolean
+    Public Tile_Map(127, 127) As Build_Tiles
+    Public Tile_active(127, 127) As Boolean
 
-    Public Tile_Boxes(31, 31) As Integer
+    Public Tile_Boxes(127, 127) As Integer
 
     Public Building_Type As Byte
-    Public WriteNumber As Byte    
+    Public WriteNumber As Integer
     Public WriteType As Byte
     Public Walkable As Byte = 3
     Public tile_size As Integer = 32
-    Public showSprite2 As Boolean
-    Public Tile_Sprites As Image
+    Public showSprite2 As Boolean    
+    Public Tile_Sprites As Image()
 
-    Private Sub Form1_Load(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MyBase.Load
-
-        For x = 0 To 31
-            For y = 0 To 31
-                Tile_Map(x, y) = New Build_Tiles(0, 0, 0, 0, 0, 0)
-            Next
-        Next
-        Walkable = 3
-    End Sub
-
-    Private Sub TextBox3_KeyDown(ByVal sender As Object, ByVal e As System.Windows.Forms.KeyEventArgs) Handles TextBox3.KeyDown
+    Private Sub Form1_KeyDown(ByVal sender As Object, ByVal e As System.Windows.Forms.KeyEventArgs) Handles Me.KeyDown
         If e.KeyCode = Keys.Right AndAlso WriteNumber < 200 Then WriteNumber = CByte(WriteNumber + 1)
         If e.KeyCode = Keys.Left AndAlso WriteNumber > 0 Then WriteNumber = CByte(WriteNumber - 1)
 
         If Tile_Sprites Is Nothing Then Exit Sub
         Dim g As Graphics = Graphics.FromHwnd(Me.Handle)
 
-        g.DrawImage(Tile_Sprites, 0, 30)
-        g.DrawRectangle(Pens.Green, New Rectangle(WriteNumber * tile_size, 30, tile_size - 1, tile_size - 1))        
+        g.DrawImage(Tile_Sprites(WriteType), 0, 30)
+        g.DrawRectangle(Pens.Green, New Rectangle(WriteNumber * tile_size, 30, tile_size - 1, tile_size - 1))
 
     End Sub
 
-    Private Sub TextBox3_TextChanged(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles TextBox3.TextChanged
-        Dim X As Byte
-        If Byte.TryParse(TextBox3.Text, X) = True Then
-            If X >= 0 AndAlso X <= 255 Then
-                WriteType = X
-                TextBox3.BackColor = Color.LightGreen
-            Else
-                TextBox3.BackColor = Color.Red
-            End If
-
-        Else
-            TextBox3.Text = ""
-            TextBox3.BackColor = Color.White
-        End If
-
-
+    Private Sub Form1_Load(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MyBase.Load
+        For x = 0 To 127
+            For y = 0 To 127
+                Tile_Map(x, y) = New Build_Tiles(0, 0, 0, 0, 0, 0)
+            Next
+        Next        
+        For x = 0 To 255
+            TileBox.Items.Add(CType(x, planet_tile_type_enum))
+        Next
+        Load_Images()
+        WalkableBox.SelectedIndex = 0
+        TileBox.SelectedIndex = 0
+        SpriteBox.SelectedIndex = 0
     End Sub
 
     Private Sub NewToolStripMenuItem_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles NewToolStripMenuItem.Click
-        For x = 0 To 31
-            For y = 0 To 31                
+        For x = 0 To 127
+            For y = 0 To 127
                 Tile_Map(x, y) = New Build_Tiles(0, 0, 0, 0, 0, 0)
                 Tile_active(x, y) = False
             Next
         Next
-        Label2.BackColor = Color.LawnGreen
-        Label4.BackColor = Color.White
-        Walkable = 3
-        WriteNumber = 0        
-        WriteType = 0
+        Reset_Selections()
         Me.Refresh()
     End Sub
 
     Private Sub OpenToolStripMenuItem_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles OpenToolStripMenuItem.Click
-        If OpenFileDialog1.ShowDialog = Windows.Forms.DialogResult.OK Then
 
+        OpenFileDialog1.InitialDirectory = "C:\Users\Toad\Documents\Visual Studio 2008\Projects\SpaceManGame\SpaceManGame\bin\x86\Debug\Data\BuildingMap\"
+
+        If OpenFileDialog1.ShowDialog = Windows.Forms.DialogResult.OK Then
             Dim Tile_List As HashSet(Of Build_Tiles) = New HashSet(Of Build_Tiles)
             Dim stream As New IO.FileStream(OpenFileDialog1.FileName, IO.FileMode.Open, IO.FileAccess.Read, IO.FileShare.Read)
 
@@ -107,16 +92,11 @@
             Next
             stream.Close()
 
-
-            Label2.BackColor = Color.LawnGreen
-            Label4.BackColor = Color.White
-            Walkable = 3
-            WriteNumber = 0            
-            WriteType = 0
-
-            For x = 0 To 31
-                For y = 0 To 31
-                    Tile_Map(x, y) = New Build_Tiles(0, 0, 0, 0, 0, 0)
+            Reset_Selections()
+            
+            For x = 0 To 127
+                For y = 0 To 127
+                    'Tile_Map(x, y) = New Build_Tiles(0, 0, 0, 0, 0, 0)
                     Tile_active(x, y) = False
                 Next
             Next
@@ -130,10 +110,12 @@
         End If
     End Sub
 
-
-
-
-
+    Sub Reset_Selections()
+        WalkableBox.SelectedIndex = 0
+        SpriteBox.SelectedIndex = 0
+        TileBox.SelectedIndex = 0
+        WriteNumber = 0
+    End Sub
 
 
     Function Load_Building(ByVal Building As String) As HashSet(Of Build_Tiles)
@@ -144,7 +126,6 @@
         stream.Close()
         Return Tile_List
     End Function
-
 
     Sub Save_Building(ByVal FileName As String, ByVal Building As HashSet(Of Build_Tiles))        
         Dim stream As New IO.FileStream(FileName, IO.FileMode.Create, IO.FileAccess.Write, IO.FileShare.None)
@@ -171,135 +152,112 @@
     End Sub
 
     Private Sub Form1_MouseDown(ByVal sender As Object, ByVal e As System.Windows.Forms.MouseEventArgs) Handles Me.MouseDown
-        If Tile_Sprites Is Nothing Then Exit Sub
-        Dim g As Graphics = Graphics.FromHwnd(Me.Handle)
-        Dim pos As Point
-        pos.X = e.X \ 32
-        
-        If e.Button = Windows.Forms.MouseButtons.Left Then
-            If pos.X >= 0 AndAlso pos.X <= 40 AndAlso e.Y >= 30 AndAlso e.Y <= 30 + tile_size Then
-                WriteNumber = CByte(pos.X)
-            End If
-        End If
-
-        g.DrawImage(Tile_Sprites, 0, 30)
-        g.DrawRectangle(Pens.Green, New Rectangle(WriteNumber * tile_size, 30, tile_size - 1, tile_size - 1))
-
-
-        pos.X = e.X \ tile_size
-        pos.Y = (e.Y - 70) \ tile_size
-        If e.Y < 70 Then pos.Y = -1
-        If e.Button = Windows.Forms.MouseButtons.Left Then
-            If pos.X >= 0 AndAlso pos.X <= 31 AndAlso pos.Y >= 0 AndAlso pos.Y <= 31 Then
-
-                Tile_Map(pos.X, pos.Y).X = CByte(pos.X)
-                Tile_Map(pos.X, pos.Y).Y = CByte(pos.Y)
-                If showSprite2 = False Then
-                    Tile_Map(pos.X, pos.Y).Sprite = WriteNumber
-                Else
-                    Tile_Map(pos.X, pos.Y).Sprite2 = WriteNumber
-                End If
-                Tile_Map(pos.X, pos.Y).Type = WriteType
-                If Walkable < 100 Then Tile_Map(pos.X, pos.Y).Walkable = Walkable
-
-                Tile_active(pos.X, pos.Y) = True
-
-
-                If showSprite2 = False Then
-                    g.DrawImage(Tile_Sprites, pos.X * tile_size, 70 + pos.Y * tile_size, New RectangleF(Tile_Map(pos.X, pos.Y).Sprite * 32, 0, tile_size, tile_size), GraphicsUnit.Pixel)
-                Else
-                    g.DrawImage(Tile_Sprites, pos.X * tile_size, 70 + pos.Y * tile_size, New RectangleF(Tile_Map(pos.X, pos.Y).Sprite2 * 32, 0, tile_size, tile_size), GraphicsUnit.Pixel)
-                End If
-
-                If Tile_active(pos.X, pos.Y) = True Then
-                    If Tile_Map(pos.X, pos.Y).Walkable = 0 Then g.DrawRectangle(Pens.Red, New Rectangle(pos.X * tile_size, (pos.Y * tile_size) + 70, tile_size - 1, tile_size - 1))
-                    If Tile_Map(pos.X, pos.Y).Walkable = 3 Then g.DrawRectangle(Pens.Green, New Rectangle(pos.X * tile_size, (pos.Y * tile_size) + 70, tile_size - 1, tile_size - 1))
-                    If Tile_Map(pos.X, pos.Y).Walkable = 4 Then g.DrawRectangle(Pens.Blue, New Rectangle(pos.X * tile_size, (pos.Y * tile_size) + 70, tile_size - 1, tile_size - 1))
-                End If
-                g.DrawString(Tile_Map(pos.X, pos.Y).Type.ToString, Me.Font, Brushes.Black, pos.X * 32, 70 + pos.Y * 32)
-                g.Dispose()
-            End If
-        End If
-
-        If e.Button = Windows.Forms.MouseButtons.Right Then
-            If pos.X >= 0 AndAlso pos.X <= 31 AndAlso pos.Y >= 0 AndAlso pos.Y <= 31 Then
-                Tile_active(pos.X, pos.Y) = False
-
-                If showSprite2 = False Then
-                    g.DrawImage(Tile_Sprites, pos.X * tile_size, 70 + pos.Y * tile_size, New RectangleF(Tile_Map(pos.X, pos.Y).Sprite * 32, 0, tile_size, tile_size), GraphicsUnit.Pixel)
-                Else
-                    g.DrawImage(Tile_Sprites, pos.X * tile_size, 70 + pos.Y * tile_size, New RectangleF(Tile_Map(pos.X, pos.Y).Sprite2 * 32, 0, tile_size, tile_size), GraphicsUnit.Pixel)
-                End If
-                g.DrawString(Tile_Map(pos.X, pos.Y).Type.ToString, Me.Font, Brushes.Black, pos.X * 32, 70 + pos.Y * 32)
-            End If
-        End If
+        SetTile(e)
     End Sub
-
 
     Private Sub Form1_MouseMove(ByVal sender As Object, ByVal e As System.Windows.Forms.MouseEventArgs) Handles Me.MouseMove
-        Dim pos As Point
-        pos.X = e.X \ tile_size
-        pos.Y = (e.Y - 70) \ tile_size
-        Label7.Text = pos.X.ToString + " / " + pos.Y.ToString
-
-        If Tile_Sprites Is Nothing Then Exit Sub
-        
-        If e.Y < 70 Then pos.Y = -1
-        If e.Button = Windows.Forms.MouseButtons.Left Then
-            If pos.X >= 0 AndAlso pos.X <= 31 AndAlso pos.Y >= 0 AndAlso pos.Y <= 31 Then
-
-                Tile_Map(pos.X, pos.Y).X = CByte(pos.X)
-                Tile_Map(pos.X, pos.Y).Y = CByte(pos.Y)
-
-                If showSprite2 = False Then
-                    Tile_Map(pos.X, pos.Y).Sprite = WriteNumber
-                Else
-                    Tile_Map(pos.X, pos.Y).Sprite2 = WriteNumber
-                End If
-
-                Tile_Map(pos.X, pos.Y).Type = WriteType
-                If Walkable < 100 Then Tile_Map(pos.X, pos.Y).Walkable = Walkable
-
-                Tile_active(pos.X, pos.Y) = True
-
-                Dim g As Graphics = Graphics.FromHwnd(Me.Handle)                
-                If showSprite2 = False Then
-                    g.DrawImage(Tile_Sprites, pos.X * tile_size, 70 + pos.Y * tile_size, New RectangleF(Tile_Map(pos.X, pos.Y).Sprite * 32, 0, tile_size, tile_size), GraphicsUnit.Pixel)
-                Else
-                    g.DrawImage(Tile_Sprites, pos.X * tile_size, 70 + pos.Y * tile_size, New RectangleF(Tile_Map(pos.X, pos.Y).Sprite2 * 32, 0, tile_size, tile_size), GraphicsUnit.Pixel)
-                End If
-
-                'g.DrawRectangle(Pens.Red, New Rectangle(pos.X * tile_size, (pos.Y * tile_size) + 70, tile_size - 1, tile_size - 1))
-
-                If Tile_active(pos.X, pos.Y) = True Then
-                    If Tile_Map(pos.X, pos.Y).Walkable = 0 Then g.DrawRectangle(Pens.Red, New Rectangle(pos.X * tile_size, (pos.Y * tile_size) + 70, tile_size - 1, tile_size - 1))
-                    If Tile_Map(pos.X, pos.Y).Walkable = 3 Then g.DrawRectangle(Pens.Green, New Rectangle(pos.X * tile_size, (pos.Y * tile_size) + 70, tile_size - 1, tile_size - 1))
-                    If Tile_Map(pos.X, pos.Y).Walkable = 4 Then g.DrawRectangle(Pens.Blue, New Rectangle(pos.X * tile_size, (pos.Y * tile_size) + 70, tile_size - 1, tile_size - 1))
-                End If
-                g.DrawString(Tile_Map(pos.X, pos.Y).Type.ToString, Me.Font, Brushes.Black, pos.X * 32, 70 + pos.Y * 32)
-                g.Dispose()
-            End If
-        End If
-        If e.Button = Windows.Forms.MouseButtons.Right Then
-            If pos.X >= 0 AndAlso pos.X <= 31 AndAlso pos.Y >= 0 AndAlso pos.Y <= 31 Then
-                Tile_active(pos.X, pos.Y) = False
-
-                Dim g As Graphics = Graphics.FromHwnd(Me.Handle)
-                If showSprite2 = False Then
-                    g.DrawImage(Tile_Sprites, pos.X * tile_size, 70 + pos.Y * tile_size, New RectangleF(Tile_Map(pos.X, pos.Y).Sprite * 32, 0, tile_size, tile_size), GraphicsUnit.Pixel)
-                Else
-                    g.DrawImage(Tile_Sprites, pos.X * tile_size, 70 + pos.Y * tile_size, New RectangleF(Tile_Map(pos.X, pos.Y).Sprite2 * 32, 0, tile_size, tile_size), GraphicsUnit.Pixel)
-                End If
-                g.DrawString(Tile_Map(pos.X, pos.Y).Type.ToString, Me.Font, Brushes.Black, pos.X * 32, 70 + pos.Y * 32)
-            End If
-        End If
+        SetTile(e)
     End Sub
 
+
+    Sub SetTile(ByVal e As MouseEventArgs)
+        Dim g As Graphics = Graphics.FromHwnd(Me.Handle)
+        Dim pos As Point
+        pos.X = (e.X - 20) \ tile_size + ScrollH.Value
+        pos.Y = (e.Y - 70) \ tile_size + ScrollV.Value
+        Label7.Text = (pos.X).ToString + " / " + (pos.Y).ToString
+        'Draw Mouse pos
+
+        If e.Y < 70 Then pos.Y = -1
+
+        If e.Button = Windows.Forms.MouseButtons.Left Then
+            If pos.X - ScrollH.Value >= 0 AndAlso pos.X - ScrollH.Value <= 40 AndAlso e.Y >= 30 AndAlso e.Y <= 30 + tile_size Then
+                WriteNumber = CByte(pos.X - ScrollH.Value)
+                g.DrawImage(Tile_Sprites(WriteType), 20, 30)
+                g.DrawRectangle(Pens.White, New Rectangle(WriteNumber * tile_size + 20, 30, tile_size - 1, tile_size - 1))
+            End If
+        End If
+
+        If e.Button = Windows.Forms.MouseButtons.Left Then
+            If pos.X >= ScrollH.Value AndAlso pos.X <= ScrollH.Value + 36 AndAlso pos.Y >= ScrollV.Value AndAlso pos.Y <= ScrollV.Value + 26 Then
+
+
+                If WriteNumber > -1 Then
+
+                    Tile_Map(pos.X, pos.Y).X = CByte(pos.X)
+                    Tile_Map(pos.X, pos.Y).Y = CByte(pos.Y)
+
+                    If showSprite2 = False Then
+                        Tile_Map(pos.X, pos.Y).Sprite = CByte(WriteNumber)
+                    Else
+                        Tile_Map(pos.X, pos.Y).Sprite2 = CByte(WriteNumber)
+                    End If
+                    Tile_Map(pos.X, pos.Y).Type = WriteType
+                End If
+
+
+                If Walkable < 100 Then Tile_Map(pos.X, pos.Y).Walkable = Walkable
+                Tile_active(pos.X, pos.Y) = True
+
+
+                If showSprite2 = False Then
+                    g.DrawImage(Tile_Sprites(Tile_Map(pos.X, pos.Y).Type), 20 + (pos.X - ScrollH.Value) * tile_size, 70 + (pos.Y - ScrollV.Value) * tile_size, New RectangleF(Tile_Map(pos.X, pos.Y).Sprite * 32, 0, tile_size, tile_size), GraphicsUnit.Pixel)
+                Else
+                    g.DrawImage(Tile_Sprites(Tile_Map(pos.X, pos.Y).Type), 20 + (pos.X - ScrollH.Value) * tile_size, 70 + (pos.Y - ScrollV.Value) * tile_size, New RectangleF(Tile_Map(pos.X, pos.Y).Sprite2 * 32, 0, tile_size, tile_size), GraphicsUnit.Pixel)
+                End If
+
+                If (pos.X + 1) / 16 = 0 Then g.DrawRectangle(Pens.LightBlue, New Rectangle((pos.X - ScrollH.Value) * tile_size + 20, (pos.Y * tile_size) + 70, tile_size - 1, tile_size - 1))
+                If (pos.Y + 1) / 16 = 0 Then g.DrawRectangle(Pens.LightBlue, New Rectangle((pos.X - ScrollH.Value) * tile_size + 20, (pos.Y * tile_size) + 70, tile_size - 1, tile_size - 1))
+
+                If Tile_active(pos.X, pos.Y) = True Then
+                    If Tile_Map(pos.X, pos.Y).Walkable = 0 Then g.DrawRectangle(Pens.Red, New Rectangle((pos.X - ScrollH.Value) * tile_size + 20, ((pos.Y - ScrollV.Value) * tile_size) + 70, tile_size - 1, tile_size - 1))
+                    If Tile_Map(pos.X, pos.Y).Walkable = 3 Then g.DrawRectangle(Pens.Green, New Rectangle((pos.X - ScrollH.Value) * tile_size + 20, ((pos.Y - ScrollV.Value) * tile_size) + 70, tile_size - 1, tile_size - 1))
+                    If Tile_Map(pos.X, pos.Y).Walkable = 4 Then g.DrawRectangle(Pens.Blue, New Rectangle((pos.X - ScrollH.Value) * tile_size + 20, ((pos.Y - ScrollV.Value) * tile_size) + 70, tile_size - 1, tile_size - 1))
+                End If
+                g.DrawString(Tile_Map(pos.X, pos.Y).Type.ToString, Me.Font, Brushes.Black, 20 + (pos.X - ScrollH.Value) * 32, 70 + (pos.Y - ScrollV.Value) * 32)
+            End If
+
+        End If
+
+        If e.Button = Windows.Forms.MouseButtons.Right Then
+            If pos.X >= ScrollH.Value AndAlso pos.X <= ScrollH.Value + 36 AndAlso pos.Y >= ScrollV.Value AndAlso pos.Y <= ScrollV.Value + 26 Then
+                Tile_Map(pos.X, pos.Y).Sprite = 0
+                Tile_Map(pos.X, pos.Y).Sprite2 = 0
+
+                Tile_active(pos.X, pos.Y) = False
+                If showSprite2 = False Then
+                    g.DrawImage(Tile_Sprites(Tile_Map(pos.X, pos.Y).Type), 20 + (pos.X - ScrollH.Value) * tile_size, 70 + (pos.Y - ScrollV.Value) * tile_size, New RectangleF(Tile_Map(pos.X, pos.Y).Sprite * 32, 0, tile_size, tile_size), GraphicsUnit.Pixel)
+                Else
+                    g.DrawImage(Tile_Sprites(Tile_Map(pos.X, pos.Y).Type), 20 + (pos.X - ScrollH.Value) * tile_size, 70 + (pos.Y - ScrollV.Value) * tile_size, New RectangleF(Tile_Map(pos.X, pos.Y).Sprite2 * 32, 0, tile_size, tile_size), GraphicsUnit.Pixel)
+                End If
+
+                g.DrawString(Tile_Map(pos.X, pos.Y).Type.ToString, Me.Font, Brushes.Black, 20 + (pos.X - ScrollH.Value) * 32, 70 + (pos.Y - ScrollV.Value) * 32)
+
+            End If
+        End If
+        g.Dispose()
+
+    End Sub
+
+
+    Sub Load_Images()
+        Dim Base As String = "C:\Users\Toad\Documents\Visual Studio 2008\Projects\SpaceManGame\SpaceManGame\bin\x86\Debug\Data\Textures\Tiles\"
+        ReDim Tile_Sprites(2)
+        Tile_Sprites(0) = Bitmap.FromFile(Base + "Planet1.png")
+        Tile_Sprites(1) = Bitmap.FromFile(Base + "Desert_Planet.png")
+        Tile_Sprites(2) = Bitmap.FromFile(Base + "Desert_Mine.png")
+
+
+
+    End Sub
+
+
+
+
     Private Sub SaveToolStripMenuItem_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles SaveToolStripMenuItem.Click
+        SaveFileDialog1.InitialDirectory = "C:\Users\Toad\Documents\Visual Studio 2008\Projects\SpaceManGame\SpaceManGame\bin\x86\Debug\Data\BuildingMap\"
         If SaveFileDialog1.ShowDialog() = Windows.Forms.DialogResult.OK Then
-
             Dim Tiles As HashSet(Of Build_Tiles) = New HashSet(Of Build_Tiles)
-
             For Each item In Tile_Map
                 If item IsNot Nothing Then
 
@@ -315,74 +273,98 @@
 
     End Sub
 
-    Private Sub LoadBitmapToolStripMenuItem_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles LoadBitmapToolStripMenuItem.Click
-        If OpenFileDialog1.ShowDialog = Windows.Forms.DialogResult.OK Then
-            Tile_Sprites = Bitmap.FromFile(OpenFileDialog1.FileName)
-            'PictureBox1.Image = Tile_Sprites
-            Me.Refresh()
-        End If
+    Private Sub LoadBitmapToolStripMenuItem_Click(ByVal sender As System.Object, ByVal e As System.EventArgs)
+        'OpenFileDialog1.InitialDirectory = "C:\Users\Toad\Documents\Visual Studio 2008\Projects\SpaceManGame\SpaceManGame\bin\x86\Debug\Data\Textures\Tiles\"
+        'If OpenFileDialog1.ShowDialog = Windows.Forms.DialogResult.OK Then
+        'Tile_Sprites = Bitmap.FromFile(OpenFileDialog1.FileName)
+        'PictureBox1.Image = Tile_Sprites
+        'Me.Refresh()
+        'End If
+        Load_Images()
     End Sub
 
     Private Sub Form1_Paint(ByVal sender As Object, ByVal e As System.Windows.Forms.PaintEventArgs) Handles Me.Paint
         If Tile_Sprites IsNot Nothing Then
-            For x = 0 To 31
-                For y = 0 To 31
+            Dim Tile As Point
+            For x = 0 To 36
+                For y = 0 To 26
+                    Tile.X = x + ScrollH.Value
+                    Tile.Y = y + ScrollV.Value
                     If showSprite2 = False Then
-                        e.Graphics.DrawImage(Tile_Sprites, x * tile_size, 70 + y * tile_size, New RectangleF(Tile_Map(x, y).Sprite * 32, 0, tile_size, tile_size), GraphicsUnit.Pixel)
+                        e.Graphics.DrawImage(Tile_Sprites(Tile_Map(Tile.X, Tile.Y).Type), 20 + x * tile_size, 70 + y * tile_size, New RectangleF(Tile_Map(Tile.X, Tile.Y).Sprite * 32, 0, tile_size, tile_size), GraphicsUnit.Pixel)
                     Else
-                        e.Graphics.DrawImage(Tile_Sprites, x * tile_size, 70 + y * tile_size, New RectangleF(Tile_Map(x, y).Sprite2 * 32, 0, tile_size, tile_size), GraphicsUnit.Pixel)
+                        e.Graphics.DrawImage(Tile_Sprites(Tile_Map(Tile.X, Tile.Y).Type), 20 + x * tile_size, 70 + y * tile_size, New RectangleF(Tile_Map(Tile.X, Tile.Y).Sprite2 * 32, 0, tile_size, tile_size), GraphicsUnit.Pixel)
                     End If
 
+                    If (Tile.X + 1) Mod 16 = 0 Then e.Graphics.DrawRectangle(Pens.Blue, New Rectangle(x * tile_size + 20, (y * tile_size) + 70, tile_size - 1, tile_size - 1))
+                    If (Tile.Y + 1) Mod 16 = 0 Then e.Graphics.DrawRectangle(Pens.Blue, New Rectangle(x * tile_size + 20, (y * tile_size) + 70, tile_size - 1, tile_size - 1))
 
-                    If Tile_active(x, y) = True Then
-                        If Tile_Map(x, y).Walkable = 0 Then e.Graphics.DrawRectangle(Pens.Red, New Rectangle(x * tile_size, (y * tile_size) + 70, tile_size - 1, tile_size - 1))
-                        If Tile_Map(x, y).Walkable = 3 Then e.Graphics.DrawRectangle(Pens.Green, New Rectangle(x * tile_size, (y * tile_size) + 70, tile_size - 1, tile_size - 1))
-                        If Tile_Map(x, y).Walkable = 4 Then e.Graphics.DrawRectangle(Pens.Blue, New Rectangle(x * tile_size, (y * tile_size) + 70, tile_size - 1, tile_size - 1))
+                    If Tile_active(Tile.X, Tile.Y) = True Then
+                        If Tile_Map(Tile.X, Tile.Y).Walkable = 0 Then e.Graphics.DrawRectangle(Pens.Red, New Rectangle(x * tile_size + 20, (y * tile_size) + 70, tile_size - 1, tile_size - 1))
+                        If Tile_Map(Tile.X, Tile.Y).Walkable = 3 Then e.Graphics.DrawRectangle(Pens.Green, New Rectangle(x * tile_size + 20, (y * tile_size) + 70, tile_size - 1, tile_size - 1))
+                        If Tile_Map(Tile.X, Tile.Y).Walkable = 4 Then e.Graphics.DrawRectangle(Pens.Blue, New Rectangle(x * tile_size + 20, (y * tile_size) + 70, tile_size - 1, tile_size - 1))
                     End If
-                    e.Graphics.DrawString(Tile_Map(x, y).Type.ToString, Me.Font, Brushes.Black, x * 32, 70 + y * 32)
+
+                    e.Graphics.DrawString(Tile_Map(Tile.X, Tile.Y).Type.ToString, Me.Font, Brushes.Black, 20 + x * 32, 70 + y * 32)
 
                 Next
             Next
-            e.Graphics.DrawImage(Tile_Sprites, 0, 30)
-            e.Graphics.DrawRectangle(Pens.Green, New Rectangle(WriteNumber * tile_size, 30, tile_size - 1, tile_size - 1))
+            e.Graphics.DrawImage(Tile_Sprites(WriteType), 20, 30)
+            e.Graphics.DrawRectangle(Pens.Green, New Rectangle(WriteNumber * tile_size + 20, 30, tile_size - 1, tile_size - 1))
         End If        
 
 
     End Sub
 
-    Private Sub Label2_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles Label2.Click
-        Walkable = 3
-        Label2.BackColor = Color.LawnGreen
-        Label4.BackColor = Color.Gray
-        Label6.BackColor = Color.Gray
+    Private Sub WalkableBox_SelectedIndexChanged(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles WalkableBox.SelectedIndexChanged
+        If WalkableBox.SelectedIndex = 0 Then Walkable = 3
+        If WalkableBox.SelectedIndex = 1 Then Walkable = 0
+        If WalkableBox.SelectedIndex = 2 Then Walkable = 250
     End Sub
 
-    Private Sub Label4_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles Label4.Click
-        Walkable = 0
-        Label4.BackColor = Color.LawnGreen
-        Label2.BackColor = Color.Gray
-        Label6.BackColor = Color.Gray
+    Private Sub SpriteBox_SelectedIndexChanged(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles SpriteBox.SelectedIndexChanged
+        If SpriteBox.SelectedIndex = 0 Then showSprite2 = False : Me.Refresh()
+        If SpriteBox.SelectedIndex = 1 Then showSprite2 = True : Me.Refresh()
+        If SpriteBox.SelectedIndex = 2 Then showSprite2 = False : WriteNumber = -1 : Me.Refresh()
     End Sub
 
-    Private Sub Label5_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles Label5.Click        
-        showSprite2 = False
-        Label1.BackColor = Color.Gray
-        Label5.BackColor = Color.LawnGreen
+    Private Sub TileBox_SelectedIndexChanged(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles TileBox.SelectedIndexChanged
+        WriteType = CByte(TileBox.SelectedIndex)
+        If WriteType > Tile_Sprites.Length - 1 Then WriteType = 0
         Me.Refresh()
     End Sub
 
-    Private Sub Label1_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles Label1.Click
-        showSprite2 = True
-        Label1.BackColor = Color.LawnGreen
-        Label5.BackColor = Color.Gray
+    Private Sub ScrollV_Scroll(ByVal sender As System.Object, ByVal e As System.Windows.Forms.ScrollEventArgs) Handles ScrollV.Scroll
         Me.Refresh()
     End Sub
 
-    Private Sub Label6_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles Label6.Click
-        Walkable = 250
-        Label2.BackColor = Color.Gray
-        Label4.BackColor = Color.Gray
-        Label6.BackColor = Color.LawnGreen
+    Private Sub ScrollH_Scroll(ByVal sender As System.Object, ByVal e As System.Windows.Forms.ScrollEventArgs) Handles ScrollH.Scroll
+        Me.Refresh()
     End Sub
 
+    Private Sub SetAll_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles SetAll.Click
+        For x = 0 To 127
+            For y = 0 To 127
+                Tile_Map(x, y) = New Build_Tiles(0, 0, WriteType, CByte(WriteNumber), 0, 0)
+            Next
+        Next
+        Me.Refresh()
+    End Sub
+
+    Private Sub MenuStrip1_ItemClicked(ByVal sender As System.Object, ByVal e As System.Windows.Forms.ToolStripItemClickedEventArgs) Handles MenuStrip1.ItemClicked
+
+    End Sub
 End Class
+
+Public Enum planet_tile_type_enum As Byte
+    Forest_Planet = 0
+    Desert_Planet = 1
+    Desert_Mine = 2
+    Road
+    Shipyard
+    House
+    House_Inside
+
+    BuildingBuildOverlay
+    empty = 255
+End Enum
