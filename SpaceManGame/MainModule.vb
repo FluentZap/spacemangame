@@ -288,6 +288,10 @@
     Public External_Menu_Open As Boolean    
     Public External__Reload_Menu As Boolean = True
 
+    Public External__LandingMode As Boolean
+    Public External__LandingAllow As Boolean
+    Public External__LandingPosition As PointI
+
 
     Dim pressedkeys As HashSet(Of Keys) = Nothing
     Dim mouse_info As MainForm.mouse_info_type = Nothing
@@ -613,6 +617,7 @@
         External_Menu_Items.Add(External_menu_items_Enum.Menu_star_map, New Menu_button(button_texture_enum.ship_build__room_button, New Rectangle(0, screen_size.y - 192, 80, 32), button_style.Both, Color.White, "Star Map", Color.Black, d3d_font_enum.SB_small, False))
         External_Menu_Items.Add(External_menu_items_Enum.Menu_weapon_control, New Menu_button(button_texture_enum.ship_build__room_button, New Rectangle(0, screen_size.y - 224, 80, 32), button_style.Both, Color.White, "Weapon Control", Color.Black, d3d_font_enum.SB_small, False))
 
+        External_Menu_Items.Add(External_menu_items_Enum.LandOnPlanet, New Menu_button(button_texture_enum.ship_build__room_button, New Rectangle(screen_size.x - 80, screen_size.y \ 2 - 16, 80, 32), button_style.Both, Color.LightBlue, "Land", Color.Black, d3d_font_enum.SB_small))
 
 
         'Weapon Control
@@ -704,12 +709,12 @@
         'Dim shiprectMoon As New Rectangle(Ship_List(ship).location.intX - 4096, Ship_List(ship).location.intY - 4096, 8192, 8192)
 
         u.Ship_List(ship).orbiting = -1
-        For Each planet In u.planets
+        For Each planet In u.Planet_List
 
             If planet.Value.orbits_planet = True Then
                 'moons
-                planetpos.x = Convert.ToInt32(u.stars(u.planets(planet.Value.orbit_point).orbit_point).location.x + u.planets(planet.Value.orbit_point).orbit_distance * Math.Cos((u.planets(planet.Value.orbit_point).theta * planet_theta_offset) * 0.017453292519943295))
-                planetpos.y = Convert.ToInt32(u.stars(u.planets(planet.Value.orbit_point).orbit_point).location.y + u.planets(planet.Value.orbit_point).orbit_distance * Math.Sin((u.planets(planet.Value.orbit_point).theta * planet_theta_offset) * 0.017453292519943295))
+                planetpos.x = Convert.ToInt32(u.stars(u.Planet_List(planet.Value.orbit_point).orbit_point).location.x + u.Planet_List(planet.Value.orbit_point).orbit_distance * Math.Cos((u.Planet_List(planet.Value.orbit_point).theta * planet_theta_offset) * 0.017453292519943295))
+                planetpos.y = Convert.ToInt32(u.stars(u.Planet_List(planet.Value.orbit_point).orbit_point).location.y + u.Planet_List(planet.Value.orbit_point).orbit_distance * Math.Sin((u.Planet_List(planet.Value.orbit_point).theta * planet_theta_offset) * 0.017453292519943295))
 
                 pos.x = Convert.ToInt32(planetpos.x + planet.Value.orbit_distance * Math.Cos((planet.Value.theta * planet_theta_offset) * 0.017453292519943295))
                 pos.y = Convert.ToInt32(planetpos.y + planet.Value.orbit_distance * Math.Sin((planet.Value.theta * planet_theta_offset) * 0.017453292519943295))
@@ -729,7 +734,7 @@
                 If distance < planet.Value.size.x * 32 Then
                     Near_planet = planet.Key
                     u.Ship_List(ship).orbiting = planet.Key
-                End If                
+                End If
 
             End If
         Next
@@ -757,7 +762,7 @@
         ship1.location = New PointD(0, 0)
 
         ship1.Refresh()
-        ship1.Faction = 0
+        ship1.Faction = 0        
         u.Ship_List.Add(0, ship1)
 
 
@@ -769,15 +774,25 @@
 
 
         Dim planet1 As Planet = New Planet(0, planet_type_enum.Desert, New PointI(512, 512), 0, 50000, False, 0.5)
-        u.Planet_List = u.planets
-        u.planets.Remove(0)
-        u.planets.Add(0, planet1)
+        'u.Planet_List = u.Planet_List
+        u.Planet_List.Remove(0)
+        u.Planet_List.Add(0, planet1)
 
         planet1.populate()
+
+        Dim planet2 As Planet = New Planet(1, planet_type_enum.Desert, New PointI(512, 512), 0, 50000, False, 100)
+        u.Planet_List.Remove(1)
+        u.Planet_List.Add(1, planet2)
+
+        planet2.populate()
+
+        'u.Planet_List.Remove(2)
+        'u.Planet_List.Remove(3)
+        'u.Planet_List.Remove(4)
         'planet1.landed_ships.Add(0, New PointI(0, 0))
         
         'Fix movement
-        Add_Officer(0, New Officer(0, "Captian", Officer_location_enum.Planet, 0, pos, 6, 0.2, New Officer.sprite_list(character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head)))
+        Add_Officer(0, New Officer(0, "Captian", Officer_location_enum.Ship, 0, pos, 6, 0.2, New Officer.sprite_list(character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head)))
 
 
         u.Officer_List(0).Officer_Classes.Add(New Officer_Class(Class_List_Enum.Mage, 0, 1))
@@ -826,10 +841,13 @@
         current_player = 0
         'Officer_List.Add (0,
         'Do initial planet rotation
-        For A = 0 To 10000
-            planet_theta_offset += 0.1
-        Next
+        'For A = 0 To 10000
+        'planet_theta_offset += 0.1
+        'Next
 
+        planet_theta_offset = 1
+
+        u.Ship_List(0).location = Get_Planet_Location(1)
         'current_selected_planet_view = 1
 
         'Dim render_start, render_end, time_current, cps, rate As Long
@@ -877,7 +895,7 @@
                         update_Planet_Movements()
                         Handle_Projectiles()
                         check_near_planet(current_selected_ship_view)
-                        Near_planet = 0
+                        'Near_planet = 0
 
                     Case Is = current_view_enum.planet
                         For Each ship In u.Ship_List.Values
@@ -916,14 +934,14 @@
                     Case Is = current_view_enum.ship_external
                         render_ship_external_new(u.Ship_List.Item(current_selected_ship_view))
                     Case Is = current_view_enum.planet
-                        render_planetoid(u.planets(current_selected_planet_view))
+                        render_planetoid(u.Planet_List(current_selected_planet_view))
                     Case Is = current_view_enum.star_map
                         render_starmap()
                     Case Is = current_view_enum.Weapon_control
                         render_Weapon_Control()
                     Case Is = current_view_enum.personal_level_screen
                         render_personal_level()
-                End Select                
+                End Select
 
                 'System.Threading.Thread.Sleep(random(0, 32))
                 QueryPerformanceCounter(render_end)
@@ -1122,7 +1140,7 @@
             Dim Return_Type As Block_Return_Type_Class
             Return_Type = u.Planet_List(0).FindBestBuildingPos(building_type_enum.Apartment)
             AddPlanetBlock(Return_Type.Pos, Return_Type.Type, u.Planet_List(0))            
-            u.Planet_List(0).Start_Building_Constuction(u.Planet_List(0).GetEmptyBuildingID, 0, building_type_enum.Apartment, Return_Type.Pos * 32, Return_Type.Type)
+            u.Planet_List(0).Start_Building_Constuction(u.Planet_List(0).GetEmptyBuildingID, 0, building_type_enum.Apartment, Return_Type.Pos, Return_Type.Type)
 
             pressedkeys.Remove(Keys.Space)
 
@@ -1357,7 +1375,8 @@
             Case Is = External_menu_items_Enum.Menu_weapon_control
                 change_to_view(current_view_enum.Weapon_control)
 
-
+            Case Is = External_menu_items_Enum.LandOnPlanet
+                If External__LandingMode = False Then External__LandingMode = True Else External__LandingMode = False
 
             Case 1000 To 1999
                 For Each weapon In ship.Weapon_control_groups(choice - 1000).Connected_Weapons
@@ -1368,7 +1387,39 @@
 
         End Select
 
+        'Landing on planet
+        If Loaded_planet > -1 Then
+            If External__LandingMode = True Then
+                Dim LandingPos As PointI
+                Dim PlanetPos As PointD = Get_Planet_Location(Loaded_planet)
+                PlanetPos.x -= view_location_external.x
+                PlanetPos.y -= view_location_external.y
+                PlanetPos.x -= (u.Planet_List(Loaded_planet).size.x * 16) / 2
+                PlanetPos.y -= (u.Planet_List(Loaded_planet).size.y * 16) / 2
 
+                LandingPos.x = CInt((mouse_info.position.x - ship.center_point.x * 16 * external_zoom) / external_zoom - PlanetPos.x) \ 16
+                LandingPos.y = CInt((mouse_info.position.y - ship.center_point.y * 16 * external_zoom) / external_zoom - PlanetPos.y) \ 16
+                External__LandingPosition = LandingPos
+            End If
+
+            If External__LandingPosition.x >= 0 AndAlso External__LandingPosition.x + ship.shipsize.x <= u.Planet_List(Loaded_planet).size.x AndAlso External__LandingPosition.y >= 0 AndAlso External__LandingPosition.y + ship.shipsize.y <= u.Planet_List(Loaded_planet).size.y Then
+                External__LandingAllow = True
+            Else
+                External__LandingAllow = False
+            End If
+
+            If mouse_info.left_down = True AndAlso External__LandingMode = True AndAlso External__LandingAllow = True Then
+                External__LandingMode = False
+                External__LandingAllow = False
+                u.Planet_List(Loaded_planet).landed_ships.Add(current_selected_ship_view, External__LandingPosition)
+                'Need to set autoland
+                u.Ship_List(current_selected_ship_view).Landed = True
+                u.Ship_List(current_selected_ship_view).rotation = 0
+                u.Ship_List(current_selected_ship_view).vector_velocity.x = 0
+                u.Ship_List(current_selected_ship_view).vector_velocity.y = 0
+                u.Ship_List(current_selected_ship_view).angular_velocity = 0
+            End If
+        End If
 
         If pressedkeys.Contains(Keys.D1) Then
             For Each weapon In ship.Weapon_control_groups(0).Connected_Weapons
@@ -1398,7 +1449,7 @@
         If external_zoom > 5 Then external_zoom = 5
         If external_zoom < 0.0000001 Then external_zoom = 0.0000001
 
-        'Dim dest_point, dest_release_point As PointI
+
 
         If mouse_info.right_down = True Then
             u.Ship_List(current_selected_ship_view).NavControl = True
@@ -1901,8 +1952,8 @@
 
     Sub update_Planet_Movements()
 
-        planet_theta_offset += 0.0005
-        planet_cloud_theta += 0.0001
+        'planet_theta_offset += 0.0005
+        'planet_cloud_theta += 0.0001
     End Sub
 
     Sub UpdateGST()
@@ -1935,7 +1986,7 @@
 
 
         GSTFrequency += 1
-        If GSTFrequency = 10 Then
+        If GSTFrequency = 1 Then
             GSTFrequency = 0
             GST += 1
             If GST > 3000 Then GST = 0
@@ -1955,8 +2006,8 @@
         Dim pos As PointD
         If u.Planet_List(PlanetID).orbits_planet = True Then
             'moons
-            planetpos.x = u.stars(u.planets(planet.orbit_point).orbit_point).location.x + u.planets(planet.orbit_point).orbit_distance * Math.Cos((u.planets(planet.orbit_point).theta * (planet_theta_offset + ThetaOffset)) * 0.017453292519943295)
-            planetpos.y = u.stars(u.planets(planet.orbit_point).orbit_point).location.y + u.planets(planet.orbit_point).orbit_distance * Math.Sin((u.planets(planet.orbit_point).theta * (planet_theta_offset + ThetaOffset)) * 0.017453292519943295)
+            planetpos.x = u.stars(u.Planet_List(planet.orbit_point).orbit_point).location.x + u.Planet_List(planet.orbit_point).orbit_distance * Math.Cos((u.Planet_List(planet.orbit_point).theta * (planet_theta_offset + ThetaOffset)) * 0.017453292519943295)
+            planetpos.y = u.stars(u.Planet_List(planet.orbit_point).orbit_point).location.y + u.Planet_List(planet.orbit_point).orbit_distance * Math.Sin((u.Planet_List(planet.orbit_point).theta * (planet_theta_offset + ThetaOffset)) * 0.017453292519943295)
             pos.x = planetpos.x + planet.orbit_distance * Math.Cos((planet.theta * (planet_theta_offset + ThetaOffset)) * 0.017453292519943295)
             pos.y = planetpos.y + planet.orbit_distance * Math.Sin((planet.theta * (planet_theta_offset + ThetaOffset)) * 0.017453292519943295)
         Else

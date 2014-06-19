@@ -129,6 +129,8 @@ Public Class Ship
 
     Public Projectiles As New HashSet(Of Projectile)()
 
+    Public Landed As Boolean
+
     Sub Load_Pathfinding()
         path_find = New A_star
         path_find.set_map(tile_map, shipsize)
@@ -685,6 +687,7 @@ Public Class Ship
             location.y += planetPosNext.y - planetPos.y
         End If
 
+
     End Sub
 
     Sub Calculate_Engines()
@@ -1116,8 +1119,23 @@ Public Class Ship
 
                 End Select
             End If
+        Next
 
-
+        Dim IdList(Officer_List.Count - 1) As Integer
+        Officer_List.Keys.CopyTo(IdList, 0)
+        For Each id In IdList
+            If Landed = True AndAlso tile_map(Officer_List(id).find_tile.x, Officer_List(id).find_tile.y).type = tile_type_enum.empty Then
+                Officer_List.Remove(id)
+                u.Planet_List(Loaded_planet).officer_list.Add(id, u.Officer_List(id))
+                u.Officer_List(id).region = Officer_location_enum.Planet
+                u.Officer_List(id).Location_ID = Loaded_planet
+                Dim newPos As PointD
+                newPos.x = u.Planet_List(Loaded_planet).landed_ships(current_selected_ship_view).x * 32
+                newPos.y = u.Planet_List(Loaded_planet).landed_ships(current_selected_ship_view).y * 32
+                newPos.x += u.Officer_List(id).location.x
+                newPos.y += u.Officer_List(id).location.y
+                u.Officer_List(id).location = newPos
+            End If
         Next
     End Sub
 

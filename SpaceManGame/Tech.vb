@@ -85,22 +85,22 @@
 
         Select Case Level
             Case 1
-                u.planets(planet).tech.Add(planet_tech_list_enum.Jump_drive)
-                u.planets(planet).tech.Add(planet_tech_list_enum.Combustion_engine)
-                u.planets(planet).tech.Add(planet_tech_list_enum.Thrusters)
-                u.planets(planet).tech.Add(planet_tech_list_enum.Rail_guns)
-                u.planets(planet).tech.Add(planet_tech_list_enum.Missiles)
-                u.planets(planet).tech.Add(planet_tech_list_enum.Wep_Rail_gun_mechine)
-                u.planets(planet).tech.Add(planet_tech_list_enum.Wep_Rail_gun_Pistol)
-                u.planets(planet).tech.Add(planet_tech_list_enum.Wep_Rail_gun_Sniper_Rifle)
-                u.planets(planet).tech.Add(planet_tech_list_enum.Radar_Sensors)
-                u.planets(planet).tech.Add(planet_tech_list_enum.Carbon_fiber_construction)
-                u.planets(planet).tech.Add(planet_tech_list_enum.Corvette_blueprints)
-                u.planets(planet).tech.Add(planet_tech_list_enum.Fighter_blueprints)
-                u.planets(planet).tech.Add(planet_tech_list_enum.Ore_extractor)
-                u.planets(planet).tech.Add(planet_tech_list_enum.Carbon_extractor)
+                u.Planet_List(planet).tech.Add(planet_tech_list_enum.Jump_drive)
+                u.Planet_List(planet).tech.Add(planet_tech_list_enum.Combustion_engine)
+                u.Planet_List(planet).tech.Add(planet_tech_list_enum.Thrusters)
+                u.Planet_List(planet).tech.Add(planet_tech_list_enum.Rail_guns)
+                u.Planet_List(planet).tech.Add(planet_tech_list_enum.Missiles)
+                u.Planet_List(planet).tech.Add(planet_tech_list_enum.Wep_Rail_gun_mechine)
+                u.Planet_List(planet).tech.Add(planet_tech_list_enum.Wep_Rail_gun_Pistol)
+                u.Planet_List(planet).tech.Add(planet_tech_list_enum.Wep_Rail_gun_Sniper_Rifle)
+                u.Planet_List(planet).tech.Add(planet_tech_list_enum.Radar_Sensors)
+                u.Planet_List(planet).tech.Add(planet_tech_list_enum.Carbon_fiber_construction)
+                u.Planet_List(planet).tech.Add(planet_tech_list_enum.Corvette_blueprints)
+                u.Planet_List(planet).tech.Add(planet_tech_list_enum.Fighter_blueprints)
+                u.Planet_List(planet).tech.Add(planet_tech_list_enum.Ore_extractor)
+                u.Planet_List(planet).tech.Add(planet_tech_list_enum.Carbon_extractor)
 
-                If u.planets(planet).special_tech = Planet_special_tech_enum.Biology Then
+                If u.Planet_List(planet).special_tech = Planet_special_tech_enum.Biology Then
 
                 End If
 
