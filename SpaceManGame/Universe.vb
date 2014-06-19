@@ -9,7 +9,7 @@
 
     Class Universe
         Public stars As New Dictionary(Of Integer, Star)()
-        Public planets As New Dictionary(Of Integer, Planet)()
+        'Public planets As New Dictionary(Of Integer, Planet)()
         Public regions As New Dictionary(Of PointI, region_class)()
         Public nebula As New Dictionary(Of Integer, Nebula)()
         Public Projectiles As New HashSet(Of Projectile)()
@@ -46,11 +46,11 @@
             'regions(point.x + point.y * 100).stars.Add(star.Key)
         Next
 
-        For Each Planet In u.planets
+        For Each Planet In u.Planet_List
             Dim point As New PointI
             If Planet.Value.orbits_planet = True Then
-                point.x = Convert.ToInt32(u.stars(u.planets(Planet.Value.orbit_point).orbit_point).location.x / 393216)
-                point.y = Convert.ToInt32(u.stars(u.planets(Planet.Value.orbit_point).orbit_point).location.y / 393216)
+                point.x = Convert.ToInt32(u.stars(u.Planet_List(Planet.Value.orbit_point).orbit_point).location.x / 393216)
+                point.y = Convert.ToInt32(u.stars(u.Planet_List(Planet.Value.orbit_point).orbit_point).location.y / 393216)
             Else
                 point.x = Convert.ToInt32(u.stars(Planet.Value.orbit_point).location.x / 393216)
                 point.y = Convert.ToInt32(u.stars(Planet.Value.orbit_point).location.y / 393216)
@@ -147,7 +147,7 @@
 
                 'moon genoration
                 If random(0, 0) = 0 Then
-                    Dim a As Planet = u.planets(0)
+                    Dim a As Planet = u.Planet_List(0)
                     Dim moons As Integer = random(1, 1) + random(0, 1)
                     Dim moon_last_orbit_distance As Integer = 0
                     For moon_number = 1 To moons
@@ -222,7 +222,7 @@
             Case Else
                 p = New Planet(planetID, planet_type_enum.Vacuum, size, orbit, orbit_distance, orbits_planet, theta_offset)
         End Select
-        u.planets.Add(planetID, p)
+        u.Planet_List.Add(planetID, p)
     End Sub
 
     Function random(ByVal min As Integer, ByVal range As Integer) As Integer

@@ -664,6 +664,7 @@
         Menu_Fighter_Control
         Menu_star_map
 
+        LandOnPlanet
 
 
         Change_Alert

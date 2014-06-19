@@ -34,13 +34,13 @@
                 P.Resource_Points.Add(po, False)
             End If
         Next
-        P.Resource_Points.Clear()
+        'P.Resource_Points.Clear()
 
         'P.Resource_Points.Add(New PointI(1, 1), False)
 
         'P.Resource_Points.Add(New PointI(3, 1), False)
 
-        P.Resource_Points.Add(New PointI(5, 1), False)
+        'P.Resource_Points.Add(New PointI(5, 1), False)
         P.Farm_Points.Add(New PointI(4, 4), False)
 
         Create_Resource_Points(P)
@@ -55,21 +55,21 @@
 
         Build_Building(building_type_enum.Exchange, P.GetEmptyBuildingID, 0, P)
 
-        For a = 0 To 6
-            Build_Building(building_type_enum.Apartment, P.GetEmptyBuildingID, 0, P)
-            'Build_Building(building_type_enum.Pub, P.GetEmptyBuildingID, 0, P)
-            'Build_Building(building_type_enum.Factory, P.GetEmptyBuildingID, 0, P)
-            'Build_Building(building_type_enum.Specials, P.GetEmptyBuildingID, 0, P)
-        Next
-
+        'For a = 0 To 10
+        'Build_Building(building_type_enum.Apartment, P.GetEmptyBuildingID, 0, P)
+        'Build_Building(building_type_enum.Apartment, P.GetEmptyBuildingID, 0, P)
         'Build_Building(building_type_enum.Pub, P.GetEmptyBuildingID, 0, P)
-        Build_Building(building_type_enum.Factory, P.GetEmptyBuildingID, 0, P)
-        Build_Building(building_type_enum.Factory, P.GetEmptyBuildingID, 0, P)
-
-        Build_Building(building_type_enum.Refinery, P.GetEmptyBuildingID, 0, P)
-        Build_Building(building_type_enum.Refinery, P.GetEmptyBuildingID, 0, P)
+        'Build_Building(building_type_enum.Apartment, P.GetEmptyBuildingID, 0, P)
+        'Build_Building(building_type_enum.Apartment, P.GetEmptyBuildingID, 0, P)
+        'Build_Building(building_type_enum.Pub, P.GetEmptyBuildingID, 0, P)
+        'Build_Building(building_type_enum.Factory, P.GetEmptyBuildingID, 0, P)
+        'Build_Building(building_type_enum.Refinery, P.GetEmptyBuildingID, 0, P)
+        'Next
+        For a = 1 To P.Resource_Points.Count
+            'Build_Building(building_type_enum.Mine, P.GetEmptyBuildingID, 0, P)
+        Next
         'Build_Building(building_type_enum.Farm, P.GetEmptyBuildingID, 0, P)
-        Build_Building(building_type_enum.Mine, P.GetEmptyBuildingID, 0, P)
+
 
 
         'Build_AppartmentH(New PointI(32, 0))
@@ -513,6 +513,8 @@
         P.Building_List.Add(ID, New Planet_Building(OwnerID, New Rectangle(pos.x, pos.y, 32, 16), building_type_enum.Pub, New Worker_Slots(1, 4, 0)))
         P.Building_List(ID).BuildingRect.Add(0, New Rectangle(pos.x + 2, pos.y + 2, 28, 11))
 
+        P.Building_List(ID).PickupPoint = New PointI(pos.x, pos.y)
+
         For y = 5 To 13 Step 2
             For x = 5 To 27 Step 2
 
@@ -530,7 +532,7 @@
 
         P.Building_List.Add(ID, New Planet_Building(OwnerID, New Rectangle(pos.x, pos.y, 32, 16), building_type_enum.Pub, New Worker_Slots(1, 4, 0)))
         P.Building_List(ID).BuildingRect.Add(0, New Rectangle(pos.x + 2, pos.y + 2, 11, 28))
-
+        P.Building_List(ID).PickupPoint = New PointI(pos.x, pos.y)
         For y = 5 To 13 Step 2
             For x = 5 To 27 Step 2
 
@@ -629,11 +631,6 @@
                 P.tile_map(t.X + Pos.x, t.Y + Pos.y).walkable = CType(t.Walkable, walkable_type_enum)
             Next
         Else
-
-            For index = 0 To Building_tiles.Count - 1
-                Building_tiles(index).X += CByte(Pos.x)
-                Building_tiles(index).Y += CByte(Pos.y)
-            Next
             Return Building_tiles
         End If
         Return Nothing
