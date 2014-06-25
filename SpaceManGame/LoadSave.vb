@@ -146,6 +146,9 @@
         'planet_tile_texture(planet_tile_type_enum.Forest_Planet) = Direct3D.TextureLoader.FromFile(d3d_device, Application.StartupPath + "\Data\Textures\Tiles\planet1.png", 96, 32, 0, Direct3D.Usage.None, Texture_Format, Direct3D.Pool.Managed, Filter, MipFilter, Color.FromArgb(255, 0, 255, 0).ToArgb)
 
 
+        'Planet External Textures
+        planet_external_tile_texture(planet_external_tile_type_enum.Desert_Planet) = Direct3D.TextureLoader.FromFile(d3d_device, Application.StartupPath + "\Data\Textures\Tiles\Desert_external.png", 1280, 128, 0, Direct3D.Usage.None, Texture_Format, Direct3D.Pool.Managed, Filter, MipFilter, 0)
+
         'Projectile Sprites
         projectile_tile_texture(Projectile_Tile_Type_Enum.Energy1) = Direct3D.TextureLoader.FromFile(d3d_device, Application.StartupPath + "\Data\Textures\Projectiles\Energy1.png", 32, 32, 0, Direct3D.Usage.None, Texture_Format, Direct3D.Pool.Managed, Filter, MipFilter, Color.FromArgb(255, 0, 255, 0).ToArgb)
         projectile_tile_texture(Projectile_Tile_Type_Enum.Fire1) = Direct3D.TextureLoader.FromFile(d3d_device, Application.StartupPath + "\Data\Textures\Projectiles\Fire1.png", 32, 32, 0, Direct3D.Usage.None, Texture_Format, Direct3D.Pool.Managed, Filter, MipFilter, Color.FromArgb(255, 0, 255, 0).ToArgb)

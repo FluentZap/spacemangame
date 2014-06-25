@@ -321,6 +321,20 @@
         empty = 255
     End Enum
 
+    Enum planet_external_tile_type_enum As Byte
+        Forest_Planet = 0
+        Desert_Planet = 1
+        Desert_Mine = 2
+        Road
+        Shipyard
+        House
+        House_Inside
+
+        BuildingBuildOverlay
+        empty = 255
+    End Enum
+
+
     Enum item_tile_texture_enum As Byte
         Crystal_Container
 
