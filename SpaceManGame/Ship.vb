@@ -1140,48 +1140,81 @@ Public Class Ship
     End Sub
 
     Sub MoveOfficer(ByVal Id As Integer, ByRef vector As PointD)
-        Dim Pos(3) As PointD
+        Dim X, Y As Single
         vector.x *= Officer_List(Id).speed
         vector.y *= Officer_List(Id).speed
 
+        Do
+            If vector.x > 0 Then
+                If vector.x > 1 Then vector.x -= 1 : X = 1 Else X = vector.sngX : vector.x = 0
+            Else
+                If vector.x < -1 Then vector.x += 1 : X = -1 Else X = vector.sngX : vector.x = 0
+            End If
+
+
+            If vector.y > 0 Then
+                If vector.y > 1 Then vector.y -= 1 : Y = 1 Else Y = vector.sngY : vector.y = 0
+            Else
+                If vector.y < -1 Then vector.y += 1 : Y = -1 Else Y = vector.sngY : vector.y = 0
+            End If
+
+            If X > 0 Then MoveOfficerStep(Id, Move_Direction.Right, Math.Abs(X))
+            If X < 0 Then MoveOfficerStep(Id, Move_Direction.Left, Math.Abs(X))
+            If Y < 0 Then MoveOfficerStep(Id, Move_Direction.Up, Math.Abs(Y))
+            If Y > 0 Then MoveOfficerStep(Id, Move_Direction.Down, Math.Abs(Y))
+
+        Loop Until vector.x = 0 AndAlso vector.y = 0
+
+    End Sub
+
+    Private Sub MoveOfficerStep(ByVal Id As Integer, ByVal Direction As Move_Direction, ByVal Amount As Single)
+
+        Dim R, B As RectangleF
         '0:7,1
         '0:24,1
         '0:7,31
         '0:24,31
+        B = New RectangleF(Officer_List(Id).GetLocationD.sngX + 9, Officer_List(Id).GetLocationD.sngY + 27, 14, 5)
+        R = New RectangleF(Officer_List(Id).GetLocationD.sngX + 9, Officer_List(Id).GetLocationD.sngY + 27, 14, 5)
+        If Direction = Move_Direction.Up Then R.Y -= Amount
+        If Direction = Move_Direction.Down Then R.Y += Amount
+        If Direction = Move_Direction.Left Then R.X -= Amount
+        If Direction = Move_Direction.Right Then R.X += Amount
+        Dim CantMove As Boolean
 
-        'top left
-        Pos(0).x = Math.Floor((Officer_List(Id).GetLocation.x + 8 + vector.x) * 0.03125)
-        Pos(0).y = Math.Floor((Officer_List(Id).GetLocation.y + 27 + vector.y) * 0.03125)
-        'top right
-        Pos(1).x = Math.Floor((Officer_List(Id).GetLocation.x + 23 + vector.x) * 0.03125)
-        Pos(1).y = Math.Floor((Officer_List(Id).GetLocation.y + 27 + vector.y) * 0.03125)
-        'bottom left
-        Pos(2).x = Math.Floor((Officer_List(Id).GetLocation.x + 8 + vector.x) * 0.03125)
-        Pos(2).y = Math.Floor((Officer_List(Id).GetLocation.y + 31 + vector.y) * 0.03125)
-        'bottom right
-        Pos(3).x = Math.Floor((Officer_List(Id).GetLocation.x + 23 + vector.x) * 0.03125)
-        Pos(3).y = Math.Floor((Officer_List(Id).GetLocation.y + 31 + vector.y) * 0.03125)
+        Select Case Direction
+            Case Is = Move_Direction.Up
+                If Not tile_map(CInt(Math.Floor(R.Left / 32)), CInt(Math.Floor(R.Top / 32))).walkable = walkable_type_enum.Walkable Then CantMove = True
+                If Not tile_map(CInt(Math.Floor((R.Right - 1) / 32)), CInt(Math.Floor(R.Top / 32))).walkable = walkable_type_enum.Walkable Then CantMove = True
+            Case Is = Move_Direction.Down
+                If Not tile_map(CInt(Math.Floor(R.Left / 32)), CInt(Math.Floor(R.Bottom / 32))).walkable = walkable_type_enum.Walkable Then CantMove = True
+                If Not tile_map(CInt(Math.Floor((R.Right - 1) / 32)), CInt(Math.Floor(R.Bottom / 32))).walkable = walkable_type_enum.Walkable Then CantMove = True
+            Case Is = Move_Direction.Left
+                If Not tile_map(CInt(Math.Floor(R.Left / 32)), CInt(Math.Floor(R.Top / 32))).walkable = walkable_type_enum.Walkable Then CantMove = True
+                If Not tile_map(CInt(Math.Floor(R.Left / 32)), CInt(Math.Floor((R.Bottom - 1) / 32))).walkable = walkable_type_enum.Walkable Then CantMove = True
+            Case Is = Move_Direction.Right
+                If Not tile_map(CInt(Math.Floor(R.Right / 32)), CInt(Math.Floor(R.Top / 32))).walkable = walkable_type_enum.Walkable Then CantMove = True
+                If Not tile_map(CInt(Math.Floor(R.Right / 32)), CInt(Math.Floor((R.Bottom - 1) / 32))).walkable = walkable_type_enum.Walkable Then CantMove = True
+        End Select
 
-        Dim b As Integer = 0
-        For a = 0 To 3
-            If Pos(a).x >= 0 And Pos(a).x <= shipsize.x And Pos(a).y >= 0 And Pos(a).y <= shipsize.y Then
-                If tile_map(Convert.ToInt32(Pos(a).x), Convert.ToInt32(Pos(a).y)).walkable = walkable_type_enum.Walkable OrElse tile_map(Convert.ToInt32(Pos(a).x), Convert.ToInt32(Pos(a).y)).walkable = walkable_type_enum.OpenDoor Then
-                    b = b + 1
-                ElseIf tile_map(Convert.ToInt32(Pos(a).x), Convert.ToInt32(Pos(a).y)).walkable = walkable_type_enum.Door Then
-                    open_door(New PointI(Convert.ToInt32(Pos(a).x), Convert.ToInt32(Pos(a).y)))
-                End If
-            End If
-        Next
-        'clear_fov()
-        If b = 4 Then
-            Officer_List(Id).Move(vector)
-        ElseIf b <> 0 Then
-            If vector.x < 0 Then Officer_List(Id).SetLocation(New PointD(Convert.ToInt32(Pos(0).x * 32 + 32 - 8), Officer_List(Id).GetLocation.y))
-            If vector.x > 0 Then Officer_List(Id).SetLocation(New PointD(Convert.ToInt32(Pos(1).x * 32 - 32 + 8), Officer_List(Id).GetLocation.y))
-            If vector.y < 0 Then Officer_List(Id).SetLocation(New PointD(Officer_List(Id).GetLocation.x, Convert.ToInt32(Pos(0).y * 32 + 32 - 27)))
-            If vector.y > 0 Then Officer_List(Id).SetLocation(New PointD(Officer_List(Id).GetLocation.x, Convert.ToInt32(Pos(2).y * 32 - 32)))
+        If CantMove = False Then
+            Select Case Direction
+                Case Is = Move_Direction.Up : Officer_List(Id).Move(New PointD(0, -Amount))
+                Case Is = Move_Direction.Down : Officer_List(Id).Move(New PointD(0, Amount))
+                Case Is = Move_Direction.Left : Officer_List(Id).Move(New PointD(-Amount, 0))
+                Case Is = Move_Direction.Right : Officer_List(Id).Move(New PointD(Amount, 0))
+            End Select
+        Else
+            Select Case Direction
+                Case Is = Move_Direction.Up : Officer_List(Id).location.y = (CInt(B.Top) \ 32) * 32 - (B.Top - Officer_List(Id).location.y)
+                Case Is = Move_Direction.Down : Officer_List(Id).location.y = (CInt(Math.Floor(B.Bottom) / 32)) * 32 - (B.Bottom - Officer_List(Id).location.y)
+
+
+                Case Is = Move_Direction.Left : Officer_List(Id).location.x = (CInt(B.Left) \ 32) * 32 - (B.Left - Officer_List(Id).location.x)
+                Case Is = Move_Direction.Right : Officer_List(Id).location.x = (CInt(Math.Floor(B.Right) / 32)) * 32 + (Officer_List(Id).location.x - B.Right)
+
+            End Select
         End If
-        'update_fov()
     End Sub
 
     Sub clear_fov()
