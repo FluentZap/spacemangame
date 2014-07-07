@@ -302,8 +302,8 @@
         Shuttle_Bay_1
         Sick_Bay_1
         Transporter_Room_1
-        Device_Base = 253
-        Restricted = 254
+        Device_Base = 254
+        'Restricted = 254
         empty = 255
     End Enum
 
@@ -349,6 +349,8 @@
 
     Enum device_tile_type_enum As Byte
         Empty
+        Device_Base
+
         Bridge_Control_Panel
         Computer_MK1
 
@@ -790,7 +792,7 @@
     Enum Effects_Texture_Enum
 
         Spot_256
-
+        Star_2
     End Enum
 
 

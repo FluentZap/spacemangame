@@ -1181,21 +1181,40 @@ Public Class Ship
         If Direction = Move_Direction.Left Then R.X -= Amount
         If Direction = Move_Direction.Right Then R.X += Amount
         Dim CantMove As Boolean
+        Dim Left, Right, Top, Bottom As Integer
+        Left = CInt(Math.Floor(R.Left / 32))
+        Right = CInt(Math.Floor((R.Right - 0.1) / 32))
+        Top = CInt(Math.Floor(R.Top / 32))
+        Bottom = CInt(Math.Floor((R.Bottom - 0.1) / 32))
 
-        Select Case Direction
-            Case Is = Move_Direction.Up
-                If Not tile_map(CInt(Math.Floor(R.Left / 32)), CInt(Math.Floor(R.Top / 32))).walkable = walkable_type_enum.Walkable Then CantMove = True
-                If Not tile_map(CInt(Math.Floor((R.Right - 1) / 32)), CInt(Math.Floor(R.Top / 32))).walkable = walkable_type_enum.Walkable Then CantMove = True
-            Case Is = Move_Direction.Down
-                If Not tile_map(CInt(Math.Floor(R.Left / 32)), CInt(Math.Floor(R.Bottom / 32))).walkable = walkable_type_enum.Walkable Then CantMove = True
-                If Not tile_map(CInt(Math.Floor((R.Right - 1) / 32)), CInt(Math.Floor(R.Bottom / 32))).walkable = walkable_type_enum.Walkable Then CantMove = True
-            Case Is = Move_Direction.Left
-                If Not tile_map(CInt(Math.Floor(R.Left / 32)), CInt(Math.Floor(R.Top / 32))).walkable = walkable_type_enum.Walkable Then CantMove = True
-                If Not tile_map(CInt(Math.Floor(R.Left / 32)), CInt(Math.Floor((R.Bottom - 1) / 32))).walkable = walkable_type_enum.Walkable Then CantMove = True
-            Case Is = Move_Direction.Right
-                If Not tile_map(CInt(Math.Floor(R.Right / 32)), CInt(Math.Floor(R.Top / 32))).walkable = walkable_type_enum.Walkable Then CantMove = True
-                If Not tile_map(CInt(Math.Floor(R.Right / 32)), CInt(Math.Floor((R.Bottom - 1) / 32))).walkable = walkable_type_enum.Walkable Then CantMove = True
-        End Select
+        PLeft = Left : PRight = Right : PTop = Top : PBottom = Bottom
+
+        If Left >= 0 AndAlso Right <= shipsize.y AndAlso Top >= 0 AndAlso Bottom <= shipsize.x Then
+            Select Case Direction
+                Case Is = Move_Direction.Up
+                    If Not tile_map(Left, Top).walkable = walkable_type_enum.Walkable AndAlso Not tile_map(Left, Top).walkable = walkable_type_enum.OpenDoor Then CantMove = True
+                    If Not tile_map(Right, Top).walkable = walkable_type_enum.Walkable AndAlso Not tile_map(Right, Top).walkable = walkable_type_enum.OpenDoor Then CantMove = True
+                    If tile_map(Left, Top).walkable = walkable_type_enum.Door Then open_door(New PointI(Left, Top))
+                    If tile_map(Right, Top).walkable = walkable_type_enum.Door Then open_door(New PointI(Right, Top))
+                Case Is = Move_Direction.Down
+                    If Not tile_map(Left, Bottom).walkable = walkable_type_enum.Walkable AndAlso Not tile_map(Left, Bottom).walkable = walkable_type_enum.OpenDoor Then CantMove = True
+                    If Not tile_map(Right, Bottom).walkable = walkable_type_enum.Walkable AndAlso Not tile_map(Right, Bottom).walkable = walkable_type_enum.OpenDoor Then CantMove = True
+                    If tile_map(Left, Bottom).walkable = walkable_type_enum.Door Then open_door(New PointI(Left, Bottom))
+                    If tile_map(Right, Bottom).walkable = walkable_type_enum.Door Then open_door(New PointI(Right, Bottom))
+                Case Is = Move_Direction.Left
+                    If Not tile_map(Left, Top).walkable = walkable_type_enum.Walkable AndAlso Not tile_map(Left, Top).walkable = walkable_type_enum.OpenDoor Then CantMove = True
+                    If Not tile_map(Left, Bottom).walkable = walkable_type_enum.Walkable AndAlso Not tile_map(Left, Bottom).walkable = walkable_type_enum.OpenDoor Then CantMove = True
+                    If tile_map(Left, Top).walkable = walkable_type_enum.Door Then open_door(New PointI(Left, Top))
+                    If tile_map(Left, Bottom).walkable = walkable_type_enum.Door Then open_door(New PointI(Left, Bottom))
+                Case Is = Move_Direction.Right
+                    If Not tile_map(Right, Top).walkable = walkable_type_enum.Walkable AndAlso Not tile_map(Right, Top).walkable = walkable_type_enum.OpenDoor Then CantMove = True
+                    If Not tile_map(Right, Bottom).walkable = walkable_type_enum.Walkable AndAlso Not tile_map(Right, Bottom).walkable = walkable_type_enum.OpenDoor Then CantMove = True
+                    If tile_map(Right, Top).walkable = walkable_type_enum.Door Then open_door(New PointI(Right, Top))
+                    If tile_map(Right, Bottom).walkable = walkable_type_enum.Door Then open_door(New PointI(Right, Bottom))
+            End Select
+        Else
+            CantMove = True
+        End If
 
         If CantMove = False Then
             Select Case Direction
@@ -1208,11 +1227,8 @@ Public Class Ship
             Select Case Direction
                 Case Is = Move_Direction.Up : Officer_List(Id).location.y = (CInt(B.Top) \ 32) * 32 - (B.Top - Officer_List(Id).location.y)
                 Case Is = Move_Direction.Down : Officer_List(Id).location.y = (CInt(Math.Floor(B.Bottom) / 32)) * 32 - (B.Bottom - Officer_List(Id).location.y)
-
-
                 Case Is = Move_Direction.Left : Officer_List(Id).location.x = (CInt(B.Left) \ 32) * 32 - (B.Left - Officer_List(Id).location.x)
                 Case Is = Move_Direction.Right : Officer_List(Id).location.x = (CInt(Math.Floor(B.Right) / 32)) * 32 + (Officer_List(Id).location.x - B.Right)
-
             End Select
         End If
     End Sub

@@ -55,6 +55,7 @@ End Class
     Public flip As flip_enum
     Public spriteAni As Integer
     Public type As device_tile_type_enum
+    Public IDhash As HashSet(Of Integer)  'Used For Device Base
 
     Sub New(ByVal device_ID As Integer, ByVal sprite As Integer, ByVal rotate As rotate_enum, ByVal flip As flip_enum, ByVal spriteAni As Integer, ByVal SpriteTileSet As device_tile_type_enum)
         Me.device_ID = device_ID
@@ -63,6 +64,11 @@ End Class
         Me.flip = flip
         Me.spriteAni = spriteAni
         Me.type = SpriteTileSet
+        If Me.type = device_tile_type_enum.Device_Base Then
+            Me.device_ID = -1
+            Me.IDhash = New HashSet(Of Integer)
+            Me.IDhash.Add(device_ID)
+        End If
     End Sub
 
 End Class

@@ -1150,7 +1150,7 @@
                 y_step = -y_step
             End If
 
-
+            'Set Selection Tile Map
             For row = y_start To y_end Step y_step
                 For column = x_start To x_end Step x_step
 
@@ -1164,8 +1164,7 @@
                     colx += 1
                     If colx >= Device_tech_list(Build_selection).cmap(0).Length Then colx = 0 : coly += 1
 
-                    If key >= 1 AndAlso key <= 3 Then
-
+                    If key >= 1 AndAlso key <= 4 Then
                         If dt_selection.x + x < 0 Then sprite += 1
                         If dt_selection.y + y < 0 Then sprite += 1
                         If dt_selection.x + x > shipsize.x Then sprite += 1
@@ -1177,21 +1176,23 @@
                             selection_tile_map(dt_selection.x + x + 1, dt_selection.y + y + 1) = Convert.ToByte(sprite)
                             sprite += 1
                         End If
-
-                    Else
-                        If key >= 4 AndAlso key <= 7 Then
-                            If dt_selection.x + x >= 0 AndAlso dt_selection.x + x <= shipsize.x AndAlso dt_selection.y + y >= 0 AndAlso dt_selection.y + y <= shipsize.y Then
-                                selection_tile_map(dt_selection.x + x + 1, dt_selection.y + y + 1) = 254
-                            End If
-                        End If
-
-                        If key = 8 Then
-                            If dt_selection.x + x >= 0 AndAlso dt_selection.x + x <= shipsize.x AndAlso dt_selection.y + y >= 0 AndAlso dt_selection.y + y <= shipsize.y Then
-                                selection_tile_map(dt_selection.x + x + 1, dt_selection.y + y + 1) = 253
-                            End If
-                        End If
-
                     End If
+
+                    If key = 5 Then
+                        If dt_selection.x + x >= 0 AndAlso dt_selection.x + x <= shipsize.x AndAlso dt_selection.y + y >= 0 AndAlso dt_selection.y + y <= shipsize.y Then
+                            selection_tile_map(dt_selection.x + x + 1, dt_selection.y + y + 1) = 253
+                        End If
+                    End If
+
+
+                    If key >= 6 AndAlso key <= 9 Then
+                        If dt_selection.x + x >= 0 AndAlso dt_selection.x + x <= shipsize.x AndAlso dt_selection.y + y >= 0 AndAlso dt_selection.y + y <= shipsize.y Then
+                            selection_tile_map(dt_selection.x + x + 1, dt_selection.y + y + 1) = 254
+                        End If
+                    End If
+
+                    
+
                 Next
             Next
 
@@ -1219,39 +1220,51 @@
                     If dt_selection.x + x >= 0 AndAlso dt_selection.x + x <= shipsize.x AndAlso dt_selection.y + y >= 0 AndAlso dt_selection.y + y <= shipsize.y Then
 
                         If key > 0 Then
-                            If selection_tile_map(dt_selection.x + x + 1, dt_selection.y + y + 1) = 255 Then selection_tile_map(dt_selection.x + x + 1, dt_selection.y + y + 1) = 254
+                            If selection_tile_map(dt_selection.x + x + 1, dt_selection.y + y + 1) = 255 Then
+                                'If key <= 4 Then selection_tile_map(dt_selection.x + x + 1, dt_selection.y + y + 1) = 253
+                                'If key >= 5 Then selection_tile_map(dt_selection.x + x + 1, dt_selection.y + y + 1) = 254
+                            End If
                         End If
 
                         'Check cmap to tiles
                         Dim tile As Integer = Build_ship.tile_map(dt_selection.x + x, dt_selection.y + y).sprite
-                        If Not key = 0 AndAlso Build_ship.tile_map(dt_selection.x + x, dt_selection.y + y).device_tile IsNot Nothing Then Buildable = False
+
+                        If key >= 1 AndAlso key <= 5 Then
+                            If Build_ship.tile_map(dt_selection.x + x, dt_selection.y + y).device_tile IsNot Nothing Then
+                                If Not Build_ship.tile_map(dt_selection.x + x, dt_selection.y + y).device_tile.type = device_tile_type_enum.Device_Base Then
+                                    Buildable = False
+                                End If
+                            End If
+                        End If
+
+                        'If Not key = 0 AndAlso Build_ship.tile_map(dt_selection.x + x, dt_selection.y + y).device_tile IsNot Nothing AndAlso Not Build_ship.tile_map(dt_selection.x + x, dt_selection.y + y).device_tile.type = device_tile_type_enum.Restricted Then Buildable = False
 
                         For Each room In Build_ship.room_list
                             If room.Value.access_point.ContainsKey(New PointI(dt_selection.x + x, dt_selection.y + y)) Then Buildable = False
                         Next
 
-                        'Check for floor
-                        If key = 1 OrElse key = 5 Then
-                            If Not tile = room_sprite_enum.Floor Then Buildable = False
-                            device_to_room_id = Build_ship.tile_map(dt_selection.x + x, dt_selection.y + y).roomID
-                        End If
-                        'Check for walls
-                        If key = 2 OrElse key = 6 Then
-                            If tile < 4 OrElse tile > 7 Then Buildable = False
-                            device_to_room_id = Build_ship.tile_map(dt_selection.x + x, dt_selection.y + y).roomID
-                        End If
-                        'Check for empty
-                        If key = 3 OrElse key = 7 Then
-                            If Not Build_ship.tile_map(dt_selection.x + x, dt_selection.y + y).type = tile_type_enum.empty Then Buildable = False
-                        End If
+                        Select Case key
 
-                        If key = 8 Then
-                            If Not tile = room_sprite_enum.Floor Then Buildable = False
-                        End If
-
+                            Case Is = 1, 6, 10 'Check for floor
+                                If Not tile = room_sprite_enum.Floor Then Buildable = False
+                                device_to_room_id = Build_ship.tile_map(dt_selection.x + x, dt_selection.y + y).roomID
+                            Case Is = 2, 7, 11 'Check for walls
+                                If tile < 4 OrElse tile > 7 Then Buildable = False
+                                device_to_room_id = Build_ship.tile_map(dt_selection.x + x, dt_selection.y + y).roomID
+                            Case Is = 3, 8, 12 'Check for empty or device base
+                                If Not Build_ship.tile_map(dt_selection.x + x, dt_selection.y + y).type = tile_type_enum.empty AndAlso Not Build_ship.tile_map(dt_selection.x + x, dt_selection.y + y).type = tile_type_enum.Device_Base Then Buildable = False
+                                If Build_ship.tile_map(dt_selection.x + x, dt_selection.y + y).type = tile_type_enum.Device_Base Then
+                                    If (Build_ship.tile_map(dt_selection.x + x, dt_selection.y + y).device_tile IsNot Nothing AndAlso Not Build_ship.tile_map(dt_selection.x + x, dt_selection.y + y).device_tile.type = device_tile_type_enum.Device_Base) Then Buildable = False
+                                End If
+                            Case Is = 4, 9, 13 'Check for corner
+                                If tile < 0 OrElse tile > 3 Then Buildable = False
+                                device_to_room_id = Build_ship.tile_map(dt_selection.x + x, dt_selection.y + y).roomID
+                            Case Is = 5 'Check for AP
+                                If Not tile = room_sprite_enum.Floor Then Buildable = False
+                        End Select
                     Else
                         'check if important tiles are not on the map
-                        If Not key = 0 AndAlso Not key = 4 AndAlso Not key = 5 AndAlso Not key = 6 AndAlso Not key = 7 Then Buildable = False
+                        If Not key = 0 AndAlso key < 5 Then Buildable = False
 
                     End If
                     'Check if the room type matches the device
@@ -1284,7 +1297,7 @@
 
 
                                 If selection_tile_map(x + 1, y + 1) < 253 Then
-                                    If Build_ship.tile_map(x, y).type = tile_type_enum.empty Then Build_ship.tile_map(x, y) = New Ship_tile(Convert.ToByte(device_to_room_id), tile_type_enum.Device_Base, 0, 0, room_sprite_enum.empty, walkable_type_enum.Impassable)
+                                    If Build_ship.tile_map(x, y).type = tile_type_enum.empty Then Build_ship.tile_map(x, y) = New Ship_tile(Convert.ToByte(device_to_room_id), tile_type_enum.Device_Base, 0, 0, room_sprite_enum.empty, walkable_type_enum.Walkable)
 
                                     If Device_tech_list(Build_selection).IsDoor = True Then
                                         Build_ship.tile_map(x, y).walkable = walkable_type_enum.Door
@@ -1301,12 +1314,22 @@
                                     Build_ship.room_list(device_to_room_id).access_point.Add(New PointI(x, y), New access_point_type(False, id))
                                 End If
 
-                                'Do not set sprite/tile
+                                'Do not set sprite
                                 If selection_tile_map(x + 1, y + 1) = 254 Then
-                                    If Build_ship.tile_map(x, y).roomID = 0 Then
-                                        Build_ship.tile_map(x, y) = New Ship_tile(Convert.ToByte(device_to_room_id), tile_type_enum.Restricted, 0, 0, room_sprite_enum.empty, walkable_type_enum.Impassable)                                        
+                                    If Build_ship.tile_map(x, y).type = 255 Then
+                                        Build_ship.tile_map(x, y) = New Ship_tile(Convert.ToByte(device_to_room_id), tile_type_enum.Device_Base, 0, 0, room_sprite_enum.empty, walkable_type_enum.Walkable)
+                                        Build_ship.tile_map(x, y).device_tile = New Device_tile(id, -1, rotate_enum.Zero, flip_enum.None, 0, device_tile_type_enum.Device_Base)
                                     End If
-                                    Build_ship.tile_map(x, y).device_tile = New Device_tile(id, -1, rotate_enum.Zero, flip_enum.None, 0, device_tile_type_enum.Empty)
+                                    If Build_ship.tile_map(x, y).type < 255 Then
+                                        If Build_ship.tile_map(x, y).device_tile Is Nothing Then
+                                            Build_ship.tile_map(x, y).device_tile = New Device_tile(id, -1, rotate_enum.Zero, flip_enum.None, 0, device_tile_type_enum.Device_Base)
+                                        Else
+                                            'Set IdHash for Device Base
+                                            If Build_ship.tile_map(x, y).device_tile.type = device_tile_type_enum.Device_Base Then
+                                                Build_ship.tile_map(x, y).device_tile.IDhash.Add(id)
+                                            End If                                            
+                                        End If
+                                    End If
                                 End If
 
                             End If
@@ -1835,7 +1858,8 @@
                 End If
             Else
                 'Clear Devices
-                clear_id = Build_ship.tile_map(selection.x, selection.y).device_tile.device_ID
+                If Build_ship.tile_map(selection.x, selection.y).device_tile.IDhash Is Nothing Then clear_id = Build_ship.tile_map(selection.x, selection.y).device_tile.device_ID Else clear_id = Build_ship.tile_map(selection.x, selection.y).device_tile.IDhash.First
+
                 For x = 0 To Build_ship.shipsize.x
                     For y = 0 To Build_ship.shipsize.y
                         If Build_ship.tile_map(x, y).device_tile IsNot Nothing AndAlso Build_ship.tile_map(x, y).device_tile.device_ID = clear_id Then selection_tile_map(x + 1, y + 1) = room_sprite_enum.blank
@@ -1887,7 +1911,7 @@
 
                 'Clear device
                 If Build_ship.tile_map(selection.x, selection.y).device_tile IsNot Nothing Then
-                    clear_id = Build_ship.tile_map(selection.x, selection.y).device_tile.device_ID
+                    If Build_ship.tile_map(selection.x, selection.y).device_tile.IDhash Is Nothing Then clear_id = Build_ship.tile_map(selection.x, selection.y).device_tile.device_ID Else clear_id = Build_ship.tile_map(selection.x, selection.y).device_tile.IDhash.First
                     Remove_Device(clear_id)
                     Build_save_ship(Build_ship)
                 End If
@@ -1936,13 +1960,27 @@
 
 
     Sub Remove_Device(ByVal clear_id As Integer)
-
         For x = 0 To Build_ship.shipsize.x
             For y = 0 To Build_ship.shipsize.y
-                If Build_ship.tile_map(x, y).device_tile IsNot Nothing AndAlso Build_ship.tile_map(x, y).device_tile.device_ID = clear_id Then
+
+                Dim Device_Tile As Device_tile = Build_ship.tile_map(x, y).device_tile
+                Dim Remove_Base As Boolean = False
+                If Device_Tile IsNot Nothing AndAlso Device_Tile.device_ID = -1 AndAlso Device_Tile.IDhash.Contains(clear_id) Then
+                    If Device_Tile.IDhash.Count = 1 Then
+                        Remove_Base = True
+                    Else
+                        Device_Tile.IDhash.Remove(clear_id)
+                    End If
+                End If
+
+                If (Device_Tile IsNot Nothing AndAlso Device_Tile.device_ID = clear_id) OrElse Remove_Base = True Then
                     'If Build_ship.tile_map(x, y).type = tile_type_enum.empty Then Build_ship.tile_map(x, y) = New Ship_tile(0, tile_type_enum.empty, 0, 0, room_sprite_enum.empty, walkable_type_enum.Impassable)
-                    If Build_ship.tile_map(x, y).type = tile_type_enum.Device_Base Then Build_ship.tile_map(x, y) = New Ship_tile(0, tile_type_enum.empty, 0, 0, room_sprite_enum.empty, walkable_type_enum.Walkable)
-                    If Build_ship.tile_map(x, y).type = tile_type_enum.Restricted Then Build_ship.tile_map(x, y) = New Ship_tile(0, tile_type_enum.empty, 0, 0, room_sprite_enum.empty, walkable_type_enum.Walkable)
+                    If Build_ship.tile_map(x, y).type = tile_type_enum.Device_Base Then
+                        Build_ship.tile_map(x, y) = New Ship_tile(0, tile_type_enum.empty, 0, 0, room_sprite_enum.empty, walkable_type_enum.Walkable)
+                    End If
+
+
+                    'If Build_ship.tile_map(x, y).type = tile_type_enum.Restricted Then Build_ship.tile_map(x, y) = New Ship_tile(0, tile_type_enum.empty, 0, 0, room_sprite_enum.empty, walkable_type_enum.Walkable)
 
                     If Device_tech_list(Build_ship.device_list(clear_id).tech_ID).IsDoor = True AndAlso Build_ship.tile_map(x, y).device_tile.sprite > -1 Then
                         If Build_ship.tile_map(x, y).device_tile.rotate = rotate_enum.Zero OrElse Build_ship.tile_map(x, y).device_tile.rotate = rotate_enum.OneEighty Then
@@ -2090,7 +2128,7 @@
         'Find Center of Ship
         For x = 0 To Build_ship.shipsize.x
             For y = 0 To Build_ship.shipsize.y
-                If Build_ship.tile_map(x, y).type < tile_type_enum.Restricted Then
+                If Build_ship.tile_map(x, y).type < tile_type_enum.Device_Base Then
                     If x < Left Then Left = x
                     If x > Right Then Right = x
                     If y < Top Then Top = y
@@ -2103,7 +2141,7 @@
         'Adjust for tiles       
         For x = 0 To Build_ship.shipsize.x
             For y = 0 To Build_ship.shipsize.y
-                If Build_ship.tile_map(x, y).type < tile_type_enum.Restricted Then
+                If Build_ship.tile_map(x, y).type < tile_type_enum.Device_Base Then
                     Tiles += 1
                     If x <= Ship_Center.x AndAlso y <= Ship_Center.y Then A += Tech_list(Build_ship.room_list(Build_ship.tile_map(x, y).roomID).type).weight
                     If x >= Ship_Center.x AndAlso y <= Ship_Center.y Then B += Tech_list(Build_ship.room_list(Build_ship.tile_map(x, y).roomID).type).weight
@@ -2138,7 +2176,7 @@
 
         Dim Mass As Double
         For Each Tile In Build_ship.tile_map
-            If Tile.type < tile_type_enum.Restricted Then
+            If Tile.type < tile_type_enum.Device_Base Then
                 Mass += Tech_list(Build_ship.room_list(Tile.roomID).type).weight
             End If
         Next
@@ -2889,9 +2927,9 @@
                             End If
 
                             'If restricted tile
-                        Case Is = tile_type_enum.Restricted
-                            Draw_Ship_Tile(tile_type_enum.Hull_1, 2, pos, Color.White)
-                            If TileMap(x, y).device_tile IsNot Nothing AndAlso Not TileMap(x, y).device_tile.type = device_tile_type_enum.Empty Then Draw_Device_Tile(TileMap(x, y).device_tile.type, TileMap(x, y).device_tile.sprite, TileMap(x, y).device_tile.spriteAni, pos, TileMap(x, y).device_tile.rotate, TileMap(x, y).device_tile.flip, scale, Color.White)
+                            'Case Is = tile_type_enum.Restricted
+                            'Draw_Ship_Tile(tile_type_enum.Hull_1, 2, pos, Color.White)
+                            'If TileMap(x, y).device_tile IsNot Nothing AndAlso Not TileMap(x, y).device_tile.type = device_tile_type_enum.Empty Then Draw_Device_Tile(TileMap(x, y).device_tile.type, TileMap(x, y).device_tile.sprite, TileMap(x, y).device_tile.spriteAni, pos, TileMap(x, y).device_tile.rotate, TileMap(x, y).device_tile.flip, scale, Color.White)
 
                             'If device base
                         Case Is = tile_type_enum.Device_Base

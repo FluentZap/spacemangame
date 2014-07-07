@@ -1,4 +1,15 @@
-﻿Public Module Tech
+﻿'To add Device
+'Add to tech_list_enum
+'Add to Load_Tech_List
+'Add to Load_Description
+'Add to Set_Device_Map
+'Add to if weapon Set_Weapon_Tech
+
+
+
+
+
+Public Module Tech
 
     Enum tech_list_enum
         Empty = -1
@@ -40,6 +51,7 @@
 
         'Devices
         Bridge_Control_Panel
+        Control_Panel
         Computer_MK1
 
 
@@ -233,6 +245,8 @@
 
 
         Tech_list.Add(tech_list_enum.Bridge_Control_Panel, New Tech_type("Basic Energy Door", Tech_type_enum.Device, tech_list_enum.Bridge))
+        Tech_list.Add(tech_list_enum.Control_Panel, New Tech_type("Control Panel", Tech_type_enum.Device, tech_list_enum.All_rooms))
+
 
         Tech_list.Add(tech_list_enum.Computer_MK1, New Tech_type("Basic Main Computer", Tech_type_enum.Device, tech_list_enum.Bridge))
 
@@ -326,26 +340,36 @@
         Const R As Byte = 1
         Const W As Byte = 2
         Const E As Byte = 3
+        Const C As Byte = 4
+        Const AP As Byte = 5
 
-        'Const AE As Byte = 4
-        Const RE As Byte = 5
-        Const WE As Byte = 6
-        Const EE As Byte = 7
+        Const RB As Byte = 6
+        Const WB As Byte = 7
+        Const EB As Byte = 8
+        Const CB As Byte = 9
 
-        Const AP As Byte = 8
+        Const RE As Byte = 10
+        Const WE As Byte = 11
+        Const EE As Byte = 12
+        Const CE As Byte = 13
 
+        
+        '0 Blank does not set base "any tile no restrictions"
+        '1 Must be a room tile Set tile
+        '2 Must be a wall tile Set tile
+        '3 Must be empty tile Set tile
+        '4 Must Be a corner tile Set Tile
 
+        '5 On room tile Set device base No tile
+        '6 On wall tile Set device base No tile
+        '7 On empty Set device base No tile
+        '8 On corner Set device base No tile
 
-        '0, Blank / Does not set base to room
-        '1, On room tile
-        '2, On wall tile
-        '3, On empty tile
-
-        '4, On anything / Does not set sprite / set's device
-        '5, On room tile / Does not set sprite / set's device
-        '6, On wall tile / Does not set sprite / set's device
-        '7, On empty tile / Does not set sprite / set's device
-        '8, Access point
+        '9 On room tile no device base No tile
+        '10 On wall tile no device base No tile
+        '11 On empty no device base No tile
+        '12 On corner no device base No tile
+        '13 Access(Point)
 
         'S_map verticle width
         'Dim s_map() As Byte = New Byte() {3, 3, 3, 3}
@@ -360,14 +384,14 @@
         c_map(2) = New Byte() {B, R, R, R, B}
         c_map(3) = New Byte() {B, W, W, W, B}
         c_map(4) = New Byte() {B, E, E, E, B}
-        c_map(5) = New Byte() {B, EE, EE, EE, B}
-        c_map(6) = New Byte() {B, EE, EE, EE, B}
-        c_map(7) = New Byte() {B, EE, EE, EE, B}
-        c_map(8) = New Byte() {B, EE, EE, EE, B}
-        c_map(9) = New Byte() {B, EE, EE, EE, B}
-        c_map(10) = New Byte() {B, EE, EE, EE, B}
-        c_map(11) = New Byte() {B, EE, EE, EE, B}
-        c_map(12) = New Byte() {B, EE, EE, EE, B}
+        c_map(5) = New Byte() {B, EB, EB, EB, B}
+        c_map(6) = New Byte() {B, EB, EB, EB, B}
+        c_map(7) = New Byte() {B, EB, EB, EB, B}
+        c_map(8) = New Byte() {B, EB, EB, EB, B}
+        c_map(9) = New Byte() {B, EB, EB, EB, B}
+        c_map(10) = New Byte() {B, EB, EB, EB, B}
+        c_map(11) = New Byte() {B, EB, EB, EB, B}
+        c_map(12) = New Byte() {B, EB, EB, EB, B}
 
         Pipe = New HashSet(Of Device_Pipeline)
         Pipe.Add(New Device_Pipeline(Pipeline_type_enum.Energy, -25))
@@ -413,9 +437,9 @@
 
 
         c_map = New Byte(2)() {}
-        c_map(0) = New Byte() {RE, R, R, RE}
-        c_map(1) = New Byte() {RE, R, R, RE}
-        c_map(2) = New Byte() {RE, AP, AP, RE}
+        c_map(0) = New Byte() {RE, R, R, RB}
+        c_map(1) = New Byte() {RE, R, R, RB}
+        c_map(2) = New Byte() {RE, AP, AP, RB}
         Pipe = New HashSet(Of Device_Pipeline)
         Pipe.Add(New Device_Pipeline(Pipeline_type_enum.Energy, 50))
         Pipe.Add(New Device_Pipeline(Pipeline_type_enum.Data, -10))
@@ -424,7 +448,7 @@
 
 
         c_map = New Byte(0)() {}
-        c_map(0) = New Byte() {EE, EE, EE, E, W}
+        c_map(0) = New Byte() {EB, EB, EB, E, W}
         Pipe = New HashSet(Of Device_Pipeline)
         Pipe.Add(New Device_Pipeline(Pipeline_type_enum.Energy, -5))
         Pipe.Add(New Device_Pipeline(Pipeline_type_enum.Data, -10))
@@ -455,7 +479,6 @@
 
         c_map = New Byte(0)() {}
         c_map(0) = New Byte() {W, W}
-
         Pipe = New HashSet(Of Device_Pipeline)
         Pipe.Add(New Device_Pipeline(Pipeline_type_enum.Data, 50))
         Device_tech_list.Add(tech_list_enum.Airlock_MK1, New device_data(device_type_enum.door, 100, New crew_resource_type(0, 0), New PointI(0, 1), c_map, Pipe, device_tile_type_enum.Airlock_MK1, True, flip_enum.Both, True))

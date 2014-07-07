@@ -161,6 +161,7 @@
 
         effect_texture(Effects_Texture_Enum.Spot_256) = Direct3D.TextureLoader.FromFile(d3d_device, Application.StartupPath + "\Data\Textures\Effects\Light_Spot_256.png", 256, 256, 0, Direct3D.Usage.None, Texture_Format, Direct3D.Pool.Managed, Filter, MipFilter, 0)
 
+        effect_texture(Effects_Texture_Enum.Star_2) = Direct3D.TextureLoader.FromFile(d3d_device, Application.StartupPath + "\Data\Textures\Effects\Star_2.png", 2, 2, 0, Direct3D.Usage.None, Texture_Format, Direct3D.Pool.Managed, Filter, MipFilter, 0)
 
         'Item Sprites
         Item_tile_texture(0) = Direct3D.TextureLoader.FromFile(d3d_device, Application.StartupPath + "\Data\Textures\Tiles\Items.png", 1280, 32, 0, Direct3D.Usage.None, Texture_Format, Direct3D.Pool.Managed, Filter, MipFilter, Color.FromArgb(255, 0, 255, 0).ToArgb)
