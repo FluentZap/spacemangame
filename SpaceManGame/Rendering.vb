@@ -18,14 +18,14 @@
 
     Sub Draw_Ship_Tile(ByVal TileSet As Integer, ByVal Tile As Integer, ByVal Position As PointD, ByVal Color As Color)
         'd3d_sprite.Draw2D(tile_texture(TileSet), New Rectangle(Tile * 32, 0, 32, 32), New SizeF(atSize(), atSize()), New PointF(0, 0), 0, New PointF(Position.x, Position.y), Color)
-        If TileSet < tile_type_enum.Device_Base OrElse TileSet = tile_type_enum.Restricted Then
+        If TileSet < tile_type_enum.Device_Base Then
             d3d_sprite.Draw(tile_texture(TileSet), New Rectangle(Tile * 32, 0, 32, 32), New Vector3(0, 0, 0), New Vector3(Position.sngX, Position.sngY, 0), Color.ToArgb)
         End If
     End Sub
 
     Sub Draw_Planet_Tile(ByVal TileSet As Integer, ByVal Tile As Integer, ByVal Position As PointD, ByVal Color As Color)
         'd3d_sprite.Draw2D(tile_texture(TileSet), New Rectangle(Tile * 32, 0, 32, 32), New SizeF(atSize(), atSize()), New PointF(0, 0), 0, New PointF(Position.x, Position.y), Color)
-        If TileSet < tile_type_enum.Device_Base OrElse TileSet = tile_type_enum.Restricted Then
+        If TileSet < tile_type_enum.Device_Base Then
             d3d_sprite.Draw(planet_tile_texture(TileSet), New Rectangle(Tile * 32, 0, 32, 32), New Vector3(0, 0, 0), New Vector3(Position.sngX, Position.sngY, 0), Color)
         End If
     End Sub
@@ -182,6 +182,8 @@
         draw_text("Logic  " + LPS.ToString, New Rectangle(0, 100, 100, 20), CType(DrawTextFormat.Center + DrawTextFormat.VerticalCenter, DrawTextFormat), Color.White, d3d_font(d3d_font_enum.SB_small))
         render_personal_health_overlay(New PointI(256, screen_size.y - 96), u.Officer_List(current_player).Health)
 
+        draw_text("L:" + PLeft.ToString + " R:" + PRight.ToString + " T:" + PTop.ToString + " B:" + PBottom.ToString, New Rectangle(0, 150, 200, 20), CType(DrawTextFormat.Center + DrawTextFormat.VerticalCenter, DrawTextFormat), Color.White, d3d_font(d3d_font_enum.SB_small))
+
         If u.Crew_List.ContainsKey(Mouse_Target) Then
             render_personal_health_overlay(New PointI(128, screen_size.y - 96), u.Crew_List(Mouse_Target).Health)
         End If
@@ -218,7 +220,7 @@
                 pos.x = (x * 32) - view_location_personal.x
                 pos.y = (y * 32) - view_location_personal.y
                 If x >= 0 AndAlso x <= ship.shipsize.x AndAlso y >= 0 AndAlso y <= ship.shipsize.y Then
-                    If TileMap(x, y).type < tile_type_enum.Restricted Then
+                    If TileMap(x, y).type < tile_type_enum.Device_Base Then
                         Draw_Ship_Tile(TileMap(x, y).type, TileMap(x, y).sprite, pos, TileMap(x, y).adj_color)
                         If TileMap(x, y).device_tile IsNot Nothing Then Draw_Device_Tile(TileMap(x, y).device_tile.type, TileMap(x, y).device_tile.sprite, ship.device_list(TileMap(x, y).device_tile.device_ID).Sprite_Animation_Key, pos, TileMap(x, y).device_tile.rotate, TileMap(x, y).device_tile.flip, scale, Color.White)
                     End If
@@ -312,7 +314,7 @@
                             adjustedPos.y = y - ShipPos.y
 
                             If adjustedPos.x >= 0 AndAlso adjustedPos.x <= ship.shipsize.x AndAlso adjustedPos.y >= 0 AndAlso adjustedPos.y <= ship.shipsize.y Then
-                                If ship_tile_Map(adjustedPos.x, adjustedPos.y).type < tile_type_enum.Restricted Then
+                                If ship_tile_Map(adjustedPos.x, adjustedPos.y).type < tile_type_enum.Device_Base Then
                                     Draw_Ship_Tile(ship_tile_Map(adjustedPos.x, adjustedPos.y).type, ship_tile_Map(adjustedPos.x, adjustedPos.y).sprite, pos, Color.FromArgb(100, 255, 255, 255))
                                     If ship_tile_Map(adjustedPos.x, adjustedPos.y).device_tile IsNot Nothing Then Draw_Device_Tile(ship_tile_Map(adjustedPos.x, adjustedPos.y).device_tile.type, ship_tile_Map(adjustedPos.x, adjustedPos.y).device_tile.sprite, ship_tile_Map(adjustedPos.x, adjustedPos.y).device_tile.spriteAni, pos, ship_tile_Map(adjustedPos.x, adjustedPos.y).device_tile.rotate, ship_tile_Map(adjustedPos.x, adjustedPos.y).device_tile.flip, scale, Color.FromArgb(100, 100, 100, 100))
                                 End If
@@ -441,7 +443,7 @@
                 pos.x = (x * 32 * scale) - view_location_personal.x * scale
                 pos.y = (y * 32 * scale) - view_location_personal.y * scale
                 If x >= 0 AndAlso x <= planet.size.x AndAlso y >= 0 AndAlso y <= planet.size.y Then
-                    If TileMap(x, y).type < tile_type_enum.Restricted Then
+                    If TileMap(x, y).type < tile_type_enum.Device_Base Then
                         Draw_Planet_Tile(TileMap(x, y).type, TileMap(x, y).sprite, pos, Color.FromArgb(255, 255, 255, 255))
                         'If TileMap(x, y).device_tile IsNot Nothing Then Draw_Device_Tile(TileMap(x, y).device_tile.type, TileMap(x, y).device_tile.sprite, pos, TileMap(x, y).device_tile.rotate, TileMap(x, y).device_tile.flip, scale, Color.White)
                     End If
@@ -463,7 +465,7 @@
                             pos.x = (x * 32 * scale) - view_location_personal.x * scale
                             pos.y = (y * 32 * scale) - view_location_personal.y * scale
                             If x >= 0 AndAlso x <= ship.shipsize.x AndAlso y >= 0 AndAlso y <= ship.shipsize.y Then
-                                If ship_tile_Map(x, y).type < tile_type_enum.Restricted Then
+                                If ship_tile_Map(x, y).type < tile_type_enum.Device_Base Then
                                     Draw_Ship_Tile(ship_tile_Map(x, y).type, ship_tile_Map(x, y).sprite, pos, Color.FromArgb(255, 255, 255, 255))
                                     If ship_tile_Map(x, y).device_tile IsNot Nothing Then Draw_Device_Tile(ship_tile_Map(x, y).device_tile.type, ship_tile_Map(x, y).device_tile.sprite, ship_tile_Map(x, y).device_tile.spriteAni, pos, ship_tile_Map(x, y).device_tile.rotate, ship_tile_Map(x, y).device_tile.flip, scale, Color.FromArgb(255, 255, 255, 255))
                                 End If
@@ -756,7 +758,7 @@
                 pos.x = (x * 32) - view_location_weapon_control.x
                 pos.y = (y * 32) - view_location_weapon_control.y
                 If x >= 0 AndAlso x <= ship.shipsize.x AndAlso y >= 0 AndAlso y <= ship.shipsize.y Then
-                    If TileMap(x, y).type < tile_type_enum.Restricted Then
+                    If TileMap(x, y).type < tile_type_enum.Device_Base Then
                         Draw_Ship_Tile(TileMap(x, y).type, TileMap(x, y).sprite, pos, Color.FromArgb(255, 255, 255, 255))
                         If TileMap(x, y).device_tile IsNot Nothing AndAlso Not TileMap(x, y).device_tile.type = device_tile_type_enum.Empty Then
                             If ship.device_list(TileMap(x, y).device_tile.device_ID).type = device_type_enum.weapon Then
@@ -1183,7 +1185,7 @@
                 pos.x = CInt(x * 32)
                 pos.y = CInt(y * 32)
                 If x >= 0 AndAlso x <= Ship.shipsize.x AndAlso y >= 0 AndAlso y <= Ship.shipsize.y Then
-                    If TileMap(x, y).type < tile_type_enum.Restricted Then
+                    If TileMap(x, y).type < tile_type_enum.Device_Base Then
                         Draw_Ship_Tile(TileMap(x, y).type, TileMap(x, y).sprite, pos, TileMap(x, y).color)
                         If TileMap(x, y).device_tile IsNot Nothing Then Draw_Device_Tile(TileMap(x, y).device_tile.type, TileMap(x, y).device_tile.sprite, Ship.device_list(TileMap(x, y).device_tile.device_ID).Sprite_Animation_Key, pos, TileMap(x, y).device_tile.rotate, TileMap(x, y).device_tile.flip, scale, Color.White)
                     End If
@@ -1818,7 +1820,7 @@
                         If ship.room_list(ship.tile_map(x, y).roomID).type = tech_list_enum.Armor Then col = Color.LightSeaGreen
                         If ship.room_list(ship.tile_map(x, y).roomID).type = tech_list_enum.Engineering Then col = Color.Orange
 
-                        If Not ship.tile_map(x, y).type = tile_type_enum.Restricted Then
+                        If Not ship.tile_map(x, y).type = tile_type_enum.Device_Base Then
 
                             If ship.tile_map(x, y).sprite = room_sprite_enum.Floor OrElse ship.tile_map(x, y).roomID = 1 Then
                                 d3d_sprite.Draw(tile_texture(tile_type_enum.Hull_1), New Rectangle(128, 0, scale, scale), New Vector3(0, 0, 0), New Vector3(pos.x, pos.y, 0), Set_Brighness(col, 0.9))
@@ -1839,6 +1841,16 @@
     End Sub
 
 #End Region
+
+    Sub Render_StarField(ByVal Pos As PointD, ByVal Distance As Integer)
+        d3d_sprite.Begin(SpriteFlags.AlphaBlend)
+        d3d_device.SetSamplerState(0, SamplerStageStates.MinFilter, TextureFilter.None)
+        d3d_device.SetSamplerState(0, SamplerStageStates.MagFilter, TextureFilter.None)
+
+        d3d_sprite.Draw(effect_texture(Effects_Texture_Enum.Star_2), Rectangle.Empty, New Vector3(0, 0, 0), New Vector3(Pos.sngX, Pos.sngY, 0), Color.White)
+
+        d3d_sprite.End()
+    End Sub
 
 
 
@@ -2071,7 +2083,7 @@
                 pos.x = (x * 32) - view_location_weapon_control.x
                 pos.y = (y * 32) - view_location_weapon_control.y
                 If x >= 0 AndAlso x <= ship.shipsize.x AndAlso y >= 0 AndAlso y <= ship.shipsize.y Then
-                    If TileMap(x, y).type < tile_type_enum.Restricted Then
+                    If TileMap(x, y).type < tile_type_enum.Device_Base Then
                         Draw_Ship_Tile(TileMap(x, y).type, TileMap(x, y).sprite, pos, Color.FromArgb(255, 255, 255, 255))
                         If TileMap(x, y).device_tile IsNot Nothing AndAlso Not TileMap(x, y).device_tile.type = device_tile_type_enum.Empty Then
                             If ship.device_list(TileMap(x, y).device_tile.device_ID).type = device_type_enum.weapon Then

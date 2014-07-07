@@ -192,6 +192,8 @@
     Public FPS As Double
     Public LPS As Double
     Public Distance_from As Double
+    Public PLeft, PRight, PTop, PBottom As Integer
+
 
     Public Logic_Time As Double
     Public render_start, render_end, time_current, cps, refresh_rate As Long
@@ -763,7 +765,7 @@
         ship1.location = New PointD(0, 0)
 
         ship1.Refresh()
-        ship1.Faction = 0        
+        ship1.Faction = 0                
         u.Ship_List.Add(0, ship1)
 
 
@@ -793,7 +795,7 @@
         'planet1.landed_ships.Add(0, New PointI(0, 0))
         
         'Fix movement
-        Add_Officer(0, New Officer(0, "Captian", Officer_location_enum.Ship, 0, pos, 3.3, 0.2, New Officer.sprite_list(character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head)))
+        Add_Officer(0, New Officer(0, "Captian", Officer_location_enum.Ship, 0, pos, 1, 0.2, New Officer.sprite_list(character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head)))
 
 
         u.Officer_List(0).Officer_Classes.Add(New Officer_Class(Class_List_Enum.Mage, 0, 1))
