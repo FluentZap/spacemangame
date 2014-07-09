@@ -795,7 +795,7 @@
         'planet1.landed_ships.Add(0, New PointI(0, 0))
         
         'Fix movement
-        Add_Officer(0, New Officer(0, "Captian", Officer_location_enum.Ship, 0, pos, 1, 0.2, New Officer.sprite_list(character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head)))
+        Add_Officer(0, New Officer(0, "Captian", Officer_location_enum.Planet, 0, pos, 1, 0.2, New Officer.sprite_list(character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head)))
 
 
         u.Officer_List(0).Officer_Classes.Add(New Officer_Class(Class_List_Enum.Mage, 0, 1))

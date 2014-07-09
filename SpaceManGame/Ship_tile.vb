@@ -44,31 +44,45 @@
         light_level = other.light_level
     End Sub
 
+    Function Has_Device_Tile() As Boolean
+        If device_tile IsNot Nothing Then Return True
+        Return False
+    End Function
+
 End Class
 
 
 
-<Serializable()> Public Class Device_tile
-    Public device_ID As Integer
+<Serializable()> Public Class Device_tile    
     Public sprite As Integer
     Public rotate As rotate_enum
     Public flip As flip_enum
     Public spriteAni As Integer
     Public type As device_tile_type_enum
-    Public IDhash As HashSet(Of Integer)  'Used For Device Base
+    Public IDhash As New HashSet(Of Integer)()  'Used For Device Base
 
-    Sub New(ByVal device_ID As Integer, ByVal sprite As Integer, ByVal rotate As rotate_enum, ByVal flip As flip_enum, ByVal spriteAni As Integer, ByVal SpriteTileSet As device_tile_type_enum)
-        Me.device_ID = device_ID
+    Sub New(ByVal device_ID As Integer, ByVal sprite As Integer, ByVal rotate As rotate_enum, ByVal flip As flip_enum, ByVal spriteAni As Integer, ByVal SpriteTileSet As device_tile_type_enum)        
         Me.sprite = sprite
         Me.rotate = rotate
         Me.flip = flip
         Me.spriteAni = spriteAni
         Me.type = SpriteTileSet
-        If Me.type = device_tile_type_enum.Device_Base Then
-            Me.device_ID = -1
-            Me.IDhash = New HashSet(Of Integer)
-            Me.IDhash.Add(device_ID)
-        End If
+        Me.IDhash.Add(device_ID)
     End Sub
+
+
+    Function ContainsID(ByVal ID As Integer) As Boolean
+        If device_ID = ID Then Return True
+        If IDhash IsNot Nothing AndAlso IDhash.Contains(ID) Then Return True
+        Return False
+    End Function
+
+    Function device_ID() As Integer
+        If IDhash.Count > 0 Then
+            Return IDhash.First
+        Else
+            Return -1
+        End If
+    End Function
 
 End Class
