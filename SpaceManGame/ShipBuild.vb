@@ -1845,7 +1845,7 @@
 
             'Needfix
             'Clear room
-            If Build_ship.tile_map(selection.x, selection.y).device_tile Is Nothing Then
+            If Build_ship.tile_map(selection.x, selection.y).Has_Device_Tile = False Then
                 clear_id = Build_ship.tile_map(selection.x, selection.y).roomID
                 If clear_id = 1 Then
                     selection_tile_map(selection.x + 1, selection.y + 1) = room_sprite_enum.blank
@@ -1858,11 +1858,10 @@
                 End If
             Else
                 'Clear Devices
-                If Build_ship.tile_map(selection.x, selection.y).device_tile.IDhash Is Nothing Then clear_id = Build_ship.tile_map(selection.x, selection.y).device_tile.device_ID Else clear_id = Build_ship.tile_map(selection.x, selection.y).device_tile.IDhash.First
-
+                clear_id = Build_ship.tile_map(selection.x, selection.y).device_tile.device_ID
                 For x = 0 To Build_ship.shipsize.x
                     For y = 0 To Build_ship.shipsize.y
-                        If Build_ship.tile_map(x, y).device_tile IsNot Nothing AndAlso Build_ship.tile_map(x, y).device_tile.device_ID = clear_id Then selection_tile_map(x + 1, y + 1) = room_sprite_enum.blank
+                        If Build_ship.tile_map(x, y).Has_Device_Tile AndAlso Build_ship.tile_map(x, y).device_tile.ContainsID(clear_id) Then selection_tile_map(x + 1, y + 1) = room_sprite_enum.blank
                     Next
                 Next
 
@@ -1910,8 +1909,8 @@
 
 
                 'Clear device
-                If Build_ship.tile_map(selection.x, selection.y).device_tile IsNot Nothing Then
-                    If Build_ship.tile_map(selection.x, selection.y).device_tile.IDhash Is Nothing Then clear_id = Build_ship.tile_map(selection.x, selection.y).device_tile.device_ID Else clear_id = Build_ship.tile_map(selection.x, selection.y).device_tile.IDhash.First
+                If Build_ship.tile_map(selection.x, selection.y).Has_Device_Tile Then
+                    clear_id = Build_ship.tile_map(selection.x, selection.y).device_tile.device_ID
                     Remove_Device(clear_id)
                     Build_save_ship(Build_ship)
                 End If
@@ -1962,49 +1961,42 @@
     Sub Remove_Device(ByVal clear_id As Integer)
         For x = 0 To Build_ship.shipsize.x
             For y = 0 To Build_ship.shipsize.y
+                If Build_ship.tile_map(x, y).Has_Device_Tile AndAlso Build_ship.tile_map(x, y).device_tile.ContainsID(clear_id) Then
+                    If Build_ship.tile_map(x, y).device_tile.IDhash.Count > 1 Then
+                        Build_ship.tile_map(x, y).device_tile.IDhash.Remove(clear_id)
+                    Else                        
+                        'If Build_ship.tile_map(x, y).type = tile_type_enum.empty Then Build_ship.tile_map(x, y) = New Ship_tile(0, tile_type_enum.empty, 0, 0, room_sprite_enum.empty, walkable_type_enum.Impassable)
+                        If Build_ship.tile_map(x, y).type = tile_type_enum.Device_Base Then
+                            Build_ship.tile_map(x, y) = New Ship_tile(0, tile_type_enum.empty, 0, 0, room_sprite_enum.empty, walkable_type_enum.Walkable)
+                        End If
 
-                Dim Device_Tile As Device_tile = Build_ship.tile_map(x, y).device_tile
-                Dim Remove_Base As Boolean = False
-                If Device_Tile IsNot Nothing AndAlso Device_Tile.device_ID = -1 AndAlso Device_Tile.IDhash.Contains(clear_id) Then
-                    If Device_Tile.IDhash.Count = 1 Then
-                        Remove_Base = True
-                    Else
-                        Device_Tile.IDhash.Remove(clear_id)
-                    End If
-                End If
+                        'If Build_ship.tile_map(x, y).type = tile_type_enum.Restricted Then Build_ship.tile_map(x, y) = New Ship_tile(0, tile_type_enum.empty, 0, 0, room_sprite_enum.empty, walkable_type_enum.Walkable)
 
-                If (Device_Tile IsNot Nothing AndAlso Device_Tile.device_ID = clear_id) OrElse Remove_Base = True Then
-                    'If Build_ship.tile_map(x, y).type = tile_type_enum.empty Then Build_ship.tile_map(x, y) = New Ship_tile(0, tile_type_enum.empty, 0, 0, room_sprite_enum.empty, walkable_type_enum.Impassable)
-                    If Build_ship.tile_map(x, y).type = tile_type_enum.Device_Base Then
-                        Build_ship.tile_map(x, y) = New Ship_tile(0, tile_type_enum.empty, 0, 0, room_sprite_enum.empty, walkable_type_enum.Walkable)
-                    End If
-
-
-                    'If Build_ship.tile_map(x, y).type = tile_type_enum.Restricted Then Build_ship.tile_map(x, y) = New Ship_tile(0, tile_type_enum.empty, 0, 0, room_sprite_enum.empty, walkable_type_enum.Walkable)
-
-                    If Device_tech_list(Build_ship.device_list(clear_id).tech_ID).IsDoor = True AndAlso Build_ship.tile_map(x, y).device_tile.sprite > -1 Then
-                        If Build_ship.tile_map(x, y).device_tile.rotate = rotate_enum.Zero OrElse Build_ship.tile_map(x, y).device_tile.rotate = rotate_enum.OneEighty Then
-                            If y - 1 < 0 OrElse Not Build_ship.tile_map(x, y - 1).roomID = Build_ship.tile_map(x, y).roomID Then
-                                Build_ship.tile_map(x, y).sprite = room_sprite_enum.WallT
-                                Build_ship.tile_map(x, y).walkable = walkable_type_enum.Impassable
+                        If Device_tech_list(Build_ship.device_list(clear_id).tech_ID).IsDoor = True AndAlso Build_ship.tile_map(x, y).device_tile.sprite > -1 Then
+                            If Build_ship.tile_map(x, y).device_tile.rotate = rotate_enum.Zero OrElse Build_ship.tile_map(x, y).device_tile.rotate = rotate_enum.OneEighty Then
+                                If y - 1 < 0 OrElse Not Build_ship.tile_map(x, y - 1).roomID = Build_ship.tile_map(x, y).roomID Then
+                                    Build_ship.tile_map(x, y).sprite = room_sprite_enum.WallT
+                                    Build_ship.tile_map(x, y).walkable = walkable_type_enum.Impassable
+                                Else
+                                    Build_ship.tile_map(x, y).sprite = room_sprite_enum.WallB
+                                    Build_ship.tile_map(x, y).walkable = walkable_type_enum.Impassable
+                                End If
                             Else
-                                Build_ship.tile_map(x, y).sprite = room_sprite_enum.WallB
-                                Build_ship.tile_map(x, y).walkable = walkable_type_enum.Impassable
-                            End If
-                        Else
-                            If x - 1 < 0 OrElse Not Build_ship.tile_map(x - 1, y).roomID = Build_ship.tile_map(x, y).roomID Then
-                                Build_ship.tile_map(x, y).sprite = room_sprite_enum.WallL
-                                Build_ship.tile_map(x, y).walkable = walkable_type_enum.Impassable
-                            Else
-                                Build_ship.tile_map(x, y).sprite = room_sprite_enum.WallR
-                                Build_ship.tile_map(x, y).walkable = walkable_type_enum.Impassable
+                                If x - 1 < 0 OrElse Not Build_ship.tile_map(x - 1, y).roomID = Build_ship.tile_map(x, y).roomID Then
+                                    Build_ship.tile_map(x, y).sprite = room_sprite_enum.WallL
+                                    Build_ship.tile_map(x, y).walkable = walkable_type_enum.Impassable
+                                Else
+                                    Build_ship.tile_map(x, y).sprite = room_sprite_enum.WallR
+                                    Build_ship.tile_map(x, y).walkable = walkable_type_enum.Impassable
+                                End If
                             End If
                         End If
-                    End If
 
-                    Build_ship.tile_map(x, y).device_tile = Nothing
-                    If Build_ship.tile_map(x, y).sprite = room_sprite_enum.Floor Then Build_ship.tile_map(x, y).walkable = walkable_type_enum.Walkable
-                    If Build_ship.tile_map(x, y).type = tile_type_enum.empty Then Build_ship.tile_map(x, y) = New Ship_tile(0, tile_type_enum.empty, 0, 0, room_sprite_enum.empty, walkable_type_enum.Walkable)
+                        Build_ship.tile_map(x, y).device_tile = Nothing
+                        If Build_ship.tile_map(x, y).sprite = room_sprite_enum.Floor Then Build_ship.tile_map(x, y).walkable = walkable_type_enum.Walkable
+                        If Build_ship.tile_map(x, y).type = tile_type_enum.empty Then Build_ship.tile_map(x, y) = New Ship_tile(0, tile_type_enum.empty, 0, 0, room_sprite_enum.empty, walkable_type_enum.Walkable)
+
+                    End If
                 End If
             Next
         Next
