@@ -210,7 +210,7 @@ Public Class Ship
             Next
 
             room.Value.required_crew_resources.engineering = 0
-            room.Value.required_crew_resources.science = 0            
+            room.Value.required_crew_resources.science = 0
             For Each dev In room.Value.device_list
                 room.Value.required_crew_resources.engineering += Device_tech_list(device_list(dev).tech_ID).required_Points.engineering
                 room.Value.required_crew_resources.science += Device_tech_list(device_list(dev).tech_ID).required_Points.science

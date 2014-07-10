@@ -242,11 +242,11 @@
 
     Sub Load_Images()
         Dim Base As String = "C:\Users\Toad\Documents\Visual Studio 2008\Projects\SpaceManGame\SpaceManGame\bin\x86\Debug\Data\Textures\Tiles\"
-        ReDim Tile_Sprites(2)
+        ReDim Tile_Sprites(3)
         Tile_Sprites(0) = Bitmap.FromFile(Base + "Planet1.png")
         Tile_Sprites(1) = Bitmap.FromFile(Base + "Desert_Planet.png")
         Tile_Sprites(2) = Bitmap.FromFile(Base + "Desert_Mine.png")
-
+        Tile_Sprites(3) = Bitmap.FromFile(Base + "Desert_Capitol.png")
 
 
     End Sub
@@ -360,6 +360,7 @@ Public Enum planet_tile_type_enum As Byte
     Forest_Planet = 0
     Desert_Planet = 1
     Desert_Mine = 2
+    Desert_Capitol = 3
     Road
     Shipyard
     House

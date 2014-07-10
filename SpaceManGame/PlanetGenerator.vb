@@ -3,74 +3,84 @@
 
 
     Public Sub populate_planet(ByVal P As Planet)
-
-        If P.type = planet_type_enum.Desert Then populate_desert(P)
+        If P.Generated = True Then
+            If P.type = planet_type_enum.Desert Then repopulate_desert(P)
+        Else
+            If P.type = planet_type_enum.Desert Then populate_desert(P)
+        End If
 
     End Sub
 
+    Sub repopulate_desert(ByVal P As Planet)
+        For Each item In P.Building_List
+            If item.Value.Generated = False Then
+                item.Value.Generated = True
+                Build_Building(item.Value.Type, P.GetEmptyBuildingID, item.Value.Owner, P)
+            End If
+        Next
+    End Sub
 
-    Sub populate_desert(ByVal P As Planet)
 
+
+    Sub populate_desert(ByVal P As Planet)        
         'Set base
         For x = 0 To P.size.x
             For y = 0 To P.size.y
                 If random(0, 20) = 20 Then
                     P.tile_map(x, y) = New Planet_tile(planet_tile_type_enum.Desert_Planet, desert_planet_sprite_enum.Pond, walkable_type_enum.Walkable)
                 Else
-                    'if random(0, 1) = 1 Then
                     P.tile_map(x, y) = New Planet_tile(planet_tile_type_enum.Desert_Planet, desert_planet_sprite_enum.Rough, walkable_type_enum.Walkable)
-                    'Else
-                    'P.tile_map(x, y) = New Planet_tile(planet_tile_type_enum.Desert_Planet, planet_sprite_enum.Tree1, walkable_type_enum.Walkable)
-                    'End If
-
                 End If
-
             Next
         Next
+
         'Add resource Points
-        For a = 1 To random(2, 4)
+        For a = 1 To P.Resource_Count
             Dim po As New PointI(random(1, 14), random(1, 14))
-            If Not P.Resource_Points.ContainsKey(po) Then
+            If P.Resource_Points.ContainsKey(po) OrElse P.Farm_Points.ContainsKey(po) Then
+                a -= 1
+            Else
                 P.Resource_Points.Add(po, False)
             End If
         Next
-        'P.Resource_Points.Clear()
-
-        'P.Resource_Points.Add(New PointI(1, 1), False)
-
-        'P.Resource_Points.Add(New PointI(3, 1), False)
-
-        'P.Resource_Points.Add(New PointI(5, 1), False)
-        P.Farm_Points.Add(New PointI(4, 4), False)
+        'Add farm Points
+        For a = 1 To P.Farm_Count
+            Dim po As New PointI(random(1, 14), random(1, 14))
+            If P.Resource_Points.ContainsKey(po) OrElse P.Farm_Points.ContainsKey(po) Then
+                a -= 1
+            Else
+                P.Farm_Points.Add(po, False)
+            End If
+        Next
 
         Create_Resource_Points(P)
         Create_Farm_Points(P)
 
-        Build_Building(building_type_enum.Outpost, P.GetEmptyBuildingID, 0, P, New Block_Return_Type_Class(New PointI(1, 1), Block_Return_Type_Enum.WholeTile))
+        P.CapitalPoint = New PointI(8, 8)
+        P.Building_List.Add(P.GetEmptyBuildingID, New Planet_Building(0, building_type_enum.Outpost))
+        P.Building_List.Add(P.GetEmptyBuildingID, New Planet_Building(0, building_type_enum.Exchange))
 
-        'Build_Outpost(P.GetEmptyBuildingID, 0, New PointI(32 * 2, 32 * 2), P, True)
+        'Build_Building(building_type_enum.Outpost, P.GetEmptyBuildingID, 0, P, New Block_Return_Type_Class(New PointI(1, 1), Block_Return_Type_Enum.WholeTile))
+        'Build_Building(building_type_enum.Exchange, P.GetEmptyBuildingID, 0, P)
 
-        P.CapitalPoint = New PointI(1, 1)
+        For Each item In P.Building_List
+            item.Value.Generated = True
+            Build_Building(item.Value.Type, item.Key, item.Value.Owner, P)
 
+            For Each slot In item.Value.Worker_Slots
+                Dim Pos As PointI
+                Pos.x = slot.Key.x + item.Value.LandRect.X
+                Pos.y = slot.Key.y + item.Value.LandRect.Y
+                If slot.Value = -1 Then AddWorkers(Pos, slot.Value, P)
+            Next
 
-        Build_Building(building_type_enum.Exchange, P.GetEmptyBuildingID, 0, P)
-
-        'For a = 0 To 10
-        'Build_Building(building_type_enum.Apartment, P.GetEmptyBuildingID, 0, P)
-        'Build_Building(building_type_enum.Apartment, P.GetEmptyBuildingID, 0, P)
-        'Build_Building(building_type_enum.Pub, P.GetEmptyBuildingID, 0, P)
-        'Build_Building(building_type_enum.Apartment, P.GetEmptyBuildingID, 0, P)
-        'Build_Building(building_type_enum.Apartment, P.GetEmptyBuildingID, 0, P)
-        'Build_Building(building_type_enum.Pub, P.GetEmptyBuildingID, 0, P)
-        'Build_Building(building_type_enum.Factory, P.GetEmptyBuildingID, 0, P)
-        'Build_Building(building_type_enum.Refinery, P.GetEmptyBuildingID, 0, P)
-        'Next
-        For a = 1 To P.Resource_Points.Count
-            'Build_Building(building_type_enum.Mine, P.GetEmptyBuildingID, 0, P)
+            For Each slot In item.Value.Guard_Slots
+                Dim Pos As PointI
+                Pos.x = slot.Key.x + item.Value.LandRect.X
+                Pos.y = slot.Key.y + item.Value.LandRect.Y
+                If slot.Value = -1 Then AddGuard(Pos, slot.Value, P)
+            Next            
         Next
-        'Build_Building(building_type_enum.Farm, P.GetEmptyBuildingID, 0, P)
-
-
 
         'Build_AppartmentH(New PointI(32, 0))
         'Build_PubH(New PointI(32, 16))
@@ -118,45 +128,18 @@
         'Build_FactoryH(New PointI(32, 32))
 
         'Create_City()
-
-        P.CitizensMax = 6
-        P.Citizens = 0
-        P.Building_Count.SetLevel(Planet_Level_Type.Outpost)
+        P.Generated = True
     End Sub
 
-    Function AddTestWorkforce(ByVal BID As Integer, ByVal CID As Integer, ByVal P As Planet) As Integer
-        QuickAddCrew(CID, Worker_Type_Enum.Worker, 0, 0, BID, 1, Work_Shift_Enum.Morning, P) : CID += 1
-        QuickAddCrew(CID, Worker_Type_Enum.Worker, 0, 0, BID, 1, Work_Shift_Enum.Morning, P) : CID += 1
-        QuickAddCrew(CID, Worker_Type_Enum.Worker, 0, 0, BID, 1, Work_Shift_Enum.Morning, P) : CID += 1
-        QuickAddCrew(CID, Worker_Type_Enum.Worker, 0, 0, BID, 1, Work_Shift_Enum.Morning, P) : CID += 1
-
-        QuickAddCrew(CID, Worker_Type_Enum.Worker, 0, 0, BID, 1, Work_Shift_Enum.Mid, P) : CID += 1
-        QuickAddCrew(CID, Worker_Type_Enum.Worker, 0, 0, BID, 1, Work_Shift_Enum.Mid, P) : CID += 1
-        QuickAddCrew(CID, Worker_Type_Enum.Worker, 0, 0, BID, 1, Work_Shift_Enum.Mid, P) : CID += 1
-        QuickAddCrew(CID, Worker_Type_Enum.Worker, 0, 0, BID, 1, Work_Shift_Enum.Mid, P) : CID += 1
-
-        QuickAddCrew(CID, Worker_Type_Enum.Worker, 0, 0, BID, 1, Work_Shift_Enum.Night, P) : CID += 1
-        QuickAddCrew(CID, Worker_Type_Enum.Worker, 0, 0, BID, 1, Work_Shift_Enum.Night, P) : CID += 1
-        QuickAddCrew(CID, Worker_Type_Enum.Worker, 0, 0, BID, 1, Work_Shift_Enum.Night, P) : CID += 1
-        QuickAddCrew(CID, Worker_Type_Enum.Worker, 0, 0, BID, 1, Work_Shift_Enum.Night, P) : CID += 1
-
-        QuickAddCrew(CID, Worker_Type_Enum.Transporter, 0, 0, BID, 1, Work_Shift_Enum.Morning, P) : CID += 1
-        QuickAddCrew(CID, Worker_Type_Enum.Transporter, 0, 0, BID, 1, Work_Shift_Enum.Mid, P) : CID += 1
-        QuickAddCrew(CID, Worker_Type_Enum.Transporter, 0, 0, BID, 1, Work_Shift_Enum.Night, P) : CID += 1
-        Return CID
-    End Function
-
-
-    Sub QuickAddCrew(ByVal ID As Integer, ByVal WorkerType As Worker_Type_Enum, ByVal HomeBuilding As Integer, ByVal HomeSpace As Integer, ByVal WorkBuilding As Integer, ByVal PubBuilding As Integer, ByVal WorkShift As Work_Shift_Enum, ByVal P As Planet)
-        Add_Crew(ID, New Crew(0, New PointD(0, 0), 0, Officer_location_enum.Planet, 10, character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head, New crew_resource_type(0, 0)))
-        P.crew_list(ID).Worker_Type = WorkerType
-        P.crew_list(ID).HomeBuilding = HomeBuilding
-        P.crew_list(ID).HomeSpace = HomeSpace
-        P.crew_list(ID).WorkBuilding = WorkBuilding
-        P.crew_list(ID).PubBuilding = PubBuilding
-        P.crew_list(ID).WorkShift = WorkShift
+    Sub AddWorkers(ByVal Slot As PointI, ByVal Id As Integer, ByVal P As Planet)
+        Dim CrewId As Integer = P.GetEmptyCrewID
+        Add_Crew(CrewId, New Crew(0, New PointD(Slot.x * 32, Slot.y * 32), P.PlanetID, Officer_location_enum.Planet, 1, character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head, New crew_resource_type(0, 0))) : Id = CrewId
     End Sub
 
+    Sub AddGuard(ByVal Slot As PointI, ByVal Id As Integer, ByVal P As Planet)
+        Dim CrewId As Integer = P.GetEmptyCrewID
+        Add_Crew(CrewId, New Crew(0, New PointD(Slot.x * 32, Slot.y * 32), P.PlanetID, Officer_location_enum.Planet, 1, character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head, New crew_resource_type(0, 0))) : Id = CrewId
+    End Sub
 
     Sub BuildRoad(ByVal P As Planet, ByVal Pos As PointI, ByVal Size As Block_Return_Type_Enum)
         Dim DrawRect As Rectangle
@@ -173,6 +156,7 @@
             For X = DrawRect.X To DrawRect.Right
                 If X = DrawRect.X OrElse X = DrawRect.Right OrElse y = DrawRect.Y OrElse y = DrawRect.Bottom Then
                     P.tile_map(X, y).sprite = 34
+                    P.tile_map(X, y).walkable = walkable_type_enum.Walkable
                 End If
             Next
         Next
@@ -211,233 +195,238 @@
     End Sub
 
     Sub Build_Mine(ByVal ID As Integer, ByVal OwnerID As Integer, ByVal pos As PointI, ByVal P As Planet)
-        Build_From_File(building_type_enum.Mine, Block_Return_Type_Enum.WholeTile, P, pos, False)
-        P.Building_Count.CMine += 1
+        Build_From_File(building_type_enum.Mine, Block_Return_Type_Enum.WholeTile, P, pos, False)        
 
-        P.Building_List.Add(ID, New Planet_Building(OwnerID, New Rectangle(pos.x, pos.y, 32, 32), building_type_enum.Mine, New Worker_Slots(1, 4, 0)))
-
-        P.Building_List(ID).PickupPoint = New PointI(pos.x + 24, pos.y + 10)
-
+        'P.Building_List.Add(ID, New Planet_Building(OwnerID, New Rectangle(pos.x, pos.y, 32, 32), building_type_enum.Mine))
+        '        P.Building_List(ID).PickupPoint = New PointI(pos.x + 24, pos.y + 10)
         P.Building_List(ID).BuildingRect.Add(0, New Rectangle(pos.x + 7, pos.y + 18, 10, 6))
-
-        P.Building_List(ID).access_point.Add(New PointI(pos.x + 3, pos.y + 9), New Building_Access_Point_Type(BAP_Type.Worker))
-        P.Building_List(ID).access_point.Add(New PointI(pos.x + 8, pos.y + 9), New Building_Access_Point_Type(BAP_Type.Worker))
-        P.Building_List(ID).access_point.Add(New PointI(pos.x + 13, pos.y + 9), New Building_Access_Point_Type(BAP_Type.Worker))
-        P.Building_List(ID).access_point.Add(New PointI(pos.x + 18, pos.y + 9), New Building_Access_Point_Type(BAP_Type.Worker))
+        P.Building_List(ID).LandRect = New Rectangle(pos.x, pos.y, 32, 32)
+        'P.Building_List(ID).access_point.Add(New PointI(pos.x + 3, pos.y + 9), New Building_Access_Point_Type(BAP_Type.Worker))
+        'P.Building_List(ID).access_point.Add(New PointI(pos.x + 8, pos.y + 9), New Building_Access_Point_Type(BAP_Type.Worker))
+        'P.Building_List(ID).access_point.Add(New PointI(pos.x + 13, pos.y + 9), New Building_Access_Point_Type(BAP_Type.Worker))
+        'P.Building_List(ID).access_point.Add(New PointI(pos.x + 18, pos.y + 9), New Building_Access_Point_Type(BAP_Type.Worker))
 
         For y = 1 To 4
-            P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + 3, pos.y + y), New Item_Slots_Type(False))
-            P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + 4, pos.y + y), New Item_Slots_Type(False))
+            'P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + 3, pos.y + y), New Item_Slots_Type(False))
+            'P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + 4, pos.y + y), New Item_Slots_Type(False))
 
-            P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + 8, pos.y + y), New Item_Slots_Type(False))
-            P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + 9, pos.y + y), New Item_Slots_Type(False))
+            'P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + 8, pos.y + y), New Item_Slots_Type(False))
+            'P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + 9, pos.y + y), New Item_Slots_Type(False))
 
-            P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + 13, pos.y + y), New Item_Slots_Type(False))
-            P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + 14, pos.y + y), New Item_Slots_Type(False))
+            'P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + 13, pos.y + y), New Item_Slots_Type(False))
+            'P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + 14, pos.y + y), New Item_Slots_Type(False))
 
-            P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + 18, pos.y + y), New Item_Slots_Type(False))
-            P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + 19, pos.y + y), New Item_Slots_Type(False))
+            'P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + 18, pos.y + y), New Item_Slots_Type(False))
+            'P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + 19, pos.y + y), New Item_Slots_Type(False))
         Next
 
         For x = 23 To 26
-            P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + x, pos.y + 3), New Item_Slots_Type(True))
-            P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + x, pos.y + 4), New Item_Slots_Type(True))
+            'P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + x, pos.y + 3), New Item_Slots_Type(True))
+            'P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + x, pos.y + 4), New Item_Slots_Type(True))
 
-            P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + x, pos.y + 6), New Item_Slots_Type(True))
-            P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + x, pos.y + 7), New Item_Slots_Type(True))
+            'P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + x, pos.y + 6), New Item_Slots_Type(True))
+            'P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + x, pos.y + 7), New Item_Slots_Type(True))
         Next
 
-        P.Item_Point.Add(New PointI(pos.x + 23, pos.y + 3), New Item_Point_Type(100, Item_Enum.Parts))
+        'P.Item_Point.Add(New PointI(pos.x + 23, pos.y + 3), New Item_Point_Type(100, Item_Enum.Parts))
 
-        P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + 8, pos.y + 20), New Item_Slots_Type(True))
-        P.Item_Point.Add(New PointI(pos.x + 8, pos.y + 20), New Item_Point_Type(2000, Item_Enum.Refined_Crystal_Piece))
+        'P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + 8, pos.y + 20), New Item_Slots_Type(True))
+        'P.Item_Point.Add(New PointI(pos.x + 8, pos.y + 20), New Item_Point_Type(2000, Item_Enum.CrystalCoin))
+        P.Building_List(ID).Worker_Slots.Add(New PointI(2, 2), -1)
         BuildRoad(P, pos, Block_Return_Type_Enum.WholeTile)
     End Sub
 
 
     Sub Build_Farm(ByVal ID As Integer, ByVal OwnerID As Integer, ByVal pos As PointI, ByVal P As Planet)
         Build_From_File(building_type_enum.Farm, Block_Return_Type_Enum.WholeTile, P, pos, False)
-        P.Building_Count.CFarm += 1
 
-        P.Building_List.Add(ID, New Planet_Building(OwnerID, New Rectangle(pos.x, pos.y, 32, 32), building_type_enum.Farm, New Worker_Slots(1, 4, 0)))
 
-        P.Building_List(ID).PickupPoint = New PointI(pos.x + 24, pos.y + 10)
+        'P.Building_List.Add(ID, New Planet_Building(OwnerID, New Rectangle(pos.x, pos.y, 32, 32), building_type_enum.Farm))
+
+        '        P.Building_List(ID).PickupPoint = New PointI(pos.x + 24, pos.y + 10)
 
         P.Building_List(ID).BuildingRect.Add(0, New Rectangle(pos.x + 21, pos.y + 8, 9, 10))
-
-        P.Building_List(ID).access_point.Add(New PointI(pos.x + 2, pos.y + 19), New Building_Access_Point_Type(BAP_Type.Worker))
-        P.Building_List(ID).access_point.Add(New PointI(pos.x + 6, pos.y + 19), New Building_Access_Point_Type(BAP_Type.Worker))
-        P.Building_List(ID).access_point.Add(New PointI(pos.x + 10, pos.y + 19), New Building_Access_Point_Type(BAP_Type.Worker))
-        P.Building_List(ID).access_point.Add(New PointI(pos.x + 14, pos.y + 19), New Building_Access_Point_Type(BAP_Type.Worker))
+        P.Building_List(ID).LandRect = New Rectangle(pos.x, pos.y, 32, 32)
+        'P.Building_List(ID).access_point.Add(New PointI(pos.x + 2, pos.y + 19), New Building_Access_Point_Type(BAP_Type.Worker))
+        'P.Building_List(ID).access_point.Add(New PointI(pos.x + 6, pos.y + 19), New Building_Access_Point_Type(BAP_Type.Worker))
+        'P.Building_List(ID).access_point.Add(New PointI(pos.x + 10, pos.y + 19), New Building_Access_Point_Type(BAP_Type.Worker))
+        'P.Building_List(ID).access_point.Add(New PointI(pos.x + 14, pos.y + 19), New Building_Access_Point_Type(BAP_Type.Worker))
 
         For y = 22 To 29
-            P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + 2, pos.y + y), New Item_Slots_Type(False))
-            P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + 3, pos.y + y), New Item_Slots_Type(False))
+            'P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + 2, pos.y + y), New Item_Slots_Type(False))
+            'P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + 3, pos.y + y), New Item_Slots_Type(False))
 
-            P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + 5, pos.y + y), New Item_Slots_Type(False))
-            P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + 6, pos.y + y), New Item_Slots_Type(False))
+            'P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + 5, pos.y + y), New Item_Slots_Type(False))
+            'P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + 6, pos.y + y), New Item_Slots_Type(False))
 
-            P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + 8, pos.y + y), New Item_Slots_Type(False))
-            P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + 9, pos.y + y), New Item_Slots_Type(False))
+            'P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + 8, pos.y + y), New Item_Slots_Type(False))
+            'P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + 9, pos.y + y), New Item_Slots_Type(False))
 
-            P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + 11, pos.y + y), New Item_Slots_Type(False))
-            P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + 12, pos.y + y), New Item_Slots_Type(False))
+            'P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + 11, pos.y + y), New Item_Slots_Type(False))
+            'P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + 12, pos.y + y), New Item_Slots_Type(False))
 
-            P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + 14, pos.y + y), New Item_Slots_Type(False))
-            P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + 15, pos.y + y), New Item_Slots_Type(False))
+            'P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + 14, pos.y + y), New Item_Slots_Type(False))
+            'P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + 15, pos.y + y), New Item_Slots_Type(False))
 
-            P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + 17, pos.y + y), New Item_Slots_Type(False))
-            P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + 18, pos.y + y), New Item_Slots_Type(False))
+            'P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + 17, pos.y + y), New Item_Slots_Type(False))
+            'P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + 18, pos.y + y), New Item_Slots_Type(False))
 
         Next
 
-        P.Item_Point.Add(New PointI(pos.x + 2, pos.y + 22), New Item_Point_Type(100, Item_Enum.Crystal))
+        'P.Item_Point.Add(New PointI(pos.x + 2, pos.y + 22), New Item_Point_Type(100, Item_Enum.Crystal))
 
-        P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + 22, pos.y + 9), New Item_Slots_Type(True))
-        P.Item_Point.Add(New PointI(pos.x + 22, pos.y + 9), New Item_Point_Type(2000, Item_Enum.Refined_Crystal_Piece))
+        'P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + 22, pos.y + 9), New Item_Slots_Type(True))
+        'P.Item_Point.Add(New PointI(pos.x + 22, pos.y + 9), New Item_Point_Type(2000, Item_Enum.CrystalCoin))
+
+        P.Building_List(ID).Worker_Slots.Add(New PointI(2, 2), -1)
+
         BuildRoad(P, pos, Block_Return_Type_Enum.WholeTile)
     End Sub
 
     Sub Build_RefineryH(ByVal ID As Integer, ByVal OwnerID As Integer, ByVal pos As PointI, ByVal P As Planet)
         Build_From_File(building_type_enum.Refinery, Block_Return_Type_Enum.HorizontalTop, P, pos)
-        P.Building_Count.CRefinery += 1
-
-        P.Building_List.Add(ID, New Planet_Building(OwnerID, New Rectangle(pos.x, pos.y, 32, 32), building_type_enum.Refinery, New Worker_Slots(1, 4, 0)))
 
 
-        P.Building_List(ID).PickupPoint = New PointI(pos.x + 11, pos.y + 8)
+        'P.Building_List.Add(ID, New Planet_Building(OwnerID, New Rectangle(pos.x, pos.y, 32, 32), building_type_enum.Refinery))
+        P.Building_List(ID).LandRect = New Rectangle(pos.x, pos.y, 32, 16)
 
-        P.Building_List(ID).access_point.Add(New PointI(pos.x + 14, pos.y + 6), New Building_Access_Point_Type(BAP_Type.Worker))
-        P.Building_List(ID).access_point.Add(New PointI(pos.x + 17, pos.y + 6), New Building_Access_Point_Type(BAP_Type.Worker))
-        P.Building_List(ID).access_point.Add(New PointI(pos.x + 14, pos.y + 10), New Building_Access_Point_Type(BAP_Type.Worker))
-        P.Building_List(ID).access_point.Add(New PointI(pos.x + 17, pos.y + 10), New Building_Access_Point_Type(BAP_Type.Worker))
+        'P.Building_List(ID).PickupPoint = New PointI(pos.x + 11, pos.y + 8)
+
+        'P.Building_List(ID).access_point.Add(New PointI(pos.x + 14, pos.y + 6), New Building_Access_Point_Type(BAP_Type.Worker))
+        'P.Building_List(ID).access_point.Add(New PointI(pos.x + 17, pos.y + 6), New Building_Access_Point_Type(BAP_Type.Worker))
+        'P.Building_List(ID).access_point.Add(New PointI(pos.x + 14, pos.y + 10), New Building_Access_Point_Type(BAP_Type.Worker))
+        'P.Building_List(ID).access_point.Add(New PointI(pos.x + 17, pos.y + 10), New Building_Access_Point_Type(BAP_Type.Worker))
 
 
-        P.Building_List(ID).access_point.Add(New PointI(pos.x + 20, pos.y + 8), New Building_Access_Point_Type(BAP_Type.Transporter))
+        'P.Building_List(ID).access_point.Add(New PointI(pos.x + 20, pos.y + 8), New Building_Access_Point_Type(BAP_Type.Transporter))
 
         For x = 3 To 5
-            P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + x, pos.y + 7), New Item_Slots_Type(True))
-            P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + x, pos.y + 8), New Item_Slots_Type(True))
-            P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + x, pos.y + 9), New Item_Slots_Type(True))
+            'P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + x, pos.y + 7), New Item_Slots_Type(True))
+            'P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + x, pos.y + 8), New Item_Slots_Type(True))
+            'P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + x, pos.y + 9), New Item_Slots_Type(True))
         Next
 
         For x = 26 To 28
-            P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + x, pos.y + 7), New Item_Slots_Type(False))
-            P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + x, pos.y + 8), New Item_Slots_Type(False))
-            P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + x, pos.y + 9), New Item_Slots_Type(False))
+            'P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + x, pos.y + 7), New Item_Slots_Type(False))
+            'P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + x, pos.y + 8), New Item_Slots_Type(False))
+            'P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + x, pos.y + 9), New Item_Slots_Type(False))
         Next
 
 
-        P.Item_Point.Add(New PointI(pos.x + 3, pos.y + 7), New Item_Point_Type(100, Item_Enum.Crystal))
+        'P.Item_Point.Add(New PointI(pos.x + 3, pos.y + 7), New Item_Point_Type(100, Item_Enum.Crystal))
 
-        P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + 16, pos.y + 8), New Item_Slots_Type(True))
-        P.Item_Point.Add(New PointI(pos.x + 16, pos.y + 8), New Item_Point_Type(2000, Item_Enum.Refined_Crystal_Piece))
+        'P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + 16, pos.y + 8), New Item_Slots_Type(True))
+        'P.Item_Point.Add(New PointI(pos.x + 16, pos.y + 8), New Item_Point_Type(2000, Item_Enum.CrystalCoin))
+        P.Building_List(ID).Worker_Slots.Add(New PointI(2, 2), -1)
         BuildRoad(P, pos, Block_Return_Type_Enum.HorizontalTop)
     End Sub
 
     Sub Build_RefineryV(ByVal ID As Integer, ByVal OwnerID As Integer, ByVal pos As PointI, ByVal P As Planet)
         Build_From_File(building_type_enum.Refinery, Block_Return_Type_Enum.VerticalL, P, pos)
-        P.Building_Count.CRefinery += 1
 
-        P.Building_List.Add(ID, New Planet_Building(OwnerID, New Rectangle(pos.x, pos.y, 32, 32), building_type_enum.Refinery, New Worker_Slots(1, 4, 0)))
+        'P.Building_List.Add(ID, New Planet_Building(OwnerID, New Rectangle(pos.x, pos.y, 32, 32), building_type_enum.Refinery))
+        P.Building_List(ID).LandRect = New Rectangle(pos.x, pos.y, 16, 32)
+
+        'P.Building_List(ID).PickupPoint = New PointI(pos.x + 8, pos.y + 11)
+
+        'P.Building_List(ID).access_point.Add(New PointI(pos.x + 6, pos.y + 14), New Building_Access_Point_Type(BAP_Type.Worker))
+        'P.Building_List(ID).access_point.Add(New PointI(pos.x + 10, pos.y + 14), New Building_Access_Point_Type(BAP_Type.Worker))
+        'P.Building_List(ID).access_point.Add(New PointI(pos.x + 6, pos.y + 17), New Building_Access_Point_Type(BAP_Type.Worker))
+        'P.Building_List(ID).access_point.Add(New PointI(pos.x + 10, pos.y + 17), New Building_Access_Point_Type(BAP_Type.Worker))
 
 
-        P.Building_List(ID).PickupPoint = New PointI(pos.x + 8, pos.y + 11)
-
-        P.Building_List(ID).access_point.Add(New PointI(pos.x + 6, pos.y + 14), New Building_Access_Point_Type(BAP_Type.Worker))
-        P.Building_List(ID).access_point.Add(New PointI(pos.x + 10, pos.y + 14), New Building_Access_Point_Type(BAP_Type.Worker))
-        P.Building_List(ID).access_point.Add(New PointI(pos.x + 6, pos.y + 17), New Building_Access_Point_Type(BAP_Type.Worker))
-        P.Building_List(ID).access_point.Add(New PointI(pos.x + 10, pos.y + 17), New Building_Access_Point_Type(BAP_Type.Worker))
-
-
-        P.Building_List(ID).access_point.Add(New PointI(pos.x + 8, pos.y + 15), New Building_Access_Point_Type(BAP_Type.Transporter))
+        'P.Building_List(ID).access_point.Add(New PointI(pos.x + 8, pos.y + 15), New Building_Access_Point_Type(BAP_Type.Transporter))
 
         For x = 7 To 9
-            P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + x, pos.y + 3), New Item_Slots_Type(False))
-            P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + x, pos.y + 4), New Item_Slots_Type(False))
-            P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + x, pos.y + 5), New Item_Slots_Type(False))
+            'P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + x, pos.y + 3), New Item_Slots_Type(False))
+            'P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + x, pos.y + 4), New Item_Slots_Type(False))
+            'P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + x, pos.y + 5), New Item_Slots_Type(False))
         Next
 
         For x = 7 To 9
-            P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + x, pos.y + 26), New Item_Slots_Type(True))
-            P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + x, pos.y + 27), New Item_Slots_Type(True))
-            P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + x, pos.y + 28), New Item_Slots_Type(True))
+            'P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + x, pos.y + 26), New Item_Slots_Type(True))
+            'P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + x, pos.y + 27), New Item_Slots_Type(True))
+            'P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + x, pos.y + 28), New Item_Slots_Type(True))
         Next
 
 
-        P.Item_Point.Add(New PointI(pos.x + 7, pos.y + 26), New Item_Point_Type(100, Item_Enum.Crystal))
+        'P.Item_Point.Add(New PointI(pos.x + 7, pos.y + 26), New Item_Point_Type(100, Item_Enum.Crystal))
 
-        P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + 8, pos.y + 20), New Item_Slots_Type(True))
-        P.Item_Point.Add(New PointI(pos.x + 8, pos.y + 20), New Item_Point_Type(2000, Item_Enum.Refined_Crystal_Piece))
+        'P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + 8, pos.y + 20), New Item_Slots_Type(True))
+        'P.Item_Point.Add(New PointI(pos.x + 8, pos.y + 20), New Item_Point_Type(2000, Item_Enum.CrystalCoin))
+
+        P.Building_List(ID).Worker_Slots.Add(New PointI(2, 2), -1)
+
         BuildRoad(P, pos, Block_Return_Type_Enum.VerticalL)
     End Sub
 
     Sub Build_FactoryH(ByVal ID As Integer, ByVal OwnerID As Integer, ByVal pos As PointI, ByVal P As Planet)
         Build_From_File(building_type_enum.Factory, Block_Return_Type_Enum.HorizontalTop, P, pos, False)
+        P.Building_List(ID).LandRect = New Rectangle(pos.x, pos.y, 32, 16)
 
-        P.Building_Count.CFactory += 1
+        'P.Building_List.Add(ID, New Planet_Building(OwnerID, New Rectangle(pos.x, pos.y, 32, 32), building_type_enum.Factory))
 
-        P.Building_List.Add(ID, New Planet_Building(OwnerID, New Rectangle(pos.x, pos.y, 32, 32), building_type_enum.Factory, New Worker_Slots(1, 4, 0)))
+        'P.Building_List(ID).PickupPoint = New PointI(pos.x + 15, pos.y + 7)
 
-        P.Building_List(ID).PickupPoint = New PointI(pos.x + 15, pos.y + 7)
-
-        P.Building_List(ID).access_point.Add(New PointI(pos.x + 9, pos.y + 8), New Building_Access_Point_Type(BAP_Type.Worker))
-        P.Building_List(ID).access_point.Add(New PointI(pos.x + 13, pos.y + 8), New Building_Access_Point_Type(BAP_Type.Worker))
-        P.Building_List(ID).access_point.Add(New PointI(pos.x + 18, pos.y + 8), New Building_Access_Point_Type(BAP_Type.Worker))
-        P.Building_List(ID).access_point.Add(New PointI(pos.x + 22, pos.y + 8), New Building_Access_Point_Type(BAP_Type.Worker))
+        'P.Building_List(ID).access_point.Add(New PointI(pos.x + 9, pos.y + 8), New Building_Access_Point_Type(BAP_Type.Worker))
+        'P.Building_List(ID).access_point.Add(New PointI(pos.x + 13, pos.y + 8), New Building_Access_Point_Type(BAP_Type.Worker))
+        'P.Building_List(ID).access_point.Add(New PointI(pos.x + 18, pos.y + 8), New Building_Access_Point_Type(BAP_Type.Worker))
+        'P.Building_List(ID).access_point.Add(New PointI(pos.x + 22, pos.y + 8), New Building_Access_Point_Type(BAP_Type.Worker))
 
 
         For x = 1 To 3
-            P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + x, pos.y + 1), New Item_Slots_Type(True))
-            P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + x, pos.y + 2), New Item_Slots_Type(True))
-            P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + x, pos.y + 3), New Item_Slots_Type(True))
+            'P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + x, pos.y + 1), New Item_Slots_Type(True))
+            'P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + x, pos.y + 2), New Item_Slots_Type(True))
+            'P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + x, pos.y + 3), New Item_Slots_Type(True))
         Next
 
         For x = 28 To 30
-            P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + x, pos.y + 1), New Item_Slots_Type(False))
-            P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + x, pos.y + 2), New Item_Slots_Type(False))
-            P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + x, pos.y + 3), New Item_Slots_Type(False))
+            'P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + x, pos.y + 1), New Item_Slots_Type(False))
+            'P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + x, pos.y + 2), New Item_Slots_Type(False))
+            'P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + x, pos.y + 3), New Item_Slots_Type(False))
         Next
-        P.Item_Point.Add(New PointI(pos.x + 1, pos.y + 1), New Item_Point_Type(100, Item_Enum.Refined_Crystal))
+        'P.Item_Point.Add(New PointI(pos.x + 1, pos.y + 1), New Item_Point_Type(100, Item_Enum.Refined_Crystal))
 
 
-        P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + 10, pos.y + 10), New Item_Slots_Type(True))
-        P.Item_Point.Add(New PointI(pos.x + 10, pos.y + 10), New Item_Point_Type(2000, Item_Enum.Refined_Crystal_Piece))
+        'P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + 10, pos.y + 10), New Item_Slots_Type(True))
+        'P.Item_Point.Add(New PointI(pos.x + 10, pos.y + 10), New Item_Point_Type(2000, Item_Enum.CrystalCoin))
+
+        P.Building_List(ID).Worker_Slots.Add(New PointI(2, 2), -1)
         BuildRoad(P, pos, Block_Return_Type_Enum.HorizontalTop)
     End Sub
 
 
     Sub Build_FactoryV(ByVal ID As Integer, ByVal OwnerID As Integer, ByVal pos As PointI, ByVal P As Planet)
         Build_From_File(building_type_enum.Factory, Block_Return_Type_Enum.VerticalL, P, pos, False)
+        P.Building_List(ID).LandRect = New Rectangle(pos.x, pos.y, 16, 32)
 
-        P.Building_Count.CFactory += 1
+        'P.Building_List.Add(ID, New Planet_Building(OwnerID, New Rectangle(pos.x, pos.y, 32, 32), building_type_enum.Factory))
 
-        P.Building_List.Add(ID, New Planet_Building(OwnerID, New Rectangle(pos.x, pos.y, 32, 32), building_type_enum.Factory, New Worker_Slots(1, 4, 0)))
+        'P.Building_List(ID).PickupPoint = New PointI(pos.x + 15, pos.y + 7)
 
-        P.Building_List(ID).PickupPoint = New PointI(pos.x + 15, pos.y + 7)
-
-        P.Building_List(ID).access_point.Add(New PointI(pos.x + 4, pos.y + 9), New Building_Access_Point_Type(BAP_Type.Worker))
-        P.Building_List(ID).access_point.Add(New PointI(pos.x + 11, pos.y + 9), New Building_Access_Point_Type(BAP_Type.Worker))
-        P.Building_List(ID).access_point.Add(New PointI(pos.x + 4, pos.y + 22), New Building_Access_Point_Type(BAP_Type.Worker))
-        P.Building_List(ID).access_point.Add(New PointI(pos.x + 11, pos.y + 22), New Building_Access_Point_Type(BAP_Type.Worker))
+        'P.Building_List(ID).access_point.Add(New PointI(pos.x + 4, pos.y + 9), New Building_Access_Point_Type(BAP_Type.Worker))
+        'P.Building_List(ID).access_point.Add(New PointI(pos.x + 11, pos.y + 9), New Building_Access_Point_Type(BAP_Type.Worker))
+        'P.Building_List(ID).access_point.Add(New PointI(pos.x + 4, pos.y + 22), New Building_Access_Point_Type(BAP_Type.Worker))
+        'P.Building_List(ID).access_point.Add(New PointI(pos.x + 11, pos.y + 22), New Building_Access_Point_Type(BAP_Type.Worker))
 
 
         For x = 3 To 5
-            P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + x, pos.y + 14), New Item_Slots_Type(True))
-            P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + x, pos.y + 15), New Item_Slots_Type(True))
-            P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + x, pos.y + 16), New Item_Slots_Type(True))
+            'P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + x, pos.y + 14), New Item_Slots_Type(True))
+            'P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + x, pos.y + 15), New Item_Slots_Type(True))
+            'P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + x, pos.y + 16), New Item_Slots_Type(True))
         Next
 
         For x = 10 To 14
-            P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + x, pos.y + 14), New Item_Slots_Type(False))
-            P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + x, pos.y + 15), New Item_Slots_Type(False))
-            P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + x, pos.y + 16), New Item_Slots_Type(False))
+            'P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + x, pos.y + 14), New Item_Slots_Type(False))
+            'P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + x, pos.y + 15), New Item_Slots_Type(False))
+            'P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + x, pos.y + 16), New Item_Slots_Type(False))
         Next
-        P.Item_Point.Add(New PointI(pos.x + 3, pos.y + 14), New Item_Point_Type(100, Item_Enum.Refined_Crystal))
+        'P.Item_Point.Add(New PointI(pos.x + 3, pos.y + 14), New Item_Point_Type(100, Item_Enum.Refined_Crystal))
 
 
-        P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + 10, pos.y + 10), New Item_Slots_Type(True))
-        P.Item_Point.Add(New PointI(pos.x + 10, pos.y + 10), New Item_Point_Type(2000, Item_Enum.Refined_Crystal_Piece))
+        'P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + 10, pos.y + 10), New Item_Slots_Type(True))
+        'P.Item_Point.Add(New PointI(pos.x + 10, pos.y + 10), New Item_Point_Type(2000, Item_Enum.CrystalCoin))
+        P.Building_List(ID).Worker_Slots.Add(New PointI(2, 2), -1)
         BuildRoad(P, pos, Block_Return_Type_Enum.VerticalL)
     End Sub
 
@@ -484,20 +473,24 @@
 
     Sub Build_AppartmentH(ByVal ID As Integer, ByVal OwnerID As Integer, ByVal pos As PointI, ByVal P As Planet)
         Build_From_File(building_type_enum.Apartment, Block_Return_Type_Enum.HorizontalTop, P, pos, False)
-
-        P.Building_List.Add(ID, New Planet_Building(OwnerID, New Rectangle(pos.x, pos.y, 32, 16), building_type_enum.Apartment, New Worker_Slots(0, 0, 0), New Tennet_Slots(4)))
+        P.Building_List(ID).LandRect = New Rectangle(pos.x, pos.y, 32, 16)
+        'P.Building_List.Add(ID, New Planet_Building(OwnerID, New Rectangle(pos.x, pos.y, 32, 16), building_type_enum.Apartment))
         P.Building_List(ID).BuildingRect.Add(0, New Rectangle(pos.x + 2, pos.y + 2, 6, 10))
         P.Building_List(ID).BuildingRect.Add(1, New Rectangle(pos.x + 8, pos.y + 2, 8, 7))
         P.Building_List(ID).BuildingRect.Add(2, New Rectangle(pos.x + 16, pos.y + 2, 8, 7))
         P.Building_List(ID).BuildingRect.Add(3, New Rectangle(pos.x + 24, pos.y + 2, 6, 10))
 
+        P.Building_List(ID).Customer_Slots.Add(New PointI(3, 3), -1)
+        P.Building_List(ID).Customer_Slots.Add(New PointI(9, 3), -1)
+        P.Building_List(ID).Customer_Slots.Add(New PointI(17, 3), -1)
+        P.Building_List(ID).Customer_Slots.Add(New PointI(25, 3), -1)
         BuildRoad(P, pos, Block_Return_Type_Enum.HorizontalTop)
     End Sub
 
     Sub Build_AppartmentV(ByVal ID As Integer, ByVal OwnerID As Integer, ByVal pos As PointI, ByVal P As Planet)
         Build_From_File(building_type_enum.Apartment, Block_Return_Type_Enum.VerticalL, P, pos, False)
-
-        P.Building_List.Add(ID, New Planet_Building(OwnerID, New Rectangle(pos.x, pos.y, 32, 16), building_type_enum.Apartment, New Worker_Slots(0, 0, 0), New Tennet_Slots(4)))
+        P.Building_List(ID).LandRect = New Rectangle(pos.x, pos.y, 16, 32)
+        'P.Building_List.Add(ID, New Planet_Building(OwnerID, New Rectangle(pos.x, pos.y, 32, 16), building_type_enum.Apartment))
         P.Building_List(ID).BuildingRect.Add(0, New Rectangle(pos.x + 2, pos.y + 2, 11, 7))
         P.Building_List(ID).BuildingRect.Add(1, New Rectangle(pos.x + 2, pos.y + 11, 5, 10))
         P.Building_List(ID).BuildingRect.Add(2, New Rectangle(pos.x + 8, pos.y + 11, 5, 10))
@@ -508,38 +501,39 @@
 
     Sub Build_PubH(ByVal ID As Integer, ByVal OwnerID As Integer, ByVal pos As PointI, ByVal P As Planet)
         Build_From_File(building_type_enum.Pub, Block_Return_Type_Enum.HorizontalTop, P, pos, False)
-        P.Building_Count.CPub += 1
-
-        P.Building_List.Add(ID, New Planet_Building(OwnerID, New Rectangle(pos.x, pos.y, 32, 16), building_type_enum.Pub, New Worker_Slots(1, 4, 0)))
+        P.Building_List(ID).LandRect = New Rectangle(pos.x, pos.y, 32, 16)
+        'P.Building_List.Add(ID, New Planet_Building(OwnerID, New Rectangle(pos.x, pos.y, 32, 16), building_type_enum.Pub))
         P.Building_List(ID).BuildingRect.Add(0, New Rectangle(pos.x + 2, pos.y + 2, 28, 11))
 
-        P.Building_List(ID).PickupPoint = New PointI(pos.x, pos.y)
+        '        P.Building_List(ID).PickupPoint = New PointI(pos.x, pos.y)
 
         For y = 5 To 13 Step 2
             For x = 5 To 27 Step 2
 
-                P.Building_List(ID).access_point.Add(New PointI(pos.x + x, pos.y + y), New Building_Access_Point_Type(BAP_Type.Customer))
-
+                'P.Building_List(ID).access_point.Add(New PointI(pos.x + x, pos.y + y), New Building_Access_Point_Type(BAP_Type.Customer))
+                P.Building_List(ID).Customer_Slots.Add(New PointI(x, y), -1)
             Next
         Next
 
+        P.Building_List(ID).Worker_Slots.Add(New PointI(4, 4), -1)
+        
         BuildRoad(P, pos, Block_Return_Type_Enum.HorizontalTop)
     End Sub
 
     Sub Build_PubV(ByVal ID As Integer, ByVal OwnerID As Integer, ByVal pos As PointI, ByVal P As Planet)
         Build_From_File(building_type_enum.Pub, Block_Return_Type_Enum.VerticalL, P, pos, False)
-        P.Building_Count.CPub += 1
-
-        P.Building_List.Add(ID, New Planet_Building(OwnerID, New Rectangle(pos.x, pos.y, 32, 16), building_type_enum.Pub, New Worker_Slots(1, 4, 0)))
+        P.Building_List(ID).LandRect = New Rectangle(pos.x, pos.y, 16, 32)
+        'P.Building_List.Add(ID, New Planet_Building(OwnerID, New Rectangle(pos.x, pos.y, 32, 16), building_type_enum.Pub))
         P.Building_List(ID).BuildingRect.Add(0, New Rectangle(pos.x + 2, pos.y + 2, 11, 28))
-        P.Building_List(ID).PickupPoint = New PointI(pos.x, pos.y)
+        'P.Building_List(ID).PickupPoint = New PointI(pos.x, pos.y)
         For y = 5 To 13 Step 2
             For x = 5 To 27 Step 2
 
-                P.Building_List(ID).access_point.Add(New PointI(pos.x + x, pos.y + y), New Building_Access_Point_Type(BAP_Type.Customer))
-
+                'P.Building_List(ID).access_point.Add(New PointI(pos.x + x, pos.y + y), New Building_Access_Point_Type(BAP_Type.Customer))
+                P.Building_List(ID).Customer_Slots.Add(New PointI(x, y), -1)
             Next
         Next
+        P.Building_List(ID).Worker_Slots.Add(New PointI(4, 4), -1)
 
         BuildRoad(P, pos, Block_Return_Type_Enum.VerticalL)
     End Sub
@@ -547,55 +541,74 @@
     Sub Build_Exchange(ByVal ID As Integer, ByVal OwnerID As Integer, ByVal pos As PointI, ByVal P As Planet)
         Build_From_File(building_type_enum.Exchange, Block_Return_Type_Enum.WholeTile, P, pos, False)
 
+        P.Building_List(ID).LandRect = New Rectangle(pos.x, pos.y, 32, 32)
+        'P.Building_List.Add(ID, New Planet_Building(OwnerID, New Rectangle(pos.x, pos.y, 32, 32), building_type_enum.Exchange))
 
-        P.Building_List.Add(ID, New Planet_Building(OwnerID, New Rectangle(pos.x, pos.y, 32, 32), building_type_enum.Exchange, New Worker_Slots(0, 0, 4)))
 
-
-        P.Building_List(ID).PickupPoint = New PointI(pos.x + 5, pos.y + 13)
+        'P.Building_List(ID).PickupPoint = New PointI(pos.x + 5, pos.y + 13)
 
         'P.Building_List(ID).access_point.Add(New PointI(pos.x + 6, pos.y + 9), New Building_Access_Point_Type(BAP_Type.Worker))
 
         'P.Building_List(ID).access_point.Add(New PointI(pos.x + 1, pos.y + 1), New Building_Access_Point_Type(BAP_Type.Transporter))
 
         For x = 3 To 28
-            P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + x, pos.y + 3), New Item_Slots_Type(False))
-            P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + x, pos.y + 4), New Item_Slots_Type(False))
+            'P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + x, pos.y + 3), New Item_Slots_Type(False))
+            'P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + x, pos.y + 4), New Item_Slots_Type(False))
         Next
 
         'P.Item_Point.Add(New PointI(pos.x + 4, pos.y + 2), New Item_Point_Type(100, Item_Enum.Crystal))
         'P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + 4, pos.y + 4), New Item_Slots_Type(True))
         'P.Item_Point.Add(New PointI(pos.x + 4, pos.y + 4), New Item_Point_Type(2000, Item_Enum.Refined_Crystal_Piece))
+        P.Building_List(ID).Worker_Slots.Add(New PointI(2, 2), -1)
+        P.Building_List(ID).Worker_Slots.Add(New PointI(4, 2), -1)
+        P.Building_List(ID).Worker_Slots.Add(New PointI(6, 2), -1)
+        P.Building_List(ID).Worker_Slots.Add(New PointI(8, 2), -1)
 
+
+        P.Building_List(ID).Guard_Slots.Add(New PointI(2, 10), -1)
+        P.Building_List(ID).Guard_Slots.Add(New PointI(4, 10), -1)
+        P.Building_List(ID).Guard_Slots.Add(New PointI(6, 10), -1)
+        P.Building_List(ID).Guard_Slots.Add(New PointI(7, 10), -1)
         BuildRoad(P, pos, Block_Return_Type_Enum.WholeTile)
     End Sub
 
     Sub Build_Outpost(ByVal ID As Integer, ByVal OwnerID As Integer, ByVal pos As PointI, ByVal P As Planet)
         Build_From_File(building_type_enum.Outpost, Block_Return_Type_Enum.WholeTile, P, pos, False)
-        P.Building_List.Add(ID, New Planet_Building(OwnerID, New Rectangle(pos.x, pos.y, 32, 32), building_type_enum.Outpost, New Worker_Slots(0, 0, 4)))
-        P.Building_List(ID).PickupPoint = New PointI(pos.x + 15, pos.y + 15)
-
+        P.Building_List(ID).LandRect = New Rectangle(pos.x, pos.y, 32, 32)
+        'P.Building_List.Add(ID, New Planet_Building(OwnerID, New Rectangle(pos.x, pos.y, 32, 32), building_type_enum.Outpost))
+        'P.Building_List(ID).PickupPoint = New PointI(pos.x + 15, pos.y + 15)
+        P.Building_List(ID).BuildingRect.Add(0, New Rectangle(pos.x + 4, pos.y + 4, 24, 27))
         BuildRoad(P, pos, Block_Return_Type_Enum.WholeTile)
+        P.Building_List(ID).Worker_Slots.Add(New PointI(8, 2), -1)
+        P.Building_List(ID).Worker_Slots.Add(New PointI(10, 2), -1)
+        P.Building_List(ID).Guard_Slots.Add(New PointI(12, 2), -1)
+        P.Building_List(ID).Guard_Slots.Add(New PointI(14, 2), -1)
     End Sub
 
 
     Sub Build_Bank(ByVal ID As Integer, ByVal OwnerID As Integer, ByVal pos As PointI, ByVal P As Planet)
         Build_From_File(building_type_enum.Bank, Block_Return_Type_Enum.WholeTile, P, pos, False)
-        P.Building_List.Add(ID, New Planet_Building(OwnerID, New Rectangle(pos.x, pos.y, 32, 32), building_type_enum.Bank, New Worker_Slots(0, 4, 4)))
-        P.Building_List(ID).PickupPoint = New PointI(pos.x + 15, pos.y + 15)
+        P.Building_List(ID).LandRect = New Rectangle(pos.x, pos.y, 32, 32)
+        'P.Building_List.Add(ID, New Planet_Building(OwnerID, New Rectangle(pos.x, pos.y, 32, 32), building_type_enum.Bank))
+        'P.Building_List(ID).PickupPoint = New PointI(pos.x + 15, pos.y + 15)
 
         P.Building_List(ID).BuildingRect.Add(0, New Rectangle(pos.x + 4, pos.y + 4, 24, 24))
-
+        P.Building_List(ID).Worker_Slots.Add(New PointI(8, 2), -1)
+        P.Building_List(ID).Worker_Slots.Add(New PointI(10, 2), -1)
+        P.Building_List(ID).Guard_Slots.Add(New PointI(12, 2), -1)
+        P.Building_List(ID).Guard_Slots.Add(New PointI(14, 2), -1)
         BuildRoad(P, pos, Block_Return_Type_Enum.WholeTile)
     End Sub
 
 
     Sub Build_Special(ByVal ID As Integer, ByVal OwnerID As Integer, ByVal pos As PointI, ByVal P As Planet)
         Build_From_File(building_type_enum.Specials, Block_Return_Type_Enum.TopL, P, pos, False)
-        P.Building_List.Add(ID, New Planet_Building(OwnerID, New Rectangle(pos.x, pos.y, 16, 16), building_type_enum.Specials, New Worker_Slots(1, 2, 0)))
-        P.Building_List(ID).PickupPoint = New PointI(pos.x + 0, pos.y + 0)
+        P.Building_List(ID).LandRect = New Rectangle(pos.x, pos.y, 16, 16)
+        'P.Building_List.Add(ID, New Planet_Building(OwnerID, New Rectangle(pos.x, pos.y, 16, 16), building_type_enum.Specials))
+        'P.Building_List(ID).PickupPoint = New PointI(pos.x + 0, pos.y + 0)
 
         P.Building_List(ID).BuildingRect.Add(0, New Rectangle(pos.x + 3, pos.y + 3, 10, 10))
-
+        P.Building_List(ID).Worker_Slots.Add(New PointI(8, 2), -1)        
         BuildRoad(P, pos, Block_Return_Type_Enum.TopL)
     End Sub
 
@@ -641,44 +654,19 @@
 
 
     Sub Create_Farm_Points(ByVal P As Planet)
-
         For Each item In P.Farm_Points
-            'For x = item.x * 32 To item.x * 32 + 32
-            'For y = item.y * 32 To item.y * 32 + 32
-            'If random(0, 30) = 30 Then
-            'P.tile_map(x, y) = New Planet_tile(planet_tile_type_enum.Desert_Planet, planet_sprite_enum.Water, walkable_type_enum.Impassable)
-            'End If
-            'Next
-            'Next
             For a = 0 To 100
                 P.tile_map(random(item.Key.x * 32, 32), random(item.Key.y * 32, 32)) = New Planet_tile(planet_tile_type_enum.Desert_Planet, 3, walkable_type_enum.Walkable)
             Next
-
         Next
-
     End Sub
 
-
-
-
-
-
     Sub Create_Resource_Points(ByVal P As Planet)
-
         For Each item In P.Resource_Points
-            'For x = item.x * 32 To item.x * 32 + 32
-            'For y = item.y * 32 To item.y * 32 + 32
-            'If random(0, 30) = 30 Then
-            'P.tile_map(x, y) = New Planet_tile(planet_tile_type_enum.Desert_Planet, planet_sprite_enum.Water, walkable_type_enum.Impassable)
-            'End If
-            'Next
-            'Next
             For a = 0 To 100
                 P.tile_map(random(item.Key.x * 32, 32), random(item.Key.y * 32, 32)) = New Planet_tile(planet_tile_type_enum.Desert_Planet, desert_planet_sprite_enum.Crystal, walkable_type_enum.Impassable)
             Next
-
         Next
-
     End Sub
 
 
@@ -770,7 +758,7 @@
         Next
 
         Draw_Street(New PointI(0, 0), New PointI(16, 16), P)
-        Build_Building(New PointI(0, 0), building_type_enum.House, P)
+
 
         'Fighter/Corvette facility 30x30
         'Smallest Block size 32,32
@@ -812,98 +800,6 @@
 
 
 
-    Sub Build_Building(ByVal Pos As PointI, ByVal Type As building_type_enum, ByVal P As Planet)
-        Dim ID As Integer
-        For a = 0 To 100000
-            If Not P.Building_List.ContainsKey(a) Then ID = a : Exit For
-        Next
-
-
-        If Type = building_type_enum.House Then
-            'external
-            For y = 2 To 14
-                For x = 2 To 14
-                    P.tile_map(Pos.x + x, Pos.y + y).type = planet_tile_type_enum.House
-                    P.tile_map(Pos.x + x, Pos.y + y).sprite = 4
-                    P.tile_map(Pos.x + x, Pos.y + y).walkable = walkable_type_enum.Impassable
-                Next
-            Next
-
-            P.tile_map(Pos.x + 2, Pos.y + 2).sprite = 5
-            P.tile_map(Pos.x + 14, Pos.y + 2).sprite = 6
-
-            For x = 3 To 13
-                P.tile_map(Pos.x + x, Pos.y + 2).sprite = 7
-            Next
-
-            For x = 2 To 14
-                P.tile_map(Pos.x + x, Pos.y + 12).sprite = 1
-            Next
-
-            For x = 2 To 14
-                P.tile_map(Pos.x + x, Pos.y + 13).sprite = 0
-            Next
-
-            For x = 2 To 14
-                P.tile_map(Pos.x + x, Pos.y + 14).sprite = 0
-            Next
-
-            For y = 3 To 11
-                P.tile_map(Pos.x + 2, Pos.y + y).sprite = 8
-            Next
-
-            For y = 3 To 11
-                P.tile_map(Pos.x + 14, Pos.y + y).sprite = 9
-            Next
-
-            P.tile_map(Pos.x + 8, Pos.y + 13).sprite = 3
-            P.tile_map(Pos.x + 8, Pos.y + 14).sprite = 2
-            For y = Pos.y + 3 To Pos.y + 13
-                For x = Pos.x + 3 To Pos.x + 13
-                    P.tile_map(x, y).walkable = walkable_type_enum.Walkable
-                Next
-            Next
-            P.tile_map(Pos.x + 8, Pos.y + 14).walkable = walkable_type_enum.Walkable
-            'internal
-            For y = 2 To 13
-                For x = 2 To 13
-                    P.tile_map(Pos.x + x, Pos.y + y).sprite2 = 4
-                Next
-            Next
-
-            P.tile_map(Pos.x + 2, Pos.y + 2).sprite2 = 10
-            P.tile_map(Pos.x + 14, Pos.y + 2).sprite2 = 11
-
-            P.tile_map(Pos.x + 2, Pos.y + 14).sprite2 = 12
-            P.tile_map(Pos.x + 14, Pos.y + 14).sprite2 = 13
-
-            For x = 3 To 13
-                P.tile_map(Pos.x + x, Pos.y + 2).sprite2 = 14
-            Next
-
-            For x = 3 To 13
-                P.tile_map(Pos.x + x, Pos.y + 14).sprite2 = 14
-            Next
-
-            For y = 3 To 13
-                P.tile_map(Pos.x + 2, Pos.y + y).sprite2 = 15
-            Next
-
-            For y = 3 To 13
-                P.tile_map(Pos.x + 14, Pos.y + y).sprite2 = 16
-            Next
-
-            P.tile_map(Pos.x + 8, Pos.y + 14).sprite2 = 17
-
-
-            P.Building_List.Add(ID, New Planet_Building(0, New Rectangle(Pos.x + 2, Pos.y + 2, 13, 13), building_type_enum.House, New Worker_Slots(1, 4, 0)))
-        End If
-
-
-
-
-
-    End Sub
 
 
     Sub Build_Item(ByVal StartIndex As Integer, ByVal Size As PointI, ByVal Position As PointI)

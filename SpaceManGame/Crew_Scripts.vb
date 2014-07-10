@@ -247,10 +247,10 @@
         pos.x = crew_member.find_tile.x
         pos.y = crew_member.find_tile.y
         If crew_member.region = Officer_location_enum.Planet Then
-            If planet.Building_List(crew_member.WorkBuilding).access_point(command.Ap).Used = False Then
-                crew_member.command_queue.First.status = script_status_enum.complete
-            End If
+            'If planet.Building_List(crew_member.WorkBuilding).access_point(command.Ap).Used = False Then
+            crew_member.command_queue.First.status = script_status_enum.complete
         End If
+        'End If
     End Sub
 
 
@@ -263,13 +263,13 @@
         pos.x = crew_member.find_tile.x
         pos.y = crew_member.find_tile.y
         If crew_member.region = Officer_location_enum.Planet Then
-            If planet.Building_List(crew_member.WorkBuilding).access_point(command.Ap).Used = False Then
-                planet.Building_List(crew_member.WorkBuilding).access_point(command.Ap).Used = True
-                planet.Building_List(crew_member.WorkBuilding).access_point(command.Ap).NextUp = False
-                planet.Building_List(crew_member.WorkBuilding).Working_crew_list.Add(id)
-                If planet.Building_List(crew_member.WorkBuilding).Assigned_crew_list.Contains(id) Then planet.Building_List(crew_member.WorkBuilding).Assigned_crew_list.Remove(id)
-                crew_member.command_queue.First.status = script_status_enum.complete
-            End If
+            'If planet.Building_List(crew_member.WorkBuilding).access_point(command.Ap).Used = False Then
+            'planet.Building_List(crew_member.WorkBuilding).access_point(command.Ap).Used = True
+            'planet.Building_List(crew_member.WorkBuilding).access_point(command.Ap).NextUp = False
+            'planet.Building_List(crew_member.WorkBuilding).Working_crew_list.Add(id)
+            'If planet.Building_List(crew_member.WorkBuilding).Assigned_crew_list.Contains(id) Then planet.Building_List(crew_member.WorkBuilding).Assigned_crew_list.Remove(id)
+            'crew_member.command_queue.First.status = script_status_enum.complete
+            'End If
         End If
     End Sub
 
@@ -284,26 +284,26 @@
         pos.y = crew_member.find_tile.y
 
         If crew_member.region = Officer_location_enum.Planet Then
-            If planet.Building_List(crew_member.PubBuilding).Assigned_crew_list.Contains(id) Then
-                planet.Building_List(crew_member.PubBuilding).Assigned_crew_list.Remove(id)
-                planet.Building_List(crew_member.PubBuilding).Working_crew_list.Add(id)
-            End If
-
-            If command.Pub_Start = -1 Then
-                command.Pub_Start = GST + command.Pub_Time
-                If command.Pub_Start > 3000 Then command.Pub_Start -= 3000
-            End If
-
-
-            If Math.Abs(GST - command.Pub_Start) < 1500 Then
-                If GST > command.Pub_Start Then
-                    planet.Building_List(crew_member.PubBuilding).Working_crew_list.Remove(id)
-                    planet.Building_List(crew_member.PubBuilding).access_point(command.Ap).Used = False
-                    crew_member.command_queue.First.status = script_status_enum.complete
-                End If
-            End If
-
+            'If planet.Building_List(crew_member.PubBuilding).Assigned_crew_list.Contains(id) Then
+            'planet.Building_List(crew_member.PubBuilding).Assigned_crew_list.Remove(id)
+            'planet.Building_List(crew_member.PubBuilding).Working_crew_list.Add(id)
         End If
+
+        If command.Pub_Start = -1 Then
+            command.Pub_Start = GST + command.Pub_Time
+            If command.Pub_Start > 3000 Then command.Pub_Start -= 3000
+        End If
+
+
+        If Math.Abs(GST - command.Pub_Start) < 1500 Then
+            If GST > command.Pub_Start Then
+                'planet.Building_List(crew_member.PubBuilding).Working_crew_list.Remove(id)
+                'planet.Building_List(crew_member.PubBuilding).access_point(command.Ap).Used = False
+                crew_member.command_queue.First.status = script_status_enum.complete
+            End If
+        End If
+
+        'End If
     End Sub
 
 
@@ -312,7 +312,7 @@
         'Only programed for planets
         Dim planet As Planet = u.Planet_List(crew_member.Location_ID)
 
-        If crew_member.RemoveWhenDone = False Then planet.Building_List(crew_member.WorkBuilding).Available_Transporters.Add(id) Else crew_member.RemoveWhenDone = False
+        'If crew_member.RemoveWhenDone = False Then planet.Building_List(crew_member.WorkBuilding).Available_Transporters.Add(id) Else crew_member.RemoveWhenDone = False
 
         crew_member.command_queue.First.status = script_status_enum.complete
     End Sub
@@ -324,14 +324,14 @@
         Dim pos As PointI
         pos.x = crew_member.find_tile.x
         pos.y = crew_member.find_tile.y
-        If planet.Item_Point.ContainsKey(pos) AndAlso planet.Item_Point(pos).Item = Item_Enum.Refined_Crystal_Piece Then
+        If planet.Item_Point.ContainsKey(pos) AndAlso planet.Item_Point(pos).Item = Item_Enum.CrystalCoin Then
             planet.Item_Point(pos).Amount -= command.Amount
             If planet.Item_Point(pos).Amount < 0 Then command.Amount += planet.Item_Point(pos).Amount : planet.Item_Point(pos).Amount = 0
 
-            If crew_member.Item_List.ContainsKey(Item_Enum.Refined_Crystal_Piece) Then
-                crew_member.Item_List(Item_Enum.Refined_Crystal_Piece) += command.Amount
+            If crew_member.Item_List.ContainsKey(Item_Enum.CrystalCoin) Then
+                crew_member.Item_List(Item_Enum.CrystalCoin) += command.Amount
             Else
-                crew_member.Item_List.Add(Item_Enum.Refined_Crystal_Piece, command.Amount)
+                crew_member.Item_List.Add(Item_Enum.CrystalCoin, command.Amount)
             End If
 
             crew_member.command_queue.First.status = script_status_enum.complete
@@ -349,10 +349,10 @@
         Dim B As Planet_Building = planet.Building_List(command.ID)
 
         'Drops off money
-        If crew_member.Item_List.ContainsKey(Item_Enum.Refined_Crystal_Piece) Then
-            For Each Bpoint In B.Item_Slots
-                If Bpoint.Value.Input_Slot = True AndAlso planet.Item_Point.ContainsKey(Bpoint.Key) AndAlso planet.Item_Point(Bpoint.Key).Item = Item_Enum.Refined_Crystal_Piece Then planet.Item_Point(Bpoint.Key).Amount += crew_member.Item_List(Item_Enum.Refined_Crystal_Piece) : crew_member.Item_List(Item_Enum.Refined_Crystal_Piece) = 0 : crew_member.command_queue.First.status = script_status_enum.complete : Exit For
-            Next
+        If crew_member.Item_List.ContainsKey(Item_Enum.CrystalCoin) Then
+            'For Each Bpoint In B.Item_Slots
+            'If Bpoint.Value.Input_Slot = True AndAlso planet.Item_Point.ContainsKey(Bpoint.Key) AndAlso planet.Item_Point(Bpoint.Key).Item = Item_Enum.Refined_Crystal_Piece Then planet.Item_Point(Bpoint.Key).Amount += crew_member.Item_List(Item_Enum.Refined_Crystal_Piece) : crew_member.Item_List(Item_Enum.Refined_Crystal_Piece) = 0 : crew_member.command_queue.First.status = script_status_enum.complete : Exit For
+            'Next
         Else
             crew_member.command_queue.First.status = script_status_enum.complete
         End If
@@ -366,10 +366,10 @@
         Dim planet As Planet = u.Planet_List(crew_member.Location_ID)
         Dim B As Planet_Building = planet.Building_List(command.ID)
 
-        If Not crew_member.Item_List.ContainsKey(Item_Enum.Refined_Crystal_Piece) Then crew_member.Item_List.Add(Item_Enum.Refined_Crystal_Piece, 0)
+        If Not crew_member.Item_List.ContainsKey(Item_Enum.CrystalCoin) Then crew_member.Item_List.Add(Item_Enum.CrystalCoin, 0)
 
         If planet.Exchange.Pickup_Money(command.ID) = True Then
-            crew_member.Item_List(Item_Enum.Refined_Crystal_Piece) += 1
+            crew_member.Item_List(Item_Enum.CrystalCoin) += 1
         Else
             crew_member.command_queue.First.status = script_status_enum.complete
         End If
@@ -381,27 +381,27 @@
         'Only programed for planets
         Dim planet As Planet = u.Planet_List(crew_member.Location_ID)
         
-        If crew_member.Item_List.ContainsKey(Item_Enum.Refined_Crystal_Piece) AndAlso crew_member.Item_List(Item_Enum.Refined_Crystal_Piece) >= 10 Then
-            crew_member.Item_List(Item_Enum.Refined_Crystal_Piece) -= 10
+        If crew_member.Item_List.ContainsKey(Item_Enum.CrystalCoin) AndAlso crew_member.Item_List(Item_Enum.CrystalCoin) >= 10 Then
+            crew_member.Item_List(Item_Enum.CrystalCoin) -= 10
 
-            If planet.Exchange.Buy_Item(command.Item) = True Then
+            'If planet.Exchange.Buy_Item(command.Item) = True Then
 
-                If crew_member.Item_List.ContainsKey(command.Item) Then
-                    crew_member.Item_List(command.Item) += 1
-                Else
-                    crew_member.Item_List.Add(command.Item, 1)
-                End If
-
+            If crew_member.Item_List.ContainsKey(command.Item) Then
+                crew_member.Item_List(command.Item) += 1
             Else
-                command.status = script_status_enum.complete
+                crew_member.Item_List.Add(command.Item, 1)
             End If
-            command.Amount -= 1            
+
         Else
             command.status = script_status_enum.complete
         End If
+        command.Amount -= 1
+        'Else
+        command.status = script_status_enum.complete
+        'End If
 
 
-        If crew_member.Item_List(Item_Enum.Refined_Crystal_Piece) <= 0 Then crew_member.Item_List.Remove(Item_Enum.Refined_Crystal_Piece) : command.status = script_status_enum.complete
+        If crew_member.Item_List(Item_Enum.CrystalCoin) <= 0 Then crew_member.Item_List.Remove(Item_Enum.CrystalCoin) : command.status = script_status_enum.complete
         If command.Amount = 0 Then crew_member.command_queue.First.status = script_status_enum.complete
 
 
@@ -417,7 +417,7 @@
 
         If crew_member.Item_List.ContainsKey(command.Item) Then
             crew_member.Item_List(command.Item) -= 1
-            planet.Exchange.List_Item(command.Item, command.ID)
+            '            planet.Exchange.List_Item(command.Item, command.ID)
             If crew_member.Item_List(command.Item) = 0 Then crew_member.Item_List.Remove(command.Item) : crew_member.command_queue.First.status = script_status_enum.complete
         End If
 
@@ -436,25 +436,25 @@
         pos.y = crew_member.find_tile.y
 
         Dim Bought As Boolean = False
-        For Each ipoint In B.Item_Slots
-            If planet.Item_Point.ContainsKey(ipoint.Key) AndAlso planet.Item_Point(ipoint.Key).Item = command.Item Then
-                If planet.Item_Point(ipoint.Key).Amount >= 1 Then
+        'For Each ipoint In B.Item_Slots
+        'If planet.Item_Point.ContainsKey(ipoint.Key) AndAlso planet.Item_Point(ipoint.Key).Item = command.Item Then
+        'If planet.Item_Point(ipoint.Key).Amount >= 1 Then
 
-                    planet.Item_Point(ipoint.Key).Amount -= 1
+        'planet.Item_Point(ipoint.Key).Amount -= 1
 
-                    If crew_member.Item_List.ContainsKey(command.Item) Then
-                        crew_member.Item_List(command.Item) += 1
-                    Else
-                        crew_member.Item_List.Add(command.Item, 1)
-                    End If
+        If crew_member.Item_List.ContainsKey(command.Item) Then
+            crew_member.Item_List(command.Item) += 1
+        Else
+            crew_member.Item_List.Add(command.Item, 1)
+        End If
 
-                    command.Amount -= 1
-                    If planet.Item_Point(ipoint.Key).Amount = 0 Then planet.Item_Point.Remove(ipoint.Key)
-                    Bought = True
-                End If
-            End If
-            If Bought = True Then Exit For
-        Next
+        command.Amount -= 1
+        'If planet.Item_Point(ipoint.Key).Amount = 0 Then planet.Item_Point.Remove(ipoint.Key)
+        Bought = True
+        'End If
+        'End If
+        'If Bought = True Then Exit For
+        'Next
         If command.Amount = 0 OrElse Bought = False Then crew_member.command_queue.First.status = script_status_enum.complete
 
     End Sub
@@ -473,25 +473,25 @@
         Dim Dropped As Boolean = False        
         If Not crew_member.Item_List.ContainsKey(command.Item) Then crew_member.command_queue.First.status = script_status_enum.complete : Exit Sub
 
-        For Each ipoint In B.Item_Slots
+        'For Each ipoint In B.Item_Slots'
 
-            If ipoint.Value.Input_Slot = True Then
-                If Not planet.Item_Point.ContainsKey(ipoint.Key) Then planet.Item_Point.Add(ipoint.Key, New Item_Point_Type)
-                If (planet.Item_Point(ipoint.Key).Item = Item_Enum.None OrElse planet.Item_Point(ipoint.Key).Item = command.Item) Then
-                    If planet.Item_Point(ipoint.Key).Amount < 100 Then
+        'If ipoint.Value.Input_Slot = True Then
+        'If Not planet.Item_Point.ContainsKey(ipoint.Key) Then planet.Item_Point.Add(ipoint.Key, New Item_Point_Type)
+        'If (planet.Item_Point(ipoint.Key).Item = Item_Enum.None OrElse planet.Item_Point(ipoint.Key).Item = command.Item) Then
+        'If planet.Item_Point(ipoint.Key).Amount < 100 Then
 
-                        planet.Item_Point(ipoint.Key).Item = command.Item
-                        planet.Item_Point(ipoint.Key).Amount += 1
+        'planet.Item_Point(ipoint.Key).Item = command.Item
+        'planet.Item_Point(ipoint.Key).Amount += 1
 
-                        crew_member.Item_List(command.Item) -= 1
+        'crew_member.Item_List(command.Item) -= 1
 
-                        command.Amount -= 1
-                        Dropped = True
-                    End If
-                End If
-            End If
-            If Dropped = True Then Exit For
-        Next
+        'command.Amount -= 1
+        'Dropped = True
+        'End If
+        'End If
+        'End If
+        'If Dropped = True Then Exit For
+        'Next
 
         If crew_member.Item_List(command.Item) <= 0 Then crew_member.Item_List.Remove(command.Item) : crew_member.command_queue.First.status = script_status_enum.complete
 

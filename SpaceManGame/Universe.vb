@@ -124,7 +124,7 @@
         u.stars.Add(0, bh)
     End Sub
 
-    Sub generate_planets()        
+    Sub generate_planets()
         'Exit Sub
         Dim systems_to_create As List(Of Integer) = New List(Of Integer)
         Dim r As Integer
@@ -204,23 +204,23 @@
         Dim p As Planet
         Select Case random(1, 3) + random(0, 4)
             Case 1 'Vacuum
-                p = New Planet(planetID, planet_type_enum.Vacuum, size, orbit, orbit_distance, orbits_planet, theta_offset)
+                p = New Planet(planetID, planet_type_enum.Vacuum, size, orbit, orbit_distance, orbits_planet, theta_offset, Planet_Level_Type.Barren)
             Case 2 'Inferno
-                p = New Planet(planetID, planet_type_enum.Inferno, size, orbit, orbit_distance, orbits_planet, theta_offset)
+                p = New Planet(planetID, planet_type_enum.Inferno, size, orbit, orbit_distance, orbits_planet, theta_offset, Planet_Level_Type.Barren)
             Case 3 'Desert
-                p = New Planet(planetID, planet_type_enum.Desert, size, orbit, orbit_distance, orbits_planet, theta_offset)
+                p = New Planet(planetID, planet_type_enum.Desert, size, orbit, orbit_distance, orbits_planet, theta_offset, Planet_Level_Type.Barren)
             Case 4 'Tropical
-                p = New Planet(planetID, planet_type_enum.Tropical, size, orbit, orbit_distance, orbits_planet, theta_offset)
+                p = New Planet(planetID, planet_type_enum.Tropical, size, orbit, orbit_distance, orbits_planet, theta_offset, Planet_Level_Type.Barren)
             Case 5 'Forest
-                p = New Planet(planetID, planet_type_enum.Forest, size, orbit, orbit_distance, orbits_planet, theta_offset)
+                p = New Planet(planetID, planet_type_enum.Forest, size, orbit, orbit_distance, orbits_planet, theta_offset, Planet_Level_Type.Barren)
             Case 6 'Swamp
-                p = New Planet(planetID, planet_type_enum.Swamp, size, orbit, orbit_distance, orbits_planet, theta_offset)
+                p = New Planet(planetID, planet_type_enum.Swamp, size, orbit, orbit_distance, orbits_planet, theta_offset, Planet_Level_Type.Barren)
             Case 7 'Ocean
-                p = New Planet(planetID, planet_type_enum.Ocean, size, orbit, orbit_distance, orbits_planet, theta_offset)
+                p = New Planet(planetID, planet_type_enum.Ocean, size, orbit, orbit_distance, orbits_planet, theta_offset, Planet_Level_Type.Barren)
             Case 8 'Ice
-                p = New Planet(planetID, planet_type_enum.Ice, size, orbit, orbit_distance, orbits_planet, theta_offset)
+                p = New Planet(planetID, planet_type_enum.Ice, size, orbit, orbit_distance, orbits_planet, theta_offset, Planet_Level_Type.Barren)
             Case Else
-                p = New Planet(planetID, planet_type_enum.Vacuum, size, orbit, orbit_distance, orbits_planet, theta_offset)
+                p = New Planet(planetID, planet_type_enum.Vacuum, size, orbit, orbit_distance, orbits_planet, theta_offset, Planet_Level_Type.Barren)
         End Select
         u.Planet_List.Add(planetID, p)
     End Sub

@@ -162,7 +162,9 @@
             For Each crew In planet.crew_list
                 pos.x = crew.Value.location.x - view_location_personal.x
                 pos.y = crew.Value.location.y - view_location_personal.y
+                'If planet.Get_Tile(crew.Value.find_tile).sprite2 < 0 Then
                 Draw_Crew(crew.Value.SpriteSet, crew.Value.Get_Sprite, pos, Color.White)
+                'End If
                 'Lights.Add(New Lights_Type(New PointD(crew.Value.location.x - 112, crew.Value.location.x - 112), Color.Green))
             Next
         End If
@@ -182,8 +184,6 @@
         draw_text("Logic  " + LPS.ToString, New Rectangle(0, 100, 100, 20), CType(DrawTextFormat.Center + DrawTextFormat.VerticalCenter, DrawTextFormat), Color.White, d3d_font(d3d_font_enum.SB_small))
         render_personal_health_overlay(New PointI(256, screen_size.y - 96), u.Officer_List(current_player).Health)
 
-        draw_text("L:" + PLeft.ToString + " R:" + PRight.ToString + " T:" + PTop.ToString + " B:" + PBottom.ToString, New Rectangle(0, 150, 200, 20), CType(DrawTextFormat.Center + DrawTextFormat.VerticalCenter, DrawTextFormat), Color.White, d3d_font(d3d_font_enum.SB_small))
-
         If u.Crew_List.ContainsKey(Mouse_Target) Then
             render_personal_health_overlay(New PointI(128, screen_size.y - 96), u.Crew_List(Mouse_Target).Health)
         End If
@@ -195,6 +195,8 @@
             End If
         End If
 
+
+        render_personal_UI()
 
         d3d_sprite.End()
 
@@ -367,7 +369,7 @@
                 End If
 
 
-                If PItem.Item = Item_Enum.Refined_Crystal_Piece Then
+                If PItem.Item = Item_Enum.CrystalCoin Then
                     Dim amount As Integer = Planet.Item_Point(P).Amount
                     Select Case amount
                         Case Is < 3300
@@ -422,7 +424,25 @@
 
 
 
+    Sub render_personal_UI()
 
+        For Each item In Personal_Menu_Items
+            If item.Value.enabled = True Then
+                d3d_sprite.Draw(button_texture(item.Value.tile_Set), Vector3.Empty, New Vector3(item.Value.bounds.X, item.Value.bounds.Y, 0), item.Value.get_color.ToArgb)
+                If Not item.Value.text = "" Then draw_text(item.Value.text, item.Value.bounds, item.Value.align, item.Value.fontcolor, d3d_font(item.Value.font))
+            End If
+        Next
+
+        If Not Panel_Menu = panel_enum.None Then
+            For Each item In Panel_Menu_Items(Panel_Menu)
+                If item.Value.enabled = True Then
+                    d3d_sprite.Draw(button_texture(item.Value.tile_Set), Vector3.Empty, New Vector3(item.Value.bounds.X, item.Value.bounds.Y, 0), item.Value.get_color.ToArgb)
+                    If Not item.Value.text = "" Then draw_text(item.Value.text, item.Value.bounds, item.Value.align, item.Value.fontcolor, d3d_font(item.Value.font))
+                End If
+            Next
+        End If
+
+    End Sub
 
 
 
@@ -1008,7 +1028,6 @@
         Dim scale As Single = 32
         For tiley = 0 To 3
             For tilex = 0 To 3
-
                 For Level = 0 To MipLevels
                     d3d_device.SetRenderTarget(0, Planet_Texture(tiley * 4 + tilex).GetSurfaceLevel(Level))
                     d3d_device.Clear(ClearFlags.Target, Color.Black, 1, 1)
@@ -1019,7 +1038,6 @@
                     Dim s As Single = Convert.ToSingle(0.5 / (2 ^ Level))
                     If Level = 0 Then s = 0.5
                     d3d_sprite.Transform = Matrix.AffineTransformation2D(s, Vector2.Empty, 0, Vector2.Empty)
-
                     Dim pos As PointI
                     For x = 0 To Chunksize.x
                         For y = 0 To Chunksize.y
@@ -1030,7 +1048,6 @@
                                     Dim x2 As Integer = x + Chunksize.x * tilex
                                     Dim y2 As Integer = y + Chunksize.y * tiley
                                     'Draw_Planet_Tile(planet.tile_map(x2, y2).type, planet.tile_map(x2, y2).sprite, pos.ToPointD, Color.FromArgb(255, 255, 255, 255))
-
                                     d3d_sprite.Draw(planet_tile_texture(planet.tile_map(x2, y2).type), New Rectangle(planet.tile_map(x2, y2).sprite * 32, 0, 32, 32), New Vector3(0, 0, 0), New Vector3(pos.x, pos.y, 0), Color.White)
                                     'd3d_sprite.Draw2D(planet_tile_texture(planet.tile_map(x2, y2).type), New Rectangle(planet.tile_map(x2, y2).sprite * 32, 0, 32, 32), New SizeF(4, 4), pos.ToPointF, Color.White)
                                 End If
@@ -1039,8 +1056,6 @@
                     Next
                     d3d_sprite.End()
                 Next
-
-
             Next
         Next
 
