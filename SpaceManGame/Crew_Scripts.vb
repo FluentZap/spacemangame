@@ -1,11 +1,31 @@
-﻿Module Crew_Scripts
+﻿Public Enum crew_script_enum As Byte
+    center_on_tile
+    move_to_tile
+    open_door
+    use
+    hold
+    'Ship
+    set_room
+    remove_room
+    'Planet
+    'Customers
+    Customer_DoSomething
+    Customer_EatDrink
+
+End Enum
+
+Module Crew_Scripts
+
+
 
     Sub run_crew_scrips(ByVal Crew_List As Dictionary(Of Integer, Crew))
 
         'Dim crew_temp(crew_list.Keys.Count - 1) As Integer
         ' crew_list.Keys.CopyTo(crew_temp, 0)
         Dim completed As New List(Of Integer)()
-        For Each key In Crew_List.Keys
+        Dim Keys(Crew_List.Keys.Count - 1) As Integer
+        Crew_List.Keys.CopyTo(Keys, 0)
+        For Each key In Keys
             If Crew_List(key).command_queue.Any Then
 
                 Select Case Crew_List(key).command_queue.First.type
@@ -19,37 +39,10 @@
 
                     Case crew_script_enum.open_door : crew_script_open_door(Crew_List(key))
 
+                        'Planet
+                    Case crew_script_enum.Customer_DoSomething : crew_script_customer_do_something(Crew_List(key), key)
 
-
-                    Case crew_script_enum.try_working : crew_script_try_working(Crew_List(key), key)
-                    Case crew_script_enum.start_working : crew_script_start_working(Crew_List(key), key)
-
-
-                    Case crew_script_enum.pub_start : crew_script_pub_start(Crew_List(key), key)
-
-
-
-
-
-                    Case crew_script_enum.transport_buy_goods : crew_script_transport_buy_goods(Crew_List(key), key)
-                    Case crew_script_enum.transport_sell_goods : crew_script_transport_sell_goods(Crew_List(key), key)
-
-                    Case crew_script_enum.transport_dropoff_money : crew_script_transport_dropoff_money(Crew_List(key), key)
-                    Case crew_script_enum.transport_pickup_exchange_money : crew_script_transport_pickup_exchange_money(Crew_List(key), key)
-
-
-                    Case crew_script_enum.transport_pickup_goods : crew_script_transport_pickup_goods(Crew_List(key), key)
-
-                    Case crew_script_enum.transport_dropoff_goods : crew_script_transport_dropoff_goods(Crew_List(key), key)
-                    Case crew_script_enum.transport_pickup_money : crew_script_transport_pickup_money(Crew_List(key), key)
-
-                    Case crew_script_enum.transport_start : crew_script_transport_start_work(Crew_List(key), key)
-
-
-
-                    Case crew_script_enum.builder_build_tile : crew_script_builder_build_tile(Crew_List(key), key)
-                    Case crew_script_enum.builder_start_work : crew_script_builder_start_work(Crew_List(key), key)
-
+                    Case crew_script_enum.Customer_EatDrink : crew_script_customer_EatDrink(Crew_List(key), key)
 
                 End Select
                 If Crew_List(key).command_queue.First.status = script_status_enum.complete Then Crew_List(key).command_queue.Dequeue()
@@ -238,314 +231,47 @@
     End Sub
 
 
+    Public Sub crew_script_customer_do_something(ByRef crew_member As Crew, ByVal Id As Integer)
+        Dim command As Crew.Command_Customer_Do_Something = DirectCast(crew_member.command_queue.First, Crew.Command_Customer_Do_Something)
+        Dim P As Planet = u.Planet_List(crew_member.Location_ID)
+        Dim Slot As Slot_Return_Type
 
-    Public Sub crew_script_try_working(ByVal crew_member As Crew, ByVal id As Integer)
-        Dim command As Crew.Command_Try_Work = DirectCast(crew_member.command_queue.First, Crew.Command_Try_Work)
-        'Only programed for planets
-        Dim planet As Planet = u.Planet_List(crew_member.Location_ID)
-        Dim pos As PointI
-        pos.x = crew_member.find_tile.x
-        pos.y = crew_member.find_tile.y
-        If crew_member.region = Officer_location_enum.Planet Then
-            'If planet.Building_List(crew_member.WorkBuilding).access_point(command.Ap).Used = False Then
-            crew_member.command_queue.First.status = script_status_enum.complete
-        End If
-        'End If
-    End Sub
-
-
-
-    Public Sub crew_script_start_working(ByVal crew_member As Crew, ByVal id As Integer)
-        Dim command As Crew.Command_Start_Work = DirectCast(crew_member.command_queue.First, Crew.Command_Start_Work)
-        'Only programed for planets
-        Dim planet As Planet = u.Planet_List(crew_member.Location_ID)
-        Dim pos As PointI
-        pos.x = crew_member.find_tile.x
-        pos.y = crew_member.find_tile.y
-        If crew_member.region = Officer_location_enum.Planet Then
-            'If planet.Building_List(crew_member.WorkBuilding).access_point(command.Ap).Used = False Then
-            'planet.Building_List(crew_member.WorkBuilding).access_point(command.Ap).Used = True
-            'planet.Building_List(crew_member.WorkBuilding).access_point(command.Ap).NextUp = False
-            'planet.Building_List(crew_member.WorkBuilding).Working_crew_list.Add(id)
-            'If planet.Building_List(crew_member.WorkBuilding).Assigned_crew_list.Contains(id) Then planet.Building_List(crew_member.WorkBuilding).Assigned_crew_list.Remove(id)
-            'crew_member.command_queue.First.status = script_status_enum.complete
-            'End If
-        End If
-    End Sub
-
-
-
-
-    Public Sub crew_script_pub_start(ByVal crew_member As Crew, ByVal id As Integer)
-        Dim command As Crew.Command_Pub_Start = DirectCast(crew_member.command_queue.First, Crew.Command_Pub_Start)
-        Dim planet As Planet = u.Planet_List(crew_member.Location_ID)
-        Dim pos As PointI
-        pos.x = crew_member.find_tile.x
-        pos.y = crew_member.find_tile.y
-
-        If crew_member.region = Officer_location_enum.Planet Then
-            'If planet.Building_List(crew_member.PubBuilding).Assigned_crew_list.Contains(id) Then
-            'planet.Building_List(crew_member.PubBuilding).Assigned_crew_list.Remove(id)
-            'planet.Building_List(crew_member.PubBuilding).Working_crew_list.Add(id)
-        End If
-
-        If command.Pub_Start = -1 Then
-            command.Pub_Start = GST + command.Pub_Time
-            If command.Pub_Start > 3000 Then command.Pub_Start -= 3000
-        End If
-
-
-        If Math.Abs(GST - command.Pub_Start) < 1500 Then
-            If GST > command.Pub_Start Then
-                'planet.Building_List(crew_member.PubBuilding).Working_crew_list.Remove(id)
-                'planet.Building_List(crew_member.PubBuilding).access_point(command.Ap).Used = False
-                crew_member.command_queue.First.status = script_status_enum.complete
-            End If
-        End If
-
-        'End If
-    End Sub
-
-
-    Public Sub crew_script_transport_start_work(ByVal crew_member As Crew, ByVal id As Integer)
-        Dim command As Crew.Command_Trans_Start = DirectCast(crew_member.command_queue.First, Crew.Command_Trans_Start)
-        'Only programed for planets
-        Dim planet As Planet = u.Planet_List(crew_member.Location_ID)
-
-        'If crew_member.RemoveWhenDone = False Then planet.Building_List(crew_member.WorkBuilding).Available_Transporters.Add(id) Else crew_member.RemoveWhenDone = False
-
-        crew_member.command_queue.First.status = script_status_enum.complete
-    End Sub
-
-    Public Sub crew_script_transport_pickup_money(ByVal crew_member As Crew, ByVal id As Integer)
-        Dim command As Crew.Command_Trans_Pickup = DirectCast(crew_member.command_queue.First, Crew.Command_Trans_Pickup)
-        'Only programed for planets
-        Dim planet As Planet = u.Planet_List(crew_member.Location_ID)
-        Dim pos As PointI
-        pos.x = crew_member.find_tile.x
-        pos.y = crew_member.find_tile.y
-        If planet.Item_Point.ContainsKey(pos) AndAlso planet.Item_Point(pos).Item = Item_Enum.CrystalCoin Then
-            planet.Item_Point(pos).Amount -= command.Amount
-            If planet.Item_Point(pos).Amount < 0 Then command.Amount += planet.Item_Point(pos).Amount : planet.Item_Point(pos).Amount = 0
-
-            If crew_member.Item_List.ContainsKey(Item_Enum.CrystalCoin) Then
-                crew_member.Item_List(Item_Enum.CrystalCoin) += command.Amount
-            Else
-                crew_member.Item_List.Add(Item_Enum.CrystalCoin, command.Amount)
-            End If
-
-            crew_member.command_queue.First.status = script_status_enum.complete
-        Else
-            crew_member.command_queue.First.status = script_status_enum.complete
-        End If
-
-    End Sub
-
-
-    Public Sub crew_script_transport_dropoff_money(ByVal crew_member As Crew, ByVal id As Integer)
-        Dim command As Crew.Command_Trans_Dropoff_Money = DirectCast(crew_member.command_queue.First, Crew.Command_Trans_Dropoff_Money)
-        'Only programed for planets
-        Dim planet As Planet = u.Planet_List(crew_member.Location_ID)
-        Dim B As Planet_Building = planet.Building_List(command.ID)
-
-        'Drops off money
-        If crew_member.Item_List.ContainsKey(Item_Enum.CrystalCoin) Then
-            'For Each Bpoint In B.Item_Slots
-            'If Bpoint.Value.Input_Slot = True AndAlso planet.Item_Point.ContainsKey(Bpoint.Key) AndAlso planet.Item_Point(Bpoint.Key).Item = Item_Enum.Refined_Crystal_Piece Then planet.Item_Point(Bpoint.Key).Amount += crew_member.Item_List(Item_Enum.Refined_Crystal_Piece) : crew_member.Item_List(Item_Enum.Refined_Crystal_Piece) = 0 : crew_member.command_queue.First.status = script_status_enum.complete : Exit For
-            'Next
-        Else
-            crew_member.command_queue.First.status = script_status_enum.complete
-        End If
-
-    End Sub
-
-
-    Public Sub crew_script_transport_pickup_exchange_money(ByVal crew_member As Crew, ByVal id As Integer)
-        Dim command As Crew.Command_Trans_Pickup_Exchange = DirectCast(crew_member.command_queue.First, Crew.Command_Trans_Pickup_Exchange)
-        'Only programed for planets
-        Dim planet As Planet = u.Planet_List(crew_member.Location_ID)
-        Dim B As Planet_Building = planet.Building_List(command.ID)
-
-        If Not crew_member.Item_List.ContainsKey(Item_Enum.CrystalCoin) Then crew_member.Item_List.Add(Item_Enum.CrystalCoin, 0)
-
-        If planet.Exchange.Pickup_Money(command.ID) = True Then
-            crew_member.Item_List(Item_Enum.CrystalCoin) += 1
-        Else
-            crew_member.command_queue.First.status = script_status_enum.complete
-        End If
-
-    End Sub
-
-    Public Sub crew_script_transport_buy_goods(ByVal crew_member As Crew, ByVal id As Integer)
-        Dim command As Crew.Command_Trans_Buy = DirectCast(crew_member.command_queue.First, Crew.Command_Trans_Buy)
-        'Only programed for planets
-        Dim planet As Planet = u.Planet_List(crew_member.Location_ID)
-        
-        If crew_member.Item_List.ContainsKey(Item_Enum.CrystalCoin) AndAlso crew_member.Item_List(Item_Enum.CrystalCoin) >= 10 Then
-            crew_member.Item_List(Item_Enum.CrystalCoin) -= 10
-
-            'If planet.Exchange.Buy_Item(command.Item) = True Then
-
-            If crew_member.Item_List.ContainsKey(command.Item) Then
-                crew_member.Item_List(command.Item) += 1
-            Else
-                crew_member.Item_List.Add(command.Item, 1)
-            End If
-
-        Else
+        'Go to Pub
+        Slot = P.GetNearistCustomerSlot(building_type_enum.Pub, crew_member.find_tile, Id)
+        If Not Slot.ID = -1 Then
+            Dim AdjustedPos As PointI
+            AdjustedPos.x = P.Building_List(Slot.ID).LandRect.X + Slot.Point.x
+            AdjustedPos.y = P.Building_List(Slot.ID).LandRect.Y + Slot.Point.y
+            P.MoveCrewTo(crew_member.find_tile, AdjustedPos, crew_member)
+            crew_member.command_queue.Enqueue(New Crew.Command_Customer_EatDrink(Slot))
             command.status = script_status_enum.complete
         End If
-        command.Amount -= 1
-        'Else
-        command.status = script_status_enum.complete
-        'End If
-
-
-        If crew_member.Item_List(Item_Enum.CrystalCoin) <= 0 Then crew_member.Item_List.Remove(Item_Enum.CrystalCoin) : command.status = script_status_enum.complete
-        If command.Amount = 0 Then crew_member.command_queue.First.status = script_status_enum.complete
-
 
     End Sub
 
 
-    Public Sub crew_script_transport_sell_goods(ByVal crew_member As Crew, ByVal id As Integer)
-        Dim command As Crew.Command_Trans_Sell = DirectCast(crew_member.command_queue.First, Crew.Command_Trans_Sell)
-        'Only programed for planets
-        Dim planet As Planet = u.Planet_List(crew_member.Location_ID)
-        Dim B As Planet_Building = planet.Building_List(command.ID)
 
+    Public Sub crew_script_customer_EatDrink(ByRef crew_member As Crew, ByVal Id As Integer)
+        Dim command As Crew.Command_Customer_EatDrink = DirectCast(crew_member.command_queue.First, Crew.Command_Customer_EatDrink)
+        Dim P As Planet = u.Planet_List(crew_member.Location_ID)
 
-        If crew_member.Item_List.ContainsKey(command.Item) Then
-            crew_member.Item_List(command.Item) -= 1
-            '            planet.Exchange.List_Item(command.Item, command.ID)
-            If crew_member.Item_List(command.Item) = 0 Then crew_member.Item_List.Remove(command.Item) : crew_member.command_queue.First.status = script_status_enum.complete
+        If command.Duration = -1 Then
+            command.Duration = random(200, 300)
         End If
 
-        If command.Amount = 0 Then crew_member.command_queue.First.status = script_status_enum.complete
-
-    End Sub
-
-
-    Public Sub crew_script_transport_pickup_goods(ByVal crew_member As Crew, ByVal id As Integer)
-        Dim command As Crew.Command_Trans_Pickup_Goods = DirectCast(crew_member.command_queue.First, Crew.Command_Trans_Pickup_Goods)
-        'Only programed for planets
-        Dim planet As Planet = u.Planet_List(crew_member.Location_ID)
-        Dim B As Planet_Building = planet.Building_List(command.ID)
-        Dim pos As PointI
-        pos.x = crew_member.find_tile.x
-        pos.y = crew_member.find_tile.y
-
-        Dim Bought As Boolean = False
-        'For Each ipoint In B.Item_Slots
-        'If planet.Item_Point.ContainsKey(ipoint.Key) AndAlso planet.Item_Point(ipoint.Key).Item = command.Item Then
-        'If planet.Item_Point(ipoint.Key).Amount >= 1 Then
-
-        'planet.Item_Point(ipoint.Key).Amount -= 1
-
-        If crew_member.Item_List.ContainsKey(command.Item) Then
-            crew_member.Item_List(command.Item) += 1
-        Else
-            crew_member.Item_List.Add(command.Item, 1)
+        If command.Duration > 0 Then
+            command.Duration -= 1
+            'Need to add buying?
+        Else            
+            P.Building_List(command.slot.ID).Customer_Slots(command.slot.Point) = -1
+            command.status = script_status_enum.complete
+            crew_member.command_queue.Enqueue(New Crew.Command_Customer_Do_Something)
         End If
-
-        command.Amount -= 1
-        'If planet.Item_Point(ipoint.Key).Amount = 0 Then planet.Item_Point.Remove(ipoint.Key)
-        Bought = True
-        'End If
-        'End If
-        'If Bought = True Then Exit For
-        'Next
-        If command.Amount = 0 OrElse Bought = False Then crew_member.command_queue.First.status = script_status_enum.complete
-
-    End Sub
-
-
-
-    Public Sub crew_script_transport_dropoff_goods(ByVal crew_member As Crew, ByVal id As Integer)
-        Dim command As Crew.Command_Trans_Dropoff = DirectCast(crew_member.command_queue.First, Crew.Command_Trans_Dropoff)
-        'Only programed for planets
-        Dim planet As Planet = u.Planet_List(crew_member.Location_ID)
-        Dim B As Planet_Building = planet.Building_List(command.Dropoff_ID)
-        Dim pos As PointI
-        pos.x = crew_member.find_tile.x
-        pos.y = crew_member.find_tile.y
-
-        Dim Dropped As Boolean = False        
-        If Not crew_member.Item_List.ContainsKey(command.Item) Then crew_member.command_queue.First.status = script_status_enum.complete : Exit Sub
-
-        'For Each ipoint In B.Item_Slots'
-
-        'If ipoint.Value.Input_Slot = True Then
-        'If Not planet.Item_Point.ContainsKey(ipoint.Key) Then planet.Item_Point.Add(ipoint.Key, New Item_Point_Type)
-        'If (planet.Item_Point(ipoint.Key).Item = Item_Enum.None OrElse planet.Item_Point(ipoint.Key).Item = command.Item) Then
-        'If planet.Item_Point(ipoint.Key).Amount < 100 Then
-
-        'planet.Item_Point(ipoint.Key).Item = command.Item
-        'planet.Item_Point(ipoint.Key).Amount += 1
-
-        'crew_member.Item_List(command.Item) -= 1
-
-        'command.Amount -= 1
-        'Dropped = True
-        'End If
-        'End If
-        'End If
-        'If Dropped = True Then Exit For
-        'Next
-
-        If crew_member.Item_List(command.Item) <= 0 Then crew_member.Item_List.Remove(command.Item) : crew_member.command_queue.First.status = script_status_enum.complete
-
-
     End Sub
 
 
 
 
-
-
-
-    Public Sub crew_script_builder_build_tile(ByVal crew_member As Crew, ByVal id As Integer)
-        Dim command As Crew.Command_Builder_Build_Tile = DirectCast(crew_member.command_queue.First, Crew.Command_Builder_Build_Tile)
-        'Only programed for planets
-        Dim planet As Planet = u.Planet_List(crew_member.Location_ID)
-
-        If planet.Build_List.ContainsKey(command.BuildingID) AndAlso planet.Build_List(command.BuildingID).Tile_List.ContainsKey(command.Position) AndAlso planet.Build_List(command.BuildingID).Build_Progress > 0 AndAlso Not planet.Build_List(command.BuildingID).Tile_List(command.Position) = 5 Then
-
-            If command.Countdown <= 0 Then
-                planet.Build_List(command.BuildingID).Tile_List(command.Position) += CByte(1)
-                If planet.Build_List(command.BuildingID).Tile_List(command.Position) >= 5 Then planet.Build_List(command.BuildingID).Tile_List(command.Position) = 5 : planet.Build_List(command.BuildingID).Build_Progress -= 1 : crew_member.command_queue.First.status = script_status_enum.complete
-                command.Countdown = command.Time
-            Else
-                command.Countdown -= 1
-            End If
-
-        Else
-            crew_member.command_queue.First.status = script_status_enum.complete
-        End If
-
-        If planet.Build_List.ContainsKey(command.BuildingID) Then
-            If planet.Build_List(command.BuildingID).Build_Progress <= 0 Then
-                planet.Build_List(command.BuildingID).Builders -= 1
-                planet.Build_List(command.BuildingID).Compleated = True
-                crew_member.command_queue.Clear()
-                crew_member.command_queue.Enqueue(New Crew.Command_Builder_Start_Work())
-            End If
-        Else
-            crew_member.command_queue.Clear()
-            crew_member.command_queue.Enqueue(New Crew.Command_Builder_Start_Work())
-        End If
-
-    End Sub
-
-
-    Public Sub crew_script_builder_start_work(ByVal crew_member As Crew, ByVal id As Integer)
-        Dim command As Crew.Command_Builder_Start_Work = DirectCast(crew_member.command_queue.First, Crew.Command_Builder_Start_Work)
-        'Only programed for planets
-        Dim planet As Planet = u.Planet_List(crew_member.Location_ID)
-        planet.MoveCrewTo(crew_member.find_tile, planet.CapitalPoint * 32 + New PointI(16, 16), crew_member)
-        planet.Builder_List(id) = -1
-        crew_member.command_queue.First.status = script_status_enum.complete
-    End Sub
 
 
 #End Region

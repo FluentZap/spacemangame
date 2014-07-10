@@ -655,7 +655,7 @@ Public Class Ship
         vector_velocity.y -= vector_velocity.y * Drag
         angular_velocity -= angular_velocity * Drag
 
-        Exit Sub
+        'Exit Sub
 
         If vector_velocity.x < 0 Then
             'If vector_velocity.x + Friction > 0 Then vector_velocity.x = 0 Else vector_velocity.x += Friction

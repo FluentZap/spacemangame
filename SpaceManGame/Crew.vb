@@ -4,6 +4,45 @@
     Night
 End Enum
 
+Public Class Speech_Item
+    Public Text As String
+    Public Duration As Integer
+    Sub New(ByVal Text As String, ByVal Duration As Integer)
+        Me.Text = Text
+        Me.Duration = Duration
+    End Sub
+End Class
+
+Public Class Speech_Type
+    Public Speech As New Queue(Of Speech_Item)()
+
+    Sub Add(ByVal Text As String, ByVal Duration As Integer)
+        If Not Text = "" Then
+            Speech.Enqueue(New Speech_Item(Text, Duration))
+        End If
+    End Sub
+
+    Sub Advance()
+        If Speech.Count > 0 Then
+            If Speech.First.Duration > 0 Then
+                Speech.First.Duration -= 1
+            End If
+            If Speech.First.Duration <= 0 Then
+                Speech.Dequeue()
+            End If
+        End If
+    End Sub
+
+    Function GetSpeech() As String
+        If Speech.Count > 0 Then
+            Return Speech.First.Text
+        End If
+        Return ""
+    End Function
+
+End Class
+
+
 <Serializable()> Public Class Crew
     'Write New Crew Scripts class constructors here
 #Region "Crew Script Classes"
@@ -59,177 +98,23 @@ End Enum
         End Sub
     End Class
 
-
-
-    <Serializable()> Public Class Command_Start_Work
-        Inherits Crew_Command_script        
-        Public Ap As PointI
-
-        Sub New(ByVal Ap As PointI)
-            Me.Ap = Ap
-            type = crew_script_enum.start_working
-        End Sub
-    End Class
-
-
-    <Serializable()> Public Class Command_Try_Work
-        Inherits Crew_Command_script        
-        Public Ap As PointI
-
-        Sub New(ByVal Ap As PointI)
-            Me.Ap = Ap
-            type = crew_script_enum.try_working
-        End Sub
-    End Class
-
-
-    <Serializable()> Public Class Command_Pub_Start
+    'Planet
+    <Serializable()> Public Class Command_Customer_Do_Something
         Inherits Crew_Command_script
-        Public Ap As PointI
-        Public Pub_Time As Integer 'In GST
-        Public Pub_Start As Integer = -1 'In GST
-        Sub New(ByVal Ap As PointI, ByVal Pub_Time As Integer)
-            Me.Ap = Ap
-            Me.Pub_Time = Pub_Time
-            type = crew_script_enum.pub_start
-        End Sub
-    End Class
-
-
-    <Serializable()> Public Class Command_Bank_Start
-        Inherits Crew_Command_script
-        Public Ap As PointI
-        Public Pub_Time As Integer 'In GST
-        Public Pub_Start As Integer = -1 'In GST
-        Sub New(ByVal Ap As PointI, ByVal Pub_Time As Integer)
-            Me.Ap = Ap
-            Me.Pub_Time = Pub_Time
-            type = crew_script_enum.pub_start
-        End Sub
-    End Class
-
-
-    <Serializable()> Public Class Command_Trans_Start
-        Inherits Crew_Command_script        
         Sub New()
-            type = crew_script_enum.transport_start
+            type = crew_script_enum.Customer_DoSomething
         End Sub
     End Class
 
-    <Serializable()> Public Class Command_Trans_Pickup
+    <Serializable()> Public Class Command_Customer_EatDrink
         Inherits Crew_Command_script
-        Public Amount As Integer
-        Sub New(ByVal Amount As Integer)
-            Me.Amount = Amount            
-            type = crew_script_enum.transport_pickup_money
+        Public Duration As Integer = -1
+        Public slot As Slot_Return_Type
+        Sub New(ByVal Slot As Slot_Return_Type)
+            type = crew_script_enum.Customer_EatDrink
+            Me.slot = Slot
         End Sub
     End Class
-
-    <Serializable()> Public Class Command_Trans_Dropoff_Money
-        Inherits Crew_Command_script
-        Public ID As Integer
-        Sub New(ByVal Building_ID As Integer)
-            Me.ID = Building_ID
-            type = crew_script_enum.transport_dropoff_money
-        End Sub
-    End Class
-
-
-    <Serializable()> Public Class Command_Trans_Pickup_Exchange
-        Inherits Crew_Command_script        
-        Public ID As Integer
-        Sub New(ByVal Building_ID As Integer)
-            Me.ID = Building_ID
-            type = crew_script_enum.transport_pickup_exchange_money
-        End Sub
-    End Class
-
-
-    <Serializable()> Public Class Command_Trans_Buy
-        Inherits Crew_Command_script
-        Public Amount As Integer
-        Public Item As Item_Enum        
-        Sub New(ByVal Amount As Integer, ByVal Item As Item_Enum)
-
-            Me.Amount = Amount
-            Me.Item = Item
-            type = crew_script_enum.transport_buy_goods
-        End Sub
-    End Class
-
-
-
-    <Serializable()> Public Class Command_Trans_Sell
-        Inherits Crew_Command_script
-        Public Amount As Integer
-        Public Item As Item_Enum
-        Public ID As Integer
-        Sub New(ByVal Building_ID As Integer, ByVal Amount As Integer, ByVal Item As Item_Enum)
-            Me.ID = Building_ID
-            Me.Amount = Amount
-            Me.Item = Item
-            type = crew_script_enum.transport_sell_goods
-        End Sub
-    End Class
-
-
-    <Serializable()> Public Class Command_Trans_Pickup_Goods
-        Inherits Crew_Command_script
-        Public Amount As Integer
-        Public Item As Item_Enum
-        Public ID As Integer
-        Sub New(ByVal Building_ID As Integer, ByVal Amount As Integer, ByVal Item As Item_Enum)
-            Me.ID = Building_ID
-            Me.Amount = Amount
-            Me.Item = Item
-            type = crew_script_enum.transport_pickup_goods
-        End Sub
-    End Class
-
-
-
-    <Serializable()> Public Class Command_Trans_Dropoff
-        Inherits Crew_Command_script
-        Public Amount As Integer
-        Public Item As Item_Enum
-        Public Dropoff_ID As Integer
-
-        Sub New(ByVal Dropoff_ID As Integer, ByVal Amount As Integer, ByVal Item As Item_Enum)
-            Me.Dropoff_ID = Dropoff_ID
-            Me.Amount = Amount
-            Me.Item = Item
-            type = crew_script_enum.transport_dropoff_goods
-        End Sub
-    End Class
-
-
-
-
-    <Serializable()> Public Class Command_Builder_Build_Tile
-        Inherits Crew_Command_script
-        Public Countdown As Integer
-        Public Time As Integer
-        Public BuildingID As Integer
-        Public Position As PointI
-
-        Sub New(ByVal Time As Integer, ByVal BuildingID As Integer, ByVal Position As PointI)
-            Me.Time = Time
-            Me.Countdown = Time
-            Me.BuildingID = BuildingID
-            Me.Position = Position
-            type = crew_script_enum.builder_build_tile
-        End Sub
-    End Class
-
-
-    <Serializable()> Public Class Command_Builder_Start_Work
-        Inherits Crew_Command_script
-        
-        Sub New()
-            type = crew_script_enum.builder_start_work
-        End Sub
-    End Class
-
 
 #End Region
 
@@ -246,6 +131,8 @@ End Enum
     Public region As Officer_location_enum
     Public Location_ID As Integer
 
+    Public Speech As New Speech_Type
+
 
     'Ship
     Public no_ship_duty As Boolean
@@ -253,19 +140,7 @@ End Enum
     Dim Points As crew_resource_type
 
     'Planet
-    Public HomeBuilding As Integer = -1
-    Public HomeSpace As Integer
-    Public WorkBuilding As Integer = -1
-    Public WorkShift As Work_Shift_Enum
-    Public Worker_Type As Worker_Type_Enum
-    Public BankBuilding As Integer
-    Public PubBuilding As Integer    
-    Public RemoveWhenDone As Boolean = False 'For Transporters
-
-    'Public command_Queue As New LinkedList(Of crew_command_script)
-
     Public command_queue As New Queue(Of Crew_Command_script)
-    'Public command_list As LinkedList(Of 
     Public Health As Officer.Actor_Stats_Class
 
     Public Fuel As Integer

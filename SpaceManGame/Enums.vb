@@ -218,34 +218,7 @@
         Build_cross
 
     End Enum
-    Enum crew_script_enum As Byte
-        center_on_tile
-        move_to_tile
-        open_door
-        use
-        hold
-        'Ship
-        set_room
-        remove_room
-        'Planet
-        try_working
-        start_working
-        'Pub
-        pub_start
-
-        transport_start
-        transport_pickup_money
-        transport_dropoff_money
-        transport_pickup_exchange_money
-        transport_buy_goods
-        transport_sell_goods
-        transport_dropoff_goods
-        transport_pickup_goods
-
-
-        builder_build_tile
-        builder_start_work
-    End Enum
+    
     Enum ship_class_enum As Byte
         fighterW
         fighterT
@@ -445,6 +418,9 @@
         Personal__HealthOverlay
 
 
+        Panel__Shop_Panel
+
+
 
 
     End Enum
@@ -597,7 +573,7 @@
     Enum d3d_font_enum
         Big_Button
         SB_small
-
+        ChatBubbleSmall
 
     End Enum
 
@@ -749,10 +725,15 @@
         Class_Scroll_Right
     End Enum
 
-    Enum personal_menu_enum
-        Exchange_Panel1
-        Exchange_Panel2
-        Exchange_Panel3
+    Enum Panel_menu_enum
+        Exchange_Panel
+        
+
+        Shop_Panel
+        Shop_Button
+        Shop_Catagory_Button
+
+
 
     End Enum
 
@@ -767,7 +748,7 @@
     Enum panel_enum As Integer
         None
         Planet_Exchange_Panel
-
+        Shop_Panel
 
     End Enum
 

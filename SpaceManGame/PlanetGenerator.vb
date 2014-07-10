@@ -56,7 +56,7 @@
         Create_Resource_Points(P)
         Create_Farm_Points(P)
 
-        P.CapitalPoint = New PointI(8, 8)
+        P.CapitalPoint = New PointI(2, 2)
         P.Building_List.Add(P.GetEmptyBuildingID, New Planet_Building(0, building_type_enum.Outpost))
         P.Building_List.Add(P.GetEmptyBuildingID, New Planet_Building(0, building_type_enum.Exchange))
 
@@ -67,11 +67,15 @@
             item.Value.Generated = True
             Build_Building(item.Value.Type, item.Key, item.Value.Owner, P)
 
-            For Each slot In item.Value.Worker_Slots
+            Dim Slots(item.Value.Worker_Slots.Count - 1) As PointI
+            item.Value.Worker_Slots.Keys.CopyTo(Slots, 0)
+
+            For Each slot In Slots
                 Dim Pos As PointI
-                Pos.x = slot.Key.x + item.Value.LandRect.X
-                Pos.y = slot.Key.y + item.Value.LandRect.Y
-                If slot.Value = -1 Then AddWorkers(Pos, slot.Value, P)
+                Dim Id As Integer = P.GetEmptyCrewID
+                Pos.x = slot.x + item.Value.LandRect.X
+                Pos.y = slot.y + item.Value.LandRect.Y
+                If item.Value.Worker_Slots(slot) = -1 Then AddWorkers(Pos, Id, P) : P.Building_List(item.Key).Worker_Slots(slot) = Id
             Next
 
             For Each slot In item.Value.Guard_Slots
@@ -79,8 +83,23 @@
                 Pos.x = slot.Key.x + item.Value.LandRect.X
                 Pos.y = slot.Key.y + item.Value.LandRect.Y
                 If slot.Value = -1 Then AddGuard(Pos, slot.Value, P)
-            Next            
+            Next
+
+            Dim TempPop As Integer
+            For Each slot In item.Value.Customer_Slots
+                If random(0, 1) = 1 Then
+                    Dim Pos As PointI
+                    Pos.x = slot.Key.x + item.Value.LandRect.X
+                    Pos.y = slot.Key.y + item.Value.LandRect.Y
+                    If slot.Value = -1 Then AddCustomer(Pos, slot.Value, P)
+                    TempPop += 1
+                End If
+                If TempPop >= P.population Then Exit For
+            Next
         Next
+
+
+
 
         'Build_AppartmentH(New PointI(32, 0))
         'Build_PubH(New PointI(32, 16))
@@ -131,14 +150,21 @@
         P.Generated = True
     End Sub
 
-    Sub AddWorkers(ByVal Slot As PointI, ByVal Id As Integer, ByVal P As Planet)
-        Dim CrewId As Integer = P.GetEmptyCrewID
-        Add_Crew(CrewId, New Crew(0, New PointD(Slot.x * 32, Slot.y * 32), P.PlanetID, Officer_location_enum.Planet, 1, character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head, New crew_resource_type(0, 0))) : Id = CrewId
+    Sub AddWorkers(ByVal Slot As PointI, ByVal CrewId As Integer, ByVal P As Planet)
+        Add_Crew(CrewId, New Crew(0, New PointD(Slot.x * 32, Slot.y * 32), P.PlanetID, Officer_location_enum.Planet, 1, character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head, New crew_resource_type(0, 0)))
     End Sub
 
     Sub AddGuard(ByVal Slot As PointI, ByVal Id As Integer, ByVal P As Planet)
         Dim CrewId As Integer = P.GetEmptyCrewID
         Add_Crew(CrewId, New Crew(0, New PointD(Slot.x * 32, Slot.y * 32), P.PlanetID, Officer_location_enum.Planet, 1, character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head, New crew_resource_type(0, 0))) : Id = CrewId
+        Id = CrewId
+    End Sub
+
+    Sub AddCustomer(ByVal Slot As PointI, ByVal Id As Integer, ByVal P As Planet)
+        Dim CrewId As Integer = P.GetEmptyCrewID
+        Add_Crew(CrewId, New Crew(0, New PointD(Slot.x * 32, Slot.y * 32), P.PlanetID, Officer_location_enum.Planet, 1, character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head, New crew_resource_type(0, 0))) : Id = CrewId
+        Id = CrewId
+        P.crew_list(CrewId).command_queue.Enqueue(New Crew.Command_Customer_Do_Something)
     End Sub
 
     Sub BuildRoad(ByVal P As Planet, ByVal Pos As PointI, ByVal Size As Block_Return_Type_Enum)
@@ -232,7 +258,7 @@
 
         'P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + 8, pos.y + 20), New Item_Slots_Type(True))
         'P.Item_Point.Add(New PointI(pos.x + 8, pos.y + 20), New Item_Point_Type(2000, Item_Enum.CrystalCoin))
-        P.Building_List(ID).Worker_Slots.Add(New PointI(2, 2), -1)
+        P.Building_List(ID).Worker_Slots.Add(New PointI(9, 19), -1)
         BuildRoad(P, pos, Block_Return_Type_Enum.WholeTile)
     End Sub
 
@@ -505,18 +531,23 @@
         'P.Building_List.Add(ID, New Planet_Building(OwnerID, New Rectangle(pos.x, pos.y, 32, 16), building_type_enum.Pub))
         P.Building_List(ID).BuildingRect.Add(0, New Rectangle(pos.x + 2, pos.y + 2, 28, 11))
 
-        '        P.Building_List(ID).PickupPoint = New PointI(pos.x, pos.y)
+        P.Building_List(ID).Customer_Slots.Add(New PointI(7, 5), -1)
+        P.Building_List(ID).Customer_Slots.Add(New PointI(7, 7), -1)
+        P.Building_List(ID).Customer_Slots.Add(New PointI(7, 9), -1)
+        P.Building_List(ID).Customer_Slots.Add(New PointI(14, 5), -1)
+        P.Building_List(ID).Customer_Slots.Add(New PointI(14, 7), -1)
+        P.Building_List(ID).Customer_Slots.Add(New PointI(14, 9), -1)
+        P.Building_List(ID).Customer_Slots.Add(New PointI(17, 5), -1)
+        P.Building_List(ID).Customer_Slots.Add(New PointI(17, 7), -1)
+        P.Building_List(ID).Customer_Slots.Add(New PointI(17, 9), -1)
+        P.Building_List(ID).Customer_Slots.Add(New PointI(23, 5), -1)
+        P.Building_List(ID).Customer_Slots.Add(New PointI(23, 7), -1)
+        P.Building_List(ID).Customer_Slots.Add(New PointI(23, 9), -1)
 
-        For y = 5 To 13 Step 2
-            For x = 5 To 27 Step 2
 
-                'P.Building_List(ID).access_point.Add(New PointI(pos.x + x, pos.y + y), New Building_Access_Point_Type(BAP_Type.Customer))
-                P.Building_List(ID).Customer_Slots.Add(New PointI(x, y), -1)
-            Next
-        Next
 
         P.Building_List(ID).Worker_Slots.Add(New PointI(4, 4), -1)
-        
+
         BuildRoad(P, pos, Block_Return_Type_Enum.HorizontalTop)
     End Sub
 
@@ -526,13 +557,19 @@
         'P.Building_List.Add(ID, New Planet_Building(OwnerID, New Rectangle(pos.x, pos.y, 32, 16), building_type_enum.Pub))
         P.Building_List(ID).BuildingRect.Add(0, New Rectangle(pos.x + 2, pos.y + 2, 11, 28))
         'P.Building_List(ID).PickupPoint = New PointI(pos.x, pos.y)
-        For y = 5 To 13 Step 2
-            For x = 5 To 27 Step 2
 
-                'P.Building_List(ID).access_point.Add(New PointI(pos.x + x, pos.y + y), New Building_Access_Point_Type(BAP_Type.Customer))
-                P.Building_List(ID).Customer_Slots.Add(New PointI(x, y), -1)
-            Next
-        Next
+        P.Building_List(ID).Customer_Slots.Add(New PointI(5, 9), -1)
+        P.Building_List(ID).Customer_Slots.Add(New PointI(9, 9), -1)
+
+        P.Building_List(ID).Customer_Slots.Add(New PointI(5, 12), -1)
+        P.Building_List(ID).Customer_Slots.Add(New PointI(9, 12), -1)
+
+        P.Building_List(ID).Customer_Slots.Add(New PointI(5, 19), -1)
+        P.Building_List(ID).Customer_Slots.Add(New PointI(9, 19), -1)
+
+        P.Building_List(ID).Customer_Slots.Add(New PointI(5, 23), -1)
+        P.Building_List(ID).Customer_Slots.Add(New PointI(9, 23), -1)
+
         P.Building_List(ID).Worker_Slots.Add(New PointI(4, 4), -1)
 
         BuildRoad(P, pos, Block_Return_Type_Enum.VerticalL)
