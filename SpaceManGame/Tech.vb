@@ -340,18 +340,18 @@ Public Module Tech
         Const R As Byte = 1
         Const W As Byte = 2
         Const E As Byte = 3
-        Const C As Byte = 4
+        'Const C As Byte = 4
         Const AP As Byte = 5
 
         Const RB As Byte = 6
-        Const WB As Byte = 7
+        'Const WB As Byte = 7
         Const EB As Byte = 8
-        Const CB As Byte = 9
+        'Const CB As Byte = 9
 
         Const RE As Byte = 10
         Const WE As Byte = 11
-        Const EE As Byte = 12
-        Const CE As Byte = 13
+        'Const EE As Byte = 12
+        'Const CE As Byte = 13
 
         
         '0 Blank does not set base "any tile no restrictions"

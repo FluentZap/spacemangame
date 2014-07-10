@@ -176,21 +176,6 @@ Public Class Job_List_Type
 End Class
 
 
-
-Public Class Housing_List_Type    
-    Public SlotID As Integer
-    Public BuildingID As Integer
-
-    Sub New(ByVal SlotID As Integer, ByVal BuildingID As Integer)
-        Me.SlotID = SlotID
-        Me.BuildingID = BuildingID
-    End Sub
-
-
-End Class
-
-
-
 Public Class Planet
     'Planet 
     Public PlanetID As Integer
@@ -212,7 +197,7 @@ Public Class Planet
     'Ai
     Public Exchange As New PlanetExchange
     Public population As Integer
-    Public populationMax As Integer
+    Public populationMax As Integer    
     Public Citizens As Integer
     Public CitizensMax As Integer
     Public Resource_Count As Integer
@@ -230,15 +215,16 @@ Public Class Planet
 
 
 
-    Public Send_List As New Dictionary(Of KeyValuePair(Of Integer, Crew), Send_work_List_Enum)()
+    'Public Send_List As New Dictionary(Of KeyValuePair(Of Integer, Crew), Send_work_List_Enum)()
     Public Item_Point As New Dictionary(Of PointI, Item_Point_Type)()
-    Public Free_Job_List As New Dictionary(Of Integer, HashSet(Of Job_List_Type))()
-    Public Free_Housing_List As New HashSet(Of Housing_List_Type)()
-    Public Free_Job_List_Count As Integer
-    Private BuilderSpawnCounter As Integer = 100
-    Private BuilderCount As Integer
-    Public Builder_List As New Dictionary(Of Integer, Integer)()
-    Public Build_List As New Dictionary(Of Integer, Build_List_Type)()
+
+    'Public Free_Job_List As New Dictionary(Of Integer, HashSet(Of Job_List_Type))()
+    'Public Free_Housing_List As New HashSet(Of Housing_List_Type)()
+    'Public Free_Job_List_Count As Integer
+    'Private BuilderSpawnCounter As Integer = 100
+    'Private BuilderCount As Integer
+    'Public Builder_List As New Dictionary(Of Integer, Integer)()
+    'Public Build_List As New Dictionary(Of Integer, Build_List_Type)()
 
 
 
@@ -278,7 +264,7 @@ Public Class Planet
     End Sub
 
     Sub Set_Population()
-        population = crew_list.Count - BuilderCount
+        'population = crew_list.Count - BuilderCount
         populationMax = 0
         For Each item In Building_List
             If item.Value.Type = building_type_enum.Apartment Then populationMax += 4
@@ -294,7 +280,7 @@ Public Class Planet
 
 
     Sub Start_Building_Constuction(ByVal ID As Integer, ByVal OwnerID As Integer, ByVal Type As building_type_enum, ByVal Pos As PointI, ByVal Block_Type As Block_Return_Type_Enum)
-        If Not Build_List.ContainsKey(ID) Then Build_List.Add(ID, New Build_List_Type)
+        'If Not Build_List.ContainsKey(ID) Then Build_List.Add(ID, New Build_List_Type)
         Pos = Pos * 32
 
         Dim Adjusted_Pos As PointI = Pos
@@ -311,14 +297,14 @@ Public Class Planet
         End Select
 
         Dim tiles As HashSet(Of Build_Tiles) = Build_From_File(Type, Block_Type, Me, Adjusted_Pos, True)
-        Build_List(ID).Build_Progress = tiles.Count
-        Build_List(ID).Type = Type
-        Build_List(ID).OwnerID = OwnerID
-        Build_List(ID).Pos = Pos
-        Build_List(ID).BlockType = Block_Type
+        'Build_List(ID).Build_Progress = tiles.Count
+        'Build_List(ID).Type = Type
+        'Build_List(ID).OwnerID = OwnerID
+        'Build_List(ID).Pos = Pos
+        'Build_List(ID).BlockType = Block_Type
 
         For Each item In tiles
-            Build_List(ID).Tile_List.Add(New PointI(item.X + Adjusted_Pos.x, item.Y + Adjusted_Pos.y), 0)
+            'Build_List(ID).Tile_List.Add(New PointI(item.X + Adjusted_Pos.x, item.Y + Adjusted_Pos.y), 0)
         Next
 
     End Sub
@@ -485,7 +471,7 @@ Public Class Planet
     Function GetEmptyBuildingID() As Integer
         Dim ID As Integer
         For a = 0 To 100000
-            If Not Build_List.ContainsKey(a) AndAlso Not Building_List.ContainsKey(a) Then ID = a : Exit For
+            If Not Building_List.ContainsKey(a) Then ID = a : Exit For
         Next
         Return ID
     End Function
@@ -642,14 +628,35 @@ Public Class Planet
         'If GSTFrequency = 0 Then Process_Planet()
         'If GSTFrequency = 0 Then Process_Citizens()
         Process_Buildings()
-
         Process_Citizens(True)
-
         Update_Officers()
+        CrewRandomTalking()
 
         Handle_Projectiles()
         run_crew_scrips(crew_list)
         Run_animations()
+    End Sub
+
+
+    Sub CrewRandomTalking()
+        If GSTFrequency = 0 Then
+            For Each Crew In crew_list
+                If random(0, 100) = 100 Then
+                    If Crew.Value.Speech.Speech.Count = 0 Then Crew.Value.Speech.Add(AiSpeech.GetAiSpeech(Crew.Value), 20)
+                End If
+                Crew.Value.Speech.Advance()
+            Next
+        End If
+
+
+        For Each Officer In officer_list            
+            If Officer.Value.Greeted = False AndAlso Officer.Value.InBuilding > -1 Then
+                If Building_List(Officer.Value.InBuilding).GetWorker > -1 Then
+                    GetAiSpeech(crew_list(Building_List(Officer.Value.InBuilding).GetWorker), Speech_Enum.Shopkeeper_Greeting)                    
+                    Officer.Value.Greeted = True
+                End If
+            End If
+        Next
     End Sub
 
 
@@ -683,15 +690,15 @@ Public Class Planet
 
         'Remove_Compleated_Buildings
         Dim Remove_List As New HashSet(Of Integer)()
-        For Each Item In Build_List
-            If Item.Value.Compleated = True Then
-                PlanetGenerator.Build_Building(Item.Value.Type, Item.Key, Item.Value.OwnerID, Me, New Block_Return_Type_Class(Item.Value.Pos \ 32, Item.Value.BlockType))
-                Remove_List.Add(Item.Key)
-            End If
-        Next
-        For Each Item In Remove_List
-            Build_List.Remove(Item)
-        Next
+        'For Each Item In Build_List
+        'If Item.Value.Compleated = True Then
+        'PlanetGenerator.Build_Building(Item.Value.Type, Item.Key, Item.Value.OwnerID, Me, New Block_Return_Type_Class(Item.Value.Pos \ 32, Item.Value.BlockType))
+        'Remove_List.Add(Item.Key)
+        'End If
+        'Next
+        'For Each Item In Remove_List
+        'Build_List.Remove(Item)
+        'Next
 
     End Sub
 
@@ -828,7 +835,7 @@ Public Class Planet
     Function GetNearistBuilding(ByVal Building_Type As building_type_enum, ByVal Point As PointI) As Integer
         Dim list As New Dictionary(Of Integer, Integer)()
         For Each building In Building_List
-            'If building.Value.Type = Building_Type Then list.Add(building.Key, CInt(Math.Sqrt(((building.Value.PickupPoint.x - Point.x) ^ 2) + (building.Value.PickupPoint.y - Point.y) ^ 2)))
+            If building.Value.Type = Building_Type Then list.Add(building.Key, CInt(Math.Sqrt(((building.Value.LandRect.Left + building.Value.LandRect.Width \ 2) ^ 2) + (building.Value.LandRect.Top + building.Value.LandRect.Height \ 2) ^ 2)))
         Next
 
         Dim Lowest As Integer = 1000000
@@ -839,6 +846,28 @@ Public Class Planet
         If Building_List.Count = 0 Then Return -1
         Return ID
     End Function
+
+    Function GetNearistCustomerSlot(ByVal Building_Type As building_type_enum, ByVal Point As PointI, ByVal CustomerID As Integer) As Slot_Return_Type
+        Dim list As New Dictionary(Of Integer, Integer)()
+        For Each building In Building_List
+            If building.Value.EmptyCustomerSlots > 0 Then
+                If building.Value.Type = Building_Type Then list.Add(building.Key, CInt(Math.Sqrt(((building.Value.LandRect.Left + building.Value.LandRect.Width \ 2) ^ 2) + (building.Value.LandRect.Top + building.Value.LandRect.Height \ 2) ^ 2)))
+            End If
+        Next
+
+        Dim Lowest As Integer = 1000000
+        Dim BuildingID As Integer
+        For Each item In list
+            If item.Value < Lowest Then Lowest = item.Value : BuildingID = item.Key
+        Next
+        If Building_List.Count = 0 OrElse list.Count = 0 Then Return New Slot_Return_Type()
+
+        Dim slot As New Slot_Return_Type(Building_List(BuildingID).GetEmptyCustomerSlot, BuildingID)
+        Building_List(BuildingID).Customer_Slots(slot.Point) = CustomerID        
+        Return slot
+    End Function
+
+
 
     Function Check_Resources(ByVal BuildingID As Integer, ByVal Item As Item_Enum) As Integer
         Dim amount As Integer
@@ -859,74 +888,34 @@ Public Class Planet
 
 
     Sub Process_crew()
-        If GSTFrequency = 0 Then
-            'Send Crew to work
-            'Send Crew to bank if needed
-            'Send Crew to Pub
-            'Send Crew home
-            'al la repeto
+           'Send Crew to work
+        'Send Crew to bank if needed
+        'Send Crew to Pub
+        'Send Crew home
+        'al la repeto
 
 
-            'Send to work
-            If GST = 800 Then
-                For Each Crew In crew_list
-                    If Crew.Value.WorkBuilding > -1 AndAlso Crew.Value.WorkShift = Work_Shift_Enum.Morning Then
-                        Send_List.Add(Crew, Send_work_List_Enum.Work)
-                    End If
-                Next
-            ElseIf GST = 1800 Then
-                For Each Crew In crew_list
-                    If Crew.Value.WorkBuilding > -1 AndAlso Crew.Value.WorkShift = Work_Shift_Enum.Mid Then
-                        Send_List.Add(Crew, Send_work_List_Enum.Work)
-                    End If
-                Next
-            ElseIf GST = 2800 Then
-                For Each Crew In crew_list
-                    If Crew.Value.WorkBuilding > -1 AndAlso Crew.Value.WorkShift = Work_Shift_Enum.Night Then
-                        Send_List.Add(Crew, Send_work_List_Enum.Work)
-                    End If
-                Next
-            End If
+        'Send to work            
 
-            'Send crew home
-            If GST = 1000 Then
-                For Each Crew In crew_list
-                    If Crew.Value.WorkBuilding > -1 AndAlso Crew.Value.WorkShift = Work_Shift_Enum.Night Then
-                        Send_List.Add(Crew, Send_work_List_Enum.Home)
-                    End If
-                Next
-            ElseIf GST = 2000 Then
-                For Each Crew In crew_list
-                    If Crew.Value.WorkBuilding > -1 AndAlso Crew.Value.WorkShift = Work_Shift_Enum.Morning Then
-                        Send_List.Add(Crew, Send_work_List_Enum.Home)
-                    End If
-                Next
-            ElseIf GST = 3000 Then
-                For Each Crew In crew_list
-                    If Crew.Value.WorkBuilding > -1 AndAlso Crew.Value.WorkShift = Work_Shift_Enum.Mid Then
-                        Send_List.Add(Crew, Send_work_List_Enum.Home)
-                    End If
-                Next
-            End If
+        'Send crew home
 
 
-            If Send_List.Count > 0 Then
 
-                Select Case Send_List.First.Value
+        'If Send_List.Count > 0 Then
 
-                    Case Is = Send_work_List_Enum.Work
-                        Send_Crew_ToWork(Send_List.First.Key)
-                        Send_List.Remove(Send_List.First.Key)
+        'Select Case Send_List.First.Value
 
-                    Case Is = Send_work_List_Enum.Home
-                        Send_Crew_Home(Send_List.First.Key)
-                        Send_List.Remove(Send_List.First.Key)
+        'Case Is = Send_work_List_Enum.Work
+        'Send_Crew_ToWork(Send_List.First.Key)
+        'Send_List.Remove(Send_List.First.Key)
 
-                End Select
+        'Case Is = Send_work_List_Enum.Home
+        'Send_Crew_Home(Send_List.First.Key)
+        'Send_List.Remove(Send_List.First.Key)
 
-            End If
+        'End Select
 
-        End If
+        'End If
 
     End Sub
 
@@ -940,29 +929,29 @@ Public Class Planet
 
         'Not already working/going to work
         'If Not Building_List(Crew.Value.WorkBuilding).Working_crew_list.Contains(Crew.Key) AndAlso Not Building_List(Crew.Value.WorkBuilding).Assigned_crew_list.Contains(Crew.Key) Then
-        If Crew.Value.WorkBuilding > -1 Then
+        'If Crew.Value.WorkBuilding > -1 Then
 
 
-            'Worker
-            If Crew.Value.Worker_Type = Worker_Type_Enum.Worker Then
-                'Find AP in building
-                'For Each AP In Building_List(Crew.Value.WorkBuilding).access_point
-                'If AP.Value.Type = BAP_Type.Worker AndAlso AP.Value.Used = False AndAlso AP.Value.NextUp = False Then
-                'work_Point = AP.Key
-                'Found_AP = True
-                'Exit For
-            End If
-            'Next
+        'Worker
+        'If Crew.Value.Worker_Type = Worker_Type_Enum.Worker Then
+        'Find AP in building
+        'For Each AP In Building_List(Crew.Value.WorkBuilding).access_point
+        'If AP.Value.Type = BAP_Type.Worker AndAlso AP.Value.Used = False AndAlso AP.Value.NextUp = False Then
+        'work_Point = AP.Key
+        'Found_AP = True
+        'Exit For
+        'End If
+        'Next
 
-            If Found_AP = False Then
-                'For Each AP In Building_List(Crew.Value.WorkBuilding).access_point
-                'If AP.Value.Type = BAP_Type.Worker AndAlso AP.Value.NextUp = False Then
-                'work_Point = AP.Key
-                'Found_AP = True
-                'Exit For
-            End If
-            'Next
+        If Found_AP = False Then
+            'For Each AP In Building_List(Crew.Value.WorkBuilding).access_point
+            'If AP.Value.Type = BAP_Type.Worker AndAlso AP.Value.NextUp = False Then
+            'work_Point = AP.Key
+            'Found_AP = True
+            'Exit For
         End If
+        'Next
+        'End If
 
 
         'If Open access point is found send crew to work
@@ -974,10 +963,10 @@ Public Class Planet
 
             'If Not tile_map(Crew.Value.find_tile.x, Crew.Value.find_tile.y).walkable = walkable_type_enum.Walkable Then Exit For
 
-            Dim tile As PointI = Crew.Value.find_tile
+            'Dim tile As PointI = Crew.Value.find_tile
 
 
-            path_find.Standard_Pathfind(tile, work_Point)
+            'path_find.Standard_Pathfind(tile, work_Point)
             If path_find.Found_State = Pathfind.Pathfind.PFState.Found Then
 
                 If Crew.Value.command_queue.Any Then
@@ -991,11 +980,11 @@ Public Class Planet
                 Crew.Value.command_queue.Clear()
                 For Each dest In list
                     If dest = work_Point Then
-                        Crew.Value.command_queue.Enqueue(New Crew.Command_Try_Work(work_Point))
+                        'Crew.Value.command_queue.Enqueue(New Crew.Command_Try_Work(work_Point))
                     End If
-                    Crew.Value.command_queue.Enqueue(New Crew.Command_move(New PointD(dest.x * 32, dest.y * 32)))
+                    'Crew.Value.command_queue.Enqueue(New Crew.Command_move(New PointD(dest.x * 32, dest.y * 32)))
                 Next
-                Crew.Value.command_queue.Enqueue(New Crew.Command_Start_Work(work_Point))
+                'Crew.Value.command_queue.Enqueue(New Crew.Command_Start_Work(work_Point))
             End If
 
         End If
@@ -1006,29 +995,29 @@ Public Class Planet
 
 
 
-        If Crew.Value.Worker_Type = Worker_Type_Enum.Transporter Then
+        'If Crew.Value.Worker_Type = Worker_Type_Enum.Transporter Then
 
-            'Dim point As PointI = Building_List(Crew.Value.WorkBuilding).PickupPoint
-            'If Not tile_map(Crew.Value.find_tile.x, Crew.Value.find_tile.y).walkable = walkable_type_enum.Walkable Then Exit For
-
-
-            Dim tile As PointI = Crew.Value.find_tile
-
-            'path_find.Standard_Pathfind(tile, point)
-
-            If path_find.Found_State = Pathfind.Pathfind.PFState.Found Then
-                Dim list As LinkedList(Of PointI)
-                list = path_find.Path
-
-                'Need to add wait for finish                                
-                For Each dest In list
-                    Crew.Value.command_queue.Enqueue(New Crew.Command_move(New PointD(dest.x * 32, dest.y * 32)))
-                Next
-                Crew.Value.command_queue.Enqueue(New Crew.Command_Trans_Start())
+        'Dim point As PointI = Building_List(Crew.Value.WorkBuilding).PickupPoint
+        'If Not tile_map(Crew.Value.find_tile.x, Crew.Value.find_tile.y).walkable = walkable_type_enum.Walkable Then Exit For
 
 
-            End If
+        Dim tile As PointI = Crew.Value.find_tile
+
+        'path_find.Standard_Pathfind(tile, point)
+
+        If path_find.Found_State = Pathfind.Pathfind.PFState.Found Then
+            Dim list As LinkedList(Of PointI)
+            list = path_find.Path
+
+            'Need to add wait for finish                                
+            For Each dest In list
+                Crew.Value.command_queue.Enqueue(New Crew.Command_move(New PointD(dest.x * 32, dest.y * 32)))
+            Next
+            'Crew.Value.command_queue.Enqueue(New Crew.Command_Trans_Start())
+
+
         End If
+        'End If
 
 
         'End If
@@ -1042,65 +1031,65 @@ Public Class Planet
         Dim Home_rect As Rectangle
 
 
-        If crew.Value.HomeBuilding > -1 Then
+        'If crew.Value.HomeBuilding > -1 Then
 
-            'Send workers home after errands
-            If crew.Value.Worker_Type = Worker_Type_Enum.Worker Then
+        'Send workers home after errands
+        'If crew.Value.Worker_Type = Worker_Type_Enum.Worker Then
 
-                Home_rect = Building_List(crew.Value.HomeBuilding).BuildingRect(crew.Value.HomeSpace)
-                Home_Point.x = CInt(Home_rect.X + Home_rect.Width / 2)
-                Home_Point.y = CInt(Home_rect.Y + Home_rect.Height / 2)
-                'Find AP in building                    
-                'Pathfind
+        'Home_rect = Building_List(crew.Value.HomeBuilding).BuildingRect(crew.Value.HomeSpace)
+        Home_Point.x = CInt(Home_rect.X + Home_rect.Width / 2)
+        Home_Point.y = CInt(Home_rect.Y + Home_rect.Height / 2)
+        'Find AP in building                    
+        'Pathfind
 
-                If Not tile_map(crew.Value.find_tile.x, crew.Value.find_tile.y).walkable = walkable_type_enum.Walkable Then Exit Sub
-                Dim tile As PointI = crew.Value.find_tile
+        If Not tile_map(crew.Value.find_tile.x, crew.Value.find_tile.y).walkable = walkable_type_enum.Walkable Then Exit Sub
+        Dim tile As PointI = crew.Value.find_tile
 
-                crew.Value.command_queue.Clear()
-                Dim End_Point As PointI
-                End_Point = Send_Crew_Errands(crew.Value, crew.Key)
+        crew.Value.command_queue.Clear()
+        Dim End_Point As PointI
+        End_Point = Send_Crew_Errands(crew.Value, crew.Key)
 
-                'If Building_List(crew.Value.WorkBuilding).Working_crew_list.Contains(crew.Key) Then Building_List(crew.Value.WorkBuilding).Working_crew_list.Remove(crew.Key)
-                'If Building_List(crew.Value.WorkBuilding).access_point.ContainsKey(tile) Then Building_List(crew.Value.WorkBuilding).access_point(tile).Used = False
-                MoveCrewTo(End_Point, Home_Point, crew.Value)
+        'If Building_List(crew.Value.WorkBuilding).Working_crew_list.Contains(crew.Key) Then Building_List(crew.Value.WorkBuilding).Working_crew_list.Remove(crew.Key)
+        'If Building_List(crew.Value.WorkBuilding).access_point.ContainsKey(tile) Then Building_List(crew.Value.WorkBuilding).access_point(tile).Used = False
+        MoveCrewTo(End_Point, Home_Point, crew.Value)
 
-            End If
+        'End If
 
-            'Send transporters home after Errands
-            If crew.Value.Worker_Type = Worker_Type_Enum.Transporter Then
+        'Send transporters home after Errands
+        'If crew.Value.Worker_Type = Worker_Type_Enum.Transporter Then
 
-                Home_rect = Building_List(crew.Value.HomeBuilding).BuildingRect(crew.Value.HomeSpace)
-                Home_Point.x = CInt(Home_rect.X + Home_rect.Width / 2)
-                Home_Point.y = CInt(Home_rect.Y + Home_rect.Height / 2)
-                'Find AP in building                    
-                'Pathfind
-                crew.Value.RemoveWhenDone = True
-                'If Not tile_map(Crew.Value.find_tile.x, Crew.Value.find_tile.y).walkable = walkable_type_enum.Walkable Then Exit For
-                crew.Value.command_queue.Enqueue(New Crew.Command_Trans_Start())
-
-
-                Dim End_Point As PointI
-                End_Point = Send_Crew_Errands(crew.Value, crew.Key)
-
-                MoveCrewTo(End_Point, Home_Point, crew.Value)
+        'Home_rect = Building_List(crew.Value.HomeBuilding).BuildingRect(crew.Value.HomeSpace)
+        Home_Point.x = CInt(Home_rect.X + Home_rect.Width / 2)
+        Home_Point.y = CInt(Home_rect.Y + Home_rect.Height / 2)
+        'Find AP in building                    
+        'Pathfind
+        'crew.Value.RemoveWhenDone = True
+        'If Not tile_map(Crew.Value.find_tile.x, Crew.Value.find_tile.y).walkable = walkable_type_enum.Walkable Then Exit For
+        'crew.Value.command_queue.Enqueue(New Crew.Command_Trans_Start())
 
 
-                'path_find.Standard_Pathfind(End_Point, Home_Point)
-                'If path_find.Found_State = Pathfind.Pathfind.PFState.Found Then
-                'Dim list As LinkedList(Of PointI)
-                'list = path_find.Path
-                'Need to add sleep and stuuuuf
+        'Dim End_Point As PointI
+        End_Point = Send_Crew_Errands(crew.Value, crew.Key)
 
-                'For Each dest In list
-                'crew.Value.command_queue.Enqueue(New Crew.Command_move(New PointD(dest.x * 32, dest.y * 32)))
-                'Next
-                'End If
-            End If
+        MoveCrewTo(End_Point, Home_Point, crew.Value)
 
 
+        'path_find.Standard_Pathfind(End_Point, Home_Point)
+        'If path_find.Found_State = Pathfind.Pathfind.PFState.Found Then
+        'Dim list As LinkedList(Of PointI)
+        'list = path_find.Path
+        'Need to add sleep and stuuuuf
+
+        'For Each dest In list
+        'crew.Value.command_queue.Enqueue(New Crew.Command_move(New PointD(dest.x * 32, dest.y * 32)))
+        'Next
+        'End If
+        'End If
 
 
-        End If
+
+
+        'End If
 
 
     End Sub
@@ -1110,7 +1099,7 @@ Public Class Planet
 
         If Not tile_map(Crew.find_tile.x, Crew.find_tile.y).walkable = walkable_type_enum.Walkable Then Exit Function
         Dim tile As PointI
-        If Crew.Worker_Type = Worker_Type_Enum.Worker Then tile = Crew.find_tile
+        'If Crew.Worker_Type = Worker_Type_Enum.Worker Then tile = Crew.find_tile
         'If Crew.Worker_Type = Worker_Type_Enum.Transporter Then tile = Building_List(Crew.WorkBuilding).PickupPoint
 
         Dim GotoBank As Boolean
@@ -1124,19 +1113,19 @@ Public Class Planet
         Dim Home_rect As Rectangle
 
         'SetHomeBuildings
-        If Crew.BankBuilding = -1 Then
-            Home_rect = Building_List(Crew.HomeBuilding).BuildingRect(Crew.HomeSpace)
-            Home_Point.x = CInt(Home_rect.X + Home_rect.Width / 2)
-            Home_Point.y = CInt(Home_rect.Y + Home_rect.Height / 2)
-            Crew.BankBuilding = GetNearistBuilding(building_type_enum.Bank, Home_Point)
-        End If
+        'If Crew.BankBuilding = -1 Then
+        'Home_rect = Building_List(Crew.HomeBuilding).BuildingRect(Crew.HomeSpace)
+        Home_Point.x = CInt(Home_rect.X + Home_rect.Width / 2)
+        Home_Point.y = CInt(Home_rect.Y + Home_rect.Height / 2)
+        'Crew.BankBuilding = GetNearistBuilding(building_type_enum.Bank, Home_Point)
+        'End If
 
-        If Crew.PubBuilding = -1 Then
-            Home_rect = Building_List(Crew.HomeBuilding).BuildingRect(Crew.HomeSpace)
-            Home_Point.x = CInt(Home_rect.X + Home_rect.Width / 2)
-            Home_Point.y = CInt(Home_rect.Y + Home_rect.Height / 2)
-            Crew.PubBuilding = GetNearistBuilding(building_type_enum.Pub, Home_Point)
-        End If
+        'If Crew.PubBuilding = -1 Then
+        'Home_rect = Building_List(Crew.HomeBuilding).BuildingRect(Crew.HomeSpace)
+        Home_Point.x = CInt(Home_rect.X + Home_rect.Width / 2)
+        Home_Point.y = CInt(Home_rect.Y + Home_rect.Height / 2)
+        'Crew.PubBuilding = GetNearistBuilding(building_type_enum.Pub, Home_Point)
+        'End If
 
 
 
@@ -1144,44 +1133,44 @@ Public Class Planet
 
         If GotoBank = True Then
             'Need to add find new bank code
-            If Crew.BankBuilding > -1 Then
-                'If crew has a bank
-                'For Each AP In Building_List(Crew.BankBuilding).access_point
-                'If AP.Value.Type = BAP_Type.Customer AndAlso AP.Value.Used = False Then Bank_Point = AP.Key : Found_Bank_AP = True : Exit For
-                'Next
-
-                If Found_Bank_AP = True Then
-                    Found_Bank_AP = False
-                    'Building_List(Crew.BankBuilding).access_point(Bank_Point).Used = True
-
-                    MoveCrewTo(tile, Bank_Point, Crew)
-                    'Add Bank Script
-                    'Crew.command_queue.Enqueue(New Crew.Command_Pub_Start(Bank_Point, Pub_Time))
-                    tile = Bank_Point
-                End If
-            End If
-        End If
-
-        'Need to add find new pub code
-        If Crew.PubBuilding > -1 Then
-            Pub_Time = random(100, 200)
-            Dim Found_AP As Boolean
-            Dim Pub_Point As PointI
-            'For Each AP In Building_List(Crew.PubBuilding).access_point
-            'If AP.Value.Type = BAP_Type.Customer AndAlso AP.Value.Used = False Then Pub_Point = AP.Key : Found_AP = True : Exit For
+            'If Crew.BankBuilding > -1 Then
+            'If crew has a bank
+            'For Each AP In Building_List(Crew.BankBuilding).access_point
+            'If AP.Value.Type = BAP_Type.Customer AndAlso AP.Value.Used = False Then Bank_Point = AP.Key : Found_Bank_AP = True : Exit For
             'Next
 
-            If Found_AP = True Then
-                Found_AP = False
-                'Set NextUp to work to true
-                'Building_List(Crew.PubBuilding).access_point(Pub_Point).Used = True
-                'Pathfind
-                MoveCrewTo(tile, Pub_Point, Crew)
-                Crew.command_queue.Enqueue(New Crew.Command_Pub_Start(Pub_Point, Pub_Time))
-                tile = Pub_Point
+            If Found_Bank_AP = True Then
+                Found_Bank_AP = False
+                'Building_List(Crew.BankBuilding).access_point(Bank_Point).Used = True
 
+                MoveCrewTo(tile, Bank_Point, Crew)
+                'Add Bank Script
+                'Crew.command_queue.Enqueue(New Crew.Command_Pub_Start(Bank_Point, Pub_Time))
+                tile = Bank_Point
             End If
         End If
+        'End If
+
+        'Need to add find new pub code
+        'If Crew.PubBuilding > -1 Then
+        Pub_Time = random(100, 200)
+        Dim Found_AP As Boolean
+        Dim Pub_Point As PointI
+        'For Each AP In Building_List(Crew.PubBuilding).access_point
+        'If AP.Value.Type = BAP_Type.Customer AndAlso AP.Value.Used = False Then Pub_Point = AP.Key : Found_AP = True : Exit For
+        'Next
+
+        If Found_AP = True Then
+            Found_AP = False
+            'Set NextUp to work to true
+            'Building_List(Crew.PubBuilding).access_point(Pub_Point).Used = True
+            'Pathfind
+            MoveCrewTo(tile, Pub_Point, Crew)
+            'Crew.command_queue.Enqueue(New Crew.Command_Pub_Start(Pub_Point, Pub_Time))
+            tile = Pub_Point
+
+        End If
+        'End If
 
         Return tile
 
@@ -1200,31 +1189,31 @@ Public Class Planet
         MoveCrewTo(tile, Safe_Point, Crew)
 
         'Pickup Money
-        Crew.command_queue.Enqueue(New Crew.Command_Trans_Pickup(PickupCash))
+        'Crew.command_queue.Enqueue(New Crew.Command_Trans_Pickup(PickupCash))
 
         'Send To Buy Point
-        MoveCrewTo(Safe_Point, Exchange_Point, Crew)
+        'MoveCrewTo(Safe_Point, Exchange_Point, Crew)
 
         'Buy Goods
-        Crew.command_queue.Enqueue(New Crew.Command_Trans_Buy(BuyAmount, BuyType))
+        'Crew.command_queue.Enqueue(New Crew.Command_Trans_Buy(BuyAmount, BuyType))
 
         'Pickup Any Exchange money
-        Crew.command_queue.Enqueue(New Crew.Command_Trans_Pickup_Exchange(BuildingID))
+        'Crew.command_queue.Enqueue(New Crew.Command_Trans_Pickup_Exchange(BuildingID))
 
         'Send To Drop Off Point
-        MoveCrewTo(Exchange_Point, Building_Point, Crew)
+        'MoveCrewTo(Exchange_Point, Building_Point, Crew)
 
         'Drop Off Goods
-        Crew.command_queue.Enqueue(New Crew.Command_Trans_Dropoff(BuildingID, BuyAmount, BuyType))
+        'Crew.command_queue.Enqueue(New Crew.Command_Trans_Dropoff(BuildingID, BuyAmount, BuyType))
 
         'Send To Safe Point
-        MoveCrewTo(Building_Point, Safe_Point, Crew)
+        'MoveCrewTo(Building_Point, Safe_Point, Crew)
 
         'Dropoff Money
-        Crew.command_queue.Enqueue(New Crew.Command_Trans_Dropoff_Money(BuildingID))
+        'Crew.command_queue.Enqueue(New Crew.Command_Trans_Dropoff_Money(BuildingID))
 
         'Add to workers
-        Crew.command_queue.Enqueue(New Crew.Command_Trans_Start())
+        'Crew.command_queue.Enqueue(New Crew.Command_Trans_Start())
     End Sub
 
 
@@ -1239,31 +1228,31 @@ Public Class Planet
         Crew.command_queue.Clear()
 
         'Send To Point to pickup
-        MoveCrewTo(tile, Building_Point, Crew)
+        'MoveCrewTo(tile, Building_Point, Crew)
 
         'Pickup Goods
-        Crew.command_queue.Enqueue(New Crew.Command_Trans_Pickup_Goods(BuildingID, SellAmount, SellType))
+        'Crew.command_queue.Enqueue(New Crew.Command_Trans_Pickup_Goods(BuildingID, SellAmount, SellType))
 
         'Send To Buy Point
-        MoveCrewTo(Building_Point, Exchange_Point, Crew)
+        'MoveCrewTo(Building_Point, Exchange_Point, Crew)
 
         'Sell Goods
-        Crew.command_queue.Enqueue(New Crew.Command_Trans_Sell(BuildingID, SellAmount, SellType))
+        'Crew.command_queue.Enqueue(New Crew.Command_Trans_Sell(BuildingID, SellAmount, SellType))
 
         'Pickup Any Exchange money
-        Crew.command_queue.Enqueue(New Crew.Command_Trans_Pickup_Exchange(BuildingID))
+        'Crew.command_queue.Enqueue(New Crew.Command_Trans_Pickup_Exchange(BuildingID))
 
         'Send To Safe Point
-        MoveCrewTo(Exchange_Point, Safe_Point, Crew)
+        'MoveCrewTo(Exchange_Point, Safe_Point, Crew)
 
         'Dropoff Money
-        Crew.command_queue.Enqueue(New Crew.Command_Trans_Dropoff_Money(BuildingID))
+        'Crew.command_queue.Enqueue(New Crew.Command_Trans_Dropoff_Money(BuildingID))
 
         'Send To Drop Off Point
-        MoveCrewTo(Safe_Point, Building_Point, Crew)
+        'MoveCrewTo(Safe_Point, Building_Point, Crew)
 
         'Add to workers
-        Crew.command_queue.Enqueue(New Crew.Command_Trans_Start())
+        'Crew.command_queue.Enqueue(New Crew.Command_Trans_Start())
     End Sub
 
 
@@ -1279,44 +1268,44 @@ Public Class Planet
         MoveCrewTo(tile, Safe_Point, Crew)
 
         'Pickup Money
-        Crew.command_queue.Enqueue(New Crew.Command_Trans_Pickup(PickupCash))
+        'Crew.command_queue.Enqueue(New Crew.Command_Trans_Pickup(PickupCash))
 
 
         'Send To Point to pickup
         MoveCrewTo(Safe_Point, Building_Point, Crew)
 
         'Pickup Goods
-        Crew.command_queue.Enqueue(New Crew.Command_Trans_Pickup_Goods(BuildingID, SellAmount, SellType))
+        'Crew.command_queue.Enqueue(New Crew.Command_Trans_Pickup_Goods(BuildingID, SellAmount, SellType))
 
         'Send To Buy Point
         MoveCrewTo(Building_Point, Exchange_Point, Crew)
 
         'Buy Goods
-        Crew.command_queue.Enqueue(New Crew.Command_Trans_Buy(BuyAmount, BuyType))
+        'Crew.command_queue.Enqueue(New Crew.Command_Trans_Buy(BuyAmount, BuyType))
 
         'Sell Goods
-        Crew.command_queue.Enqueue(New Crew.Command_Trans_Sell(BuildingID, SellAmount, SellType))
+        'Crew.command_queue.Enqueue(New Crew.Command_Trans_Sell(BuildingID, SellAmount, SellType))
 
         'Pickup Any Exchange money
-        Crew.command_queue.Enqueue(New Crew.Command_Trans_Pickup_Exchange(BuildingID))
+        'Crew.command_queue.Enqueue(New Crew.Command_Trans_Pickup_Exchange(BuildingID))
 
         'Send To Drop Off Point
         MoveCrewTo(Exchange_Point, Building_Point, Crew)
 
         'Drop Off Goods
-        Crew.command_queue.Enqueue(New Crew.Command_Trans_Dropoff(BuildingID, BuyAmount, BuyType))
+        'Crew.command_queue.Enqueue(New Crew.Command_Trans_Dropoff(BuildingID, BuyAmount, BuyType))
 
         'Send To Safe Point
         MoveCrewTo(Building_Point, Safe_Point, Crew)
 
         'Dropoff Money
-        Crew.command_queue.Enqueue(New Crew.Command_Trans_Dropoff_Money(BuildingID))
+        'Crew.command_queue.Enqueue(New Crew.Command_Trans_Dropoff_Money(BuildingID))
 
         'Send To Drop Off Point
         MoveCrewTo(Safe_Point, Building_Point, Crew)
 
         'Add to workers
-        Crew.command_queue.Enqueue(New Crew.Command_Trans_Start())
+        'Crew.command_queue.Enqueue(New Crew.Command_Trans_Start())
     End Sub
 
 

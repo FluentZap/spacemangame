@@ -100,6 +100,9 @@
         button_texture(button_texture_enum.PLV__Level_Up) = Direct3D.TextureLoader.FromFile(d3d_device, Application.StartupPath + "\Data\Textures\menu\PLV_Level.png", 24, 16, 0, Direct3D.Usage.None, Texture_Format, Direct3D.Pool.Managed, Filter, MipFilter, Color.FromArgb(255, 0, 255, 0).ToArgb)
 
 
+        'Panels
+        button_texture(button_texture_enum.Panel__Shop_Panel) = Direct3D.TextureLoader.FromFile(d3d_device, Application.StartupPath + "\Data\Textures\menu\Shop_Panel.png", 660, 480, 0, Direct3D.Usage.None, Texture_Format, Direct3D.Pool.Managed, Filter, MipFilter, 0)
+
 
         'Personal view
         button_texture(button_texture_enum.Personal__HealthOverlay) = Direct3D.TextureLoader.FromFile(d3d_device, Application.StartupPath + "\Data\Textures\menu\Personal_HealthOverlay.png", 896, 96, 0, Direct3D.Usage.None, Texture_Format, Direct3D.Pool.Managed, Filter, MipFilter, Color.FromArgb(255, 0, 255, 0).ToArgb)
@@ -130,9 +133,7 @@
         planet_tile_texture(planet_tile_type_enum.Forest_Planet) = Direct3D.TextureLoader.FromFile(d3d_device, Application.StartupPath + "\Data\Textures\Tiles\planet1.png", 640, 32, 0, Direct3D.Usage.None, Texture_Format, Direct3D.Pool.Managed, Filter, MipFilter, 0)
 
         planet_tile_texture(planet_tile_type_enum.Desert_Planet) = Direct3D.TextureLoader.FromFile(d3d_device, Application.StartupPath + "\Data\Textures\Tiles\Desert_Planet.png", 1920, 32, 0, Direct3D.Usage.None, Texture_Format, Direct3D.Pool.Managed, Filter, MipFilter, 0)
-
         planet_tile_texture(planet_tile_type_enum.Desert_Mine) = Direct3D.TextureLoader.FromFile(d3d_device, Application.StartupPath + "\Data\Textures\Tiles\Desert_Mine.png", 960, 32, 0, Direct3D.Usage.None, Texture_Format, Direct3D.Pool.Managed, Filter, MipFilter, 0)
-
         planet_tile_texture(planet_tile_type_enum.Desert_Capitol) = Direct3D.TextureLoader.FromFile(d3d_device, Application.StartupPath + "\Data\Textures\Tiles\Desert_Capitol.png", 1280, 32, 0, Direct3D.Usage.None, Texture_Format, Direct3D.Pool.Managed, Filter, MipFilter, 0)
 
         planet_tile_texture(planet_tile_type_enum.House) = Direct3D.TextureLoader.FromFile(d3d_device, Application.StartupPath + "\Data\Textures\Tiles\Building_House_Small.png", 576, 32, 0, Direct3D.Usage.None, Texture_Format, Direct3D.Pool.Managed, Filter, MipFilter, 0)
@@ -208,23 +209,23 @@
         character_texture(character_sprite_set_enum.Human_Renagade_3) = Direct3D.TextureLoader.FromFile(d3d_device, Application.StartupPath + "\Data\Textures\Characters\Renagade3.png", 256, 192, 0, Direct3D.Usage.None, Texture_Format, Direct3D.Pool.Managed, Filter, MipFilter, Color.FromArgb(255, 0, 255, 0).ToArgb)
 
 
-        panel_texture(panel_texture_enum.sbm1) = Direct3D.TextureLoader.FromFile(d3d_device, Application.StartupPath + "\Data\textures\panels\800 x 180.png", 800, 180, 0, Direct3D.Usage.None, Texture_Format, Direct3D.Pool.Managed, Filter, MipFilter, 0)
-        panel_texture(panel_texture_enum.minimap) = Direct3D.TextureLoader.FromFile(d3d_device, Application.StartupPath + "\Data\textures\panels\minimap.png", 200, 210, 0, Direct3D.Usage.None, Texture_Format, Direct3D.Pool.Managed, Filter, MipFilter, Color.FromArgb(255, 0, 255, 0).ToArgb)
-        panel_texture(panel_texture_enum.white_square) = Direct3D.TextureLoader.FromFile(d3d_device, Application.StartupPath + "\Data\textures\panels\select_tile.png", 32, 32, 0, Direct3D.Usage.None, Texture_Format, Direct3D.Pool.Managed, Filter, MipFilter, 0)
-        panel_texture(panel_texture_enum.palette_button) = Direct3D.TextureLoader.FromFile(d3d_device, Application.StartupPath + "\Data\textures\panels\palette button.png", 80, 35, 0, Direct3D.Usage.None, Texture_Format, Direct3D.Pool.Managed, Filter, MipFilter, 0)
-        panel_texture(panel_texture_enum.palette_tab) = Direct3D.TextureLoader.FromFile(d3d_device, Application.StartupPath + "\Data\textures\panels\palette tab.png", 100, 35, 0, Direct3D.Usage.None, Texture_Format, Direct3D.Pool.Managed, Filter, MipFilter, 0)
+        'panel_texture(panel_texture_enum.sbm1) = Direct3D.TextureLoader.FromFile(d3d_device, Application.StartupPath + "\Data\textures\panels\800 x 180.png", 800, 180, 0, Direct3D.Usage.None, Texture_Format, Direct3D.Pool.Managed, Filter, MipFilter, 0)
+        'panel_texture(panel_texture_enum.minimap) = Direct3D.TextureLoader.FromFile(d3d_device, Application.StartupPath + "\Data\textures\panels\minimap.png", 200, 210, 0, Direct3D.Usage.None, Texture_Format, Direct3D.Pool.Managed, Filter, MipFilter, Color.FromArgb(255, 0, 255, 0).ToArgb)
+        'panel_texture(panel_texture_enum.white_square) = Direct3D.TextureLoader.FromFile(d3d_device, Application.StartupPath + "\Data\textures\panels\select_tile.png", 32, 32, 0, Direct3D.Usage.None, Texture_Format, Direct3D.Pool.Managed, Filter, MipFilter, 0)
+        'panel_texture(panel_texture_enum.palette_button) = Direct3D.TextureLoader.FromFile(d3d_device, Application.StartupPath + "\Data\textures\panels\palette button.png", 80, 35, 0, Direct3D.Usage.None, Texture_Format, Direct3D.Pool.Managed, Filter, MipFilter, 0)
+        'panel_texture(panel_texture_enum.palette_tab) = Direct3D.TextureLoader.FromFile(d3d_device, Application.StartupPath + "\Data\textures\panels\palette tab.png", 100, 35, 0, Direct3D.Usage.None, Texture_Format, Direct3D.Pool.Managed, Filter, MipFilter, 0)
+
+
+
 
         Cursor1 = d3d_device.CreateOffscreenPlainSurface(32, 32, Format.A8R8G8B8, Pool.Default)
         SurfaceLoader.FromFile(Cursor1, Application.StartupPath + "\data\textures\cursor\cur1.png", Filter.None, 0)
 
 
         icon_texture(0) = Direct3D.TextureLoader.FromFile(d3d_device, Application.StartupPath + "\data\textures\icons\star.png", 0, 0, 0, Direct3D.Usage.None, Texture_Format, Direct3D.Pool.Managed, Filter, MipFilter, Color.FromArgb(255, 0, 255, 0).ToArgb)
-
         icon_texture(1) = Direct3D.TextureLoader.FromFile(d3d_device, Application.StartupPath + "\data\textures\icons\moon.png", 0, 0, 0, Direct3D.Usage.None, Texture_Format, Direct3D.Pool.Managed, Filter, MipFilter, Color.FromArgb(255, 0, 255, 0).ToArgb)
-
         icon_texture(2) = Direct3D.TextureLoader.FromFile(d3d_device, Application.StartupPath + "\data\textures\icons\planet.png", 0, 0, 0, Direct3D.Usage.None, Texture_Format, Direct3D.Pool.Managed, Filter, MipFilter, Color.FromArgb(255, 0, 255, 0).ToArgb)
-
-
+        icon_texture(3) = Direct3D.TextureLoader.FromFile(d3d_device, Application.StartupPath + "\data\textures\icons\Chat_Bubble.png", 64, 32, 0, Direct3D.Usage.None, Texture_Format, Direct3D.Pool.Managed, Filter, MipFilter, Color.FromArgb(255, 0, 255, 0).ToArgb)
 
         star_map_vertex = New VertexBuffer(GetType(point_sprite_vertex_format), 200, d3d_device, Usage.WriteOnly, VertexFormats.Position, Pool.Managed)
 

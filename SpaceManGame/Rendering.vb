@@ -129,6 +129,14 @@
 
             render_personal_ship(player)
             d3d_sprite.Transform = Matrix.Transformation2D(New Vector2(0, 0), 0, New Vector2(scale, scale), New Vector2(0, 0), 0, New Vector2(0, 0))
+            
+            For Each crew In ship.Crew_list
+                pos.x = crew.Value.location.x - view_location_personal.x
+                pos.y = crew.Value.location.y - view_location_personal.y
+                Draw_Crew(crew.Value.SpriteSet, crew.Value.Get_Sprite, pos, Color.White)
+            Next
+
+
             For Each officer In ship.Officer_List
                 pos.x = officer.Value.GetLocationD.x - view_location_personal.x
                 pos.y = officer.Value.GetLocationD.y - view_location_personal.y
@@ -137,9 +145,11 @@
             Next
 
             For Each crew In ship.Crew_list
-                pos.x = crew.Value.location.x - view_location_personal.x
-                pos.y = crew.Value.location.y - view_location_personal.y
-                Draw_Crew(crew.Value.SpriteSet, crew.Value.Get_Sprite, pos, Color.White)
+                If crew.Value.Speech.Speech.Count > 0 Then
+                    pos.x = crew.Value.location.x - view_location_personal.x
+                    pos.y = crew.Value.location.y - view_location_personal.y
+                    render_chatbubble(pos, crew.Value.Speech.GetSpeech)
+                End If
             Next
         End If
 
@@ -152,21 +162,34 @@
             'For a = 0 To 100
             render_personal_planet(player)
             'Next a
-            d3d_sprite.Transform = Matrix.Transformation2D(New Vector2(0, 0), 0, New Vector2(scale, scale), New Vector2(0, 0), 0, New Vector2(0, 0))
-            For Each officer In planet.officer_list
-                pos.x = officer.Value.GetLocationD.x - view_location_personal.x
-                pos.y = officer.Value.GetLocationD.y - view_location_personal.y
-                Draw_Officer(Get_Officer_Texture(officer.Key), officer.Value.Get_Sprite, pos, Color.White)
-            Next
+            d3d_sprite.Transform = Matrix.Transformation2D(New Vector2(0, 0), 0, New Vector2(scale, scale), New Vector2(0, 0), 0, New Vector2(0, 0))            
 
             For Each crew In planet.crew_list
                 pos.x = crew.Value.location.x - view_location_personal.x
                 pos.y = crew.Value.location.y - view_location_personal.y
                 'If planet.Get_Tile(crew.Value.find_tile).sprite2 < 0 Then
                 Draw_Crew(crew.Value.SpriteSet, crew.Value.Get_Sprite, pos, Color.White)
+                'If crew.Value.Speech.Speech.Count > 0 Then render_chatbubble(pos, crew.Value.Speech.GetSpeech)
                 'End If
                 'Lights.Add(New Lights_Type(New PointD(crew.Value.location.x - 112, crew.Value.location.x - 112), Color.Green))
             Next
+
+
+            For Each officer In planet.officer_list
+                pos.x = officer.Value.GetLocationD.x - view_location_personal.x
+                pos.y = officer.Value.GetLocationD.y - view_location_personal.y
+                Draw_Officer(Get_Officer_Texture(officer.Key), officer.Value.Get_Sprite, pos, Color.White)
+            Next
+
+
+            For Each crew In planet.crew_list                
+                If crew.Value.Speech.Speech.Count > 0 Then
+                    pos.x = crew.Value.location.x - view_location_personal.x
+                    pos.y = crew.Value.location.y - view_location_personal.y
+                    render_chatbubble(pos, crew.Value.Speech.GetSpeech)
+                End If
+            Next
+
         End If
 
 
@@ -209,6 +232,15 @@
         End Try
         If DeviceLost = True Then AttemptRecovery()
     End Sub
+
+    Sub render_chatbubble(ByVal Pos As PointD, ByVal Text As String)
+        Pos.y -= 22
+        Pos.x += 6
+        d3d_sprite.Draw(icon_texture(3), Rectangle.Empty, Vector3.Empty, New Vector3(Pos.sngX, Pos.sngY, 1), Color.White)
+        draw_text(Text, New Rectangle(Pos.intX, Pos.intY, 64, 32), CType(DrawTextFormat.Center + DrawTextFormat.Left + DrawTextFormat.WordBreak, DrawTextFormat), Color.Black, d3d_font(d3d_font_enum.ChatBubbleSmall))
+    End Sub
+
+
 
     Sub render_personal_ship(ByVal player As Integer)
         Dim atsize As Integer = CInt(32 * personal_zoom)
@@ -256,17 +288,22 @@
             AdjustedView.x += planet.landed_ships(current_selected_ship_view).x * 32
             AdjustedView.y += planet.landed_ships(current_selected_ship_view).y * 32
         End If
-        
+
 
         Dim viewRect As Rectangle = New Rectangle(CInt(AdjustedView.x * personal_zoom) \ atsize, CInt(AdjustedView.y * personal_zoom) \ atsize, (screen_size.x \ atsize) + 1, (screen_size.y \ atsize) + 1)
         'For x = (CInt(view_location_personal.intX * personal_zoom) \ atsize) - 1 To (CInt(view_location_personal.x * personal_zoom) \ atsize) + (screen_size.x \ atsize) + 1
-        'For y = (CInt(view_location_personal.intY * personal_zoom) \ atsize) - 1 To (CInt(view_location_personal.y * personal_zoom) \ atsize) + (screen_size.y \ atsize) + 1
+        'For y = (CInt(view_location_personal.intY * personal_zoom) \ atsize) - 1 To (CInt(view_location_personal.y * personal_zoom) \ atsize) + (screen_size.y \ atsize) + 1        
         Dim InBuilding As Rectangle = Rectangle.Empty
 
         For Each item In planet.Building_List
             For Each building In item.Value.BuildingRect
-                Dim rect As New Rectangle(building.Value.X * 32, building.Value.Y * 32, building.Value.Width * 32, building.Value.Height * 32)
-                If rect.Contains(u.Officer_List(current_player).find_rect) Then InBuilding = building.Value : Exit For
+                Dim rect As New Rectangle(building.Value.X * 32, building.Value.Y * 32, building.Value.Width * 32, building.Value.Height * 32)                
+                If rect.Contains(u.Officer_List(current_player).find_rect) Then
+                    If Not u.Officer_List(current_player).InBuilding = item.Key Then u.Officer_List(current_player).Greeted = False
+                    u.Officer_List(current_player).InBuilding = item.Key
+                    InBuilding = building.Value
+                    Exit For
+                End If
             Next
         Next
 
@@ -285,10 +322,10 @@
 
                         render_personal_planet_item(New PointI(x, y), planet, pos)
 
-                        For Each building In planet.Build_List
-                            'Draw build Build overlay
-                            If building.Value.Tile_List.ContainsKey(New PointI(x, y)) AndAlso building.Value.Tile_List(New PointI(x, y)) > 0 Then Draw_Planet_Tile(planet_tile_type_enum.BuildingBuildOverlay, building.Value.Tile_List(New PointI(x, y)) - 1, pos, Color.FromArgb(255, 255, 255, 255))
-                        Next
+                        'For Each building In planet.Build_List
+                        'Draw build Build overlay
+                        'If building.Value.Tile_List.ContainsKey(New PointI(x, y)) AndAlso building.Value.Tile_List(New PointI(x, y)) > 0 Then Draw_Planet_Tile(planet_tile_type_enum.BuildingBuildOverlay, building.Value.Tile_List(New PointI(x, y)) - 1, pos, Color.FromArgb(255, 255, 255, 255))
+                        'Next
 
                         If TileMap(x, y).type = 1 AndAlso TileMap(x, y).sprite = 2 Then Lights.Add(New Lights_Type(New PointD(x * 32 - 112, y * 32 - 112), Set_Brighness(Color.Green, planet.Animation_Glow)))
 
@@ -349,7 +386,7 @@
             Dim PItem As Item_Point_Type = Planet.Item_Point(P)
             If Not PItem.Item = Item_Enum.None Then
 
-                If PItem.Item = Item_Enum.Crystal Then                    
+                If PItem.Item = Item_Enum.Crystal Then
                     Dim amount As Integer = Planet.Item_Point(P).Amount
                     Select Case amount
                         Case Is < 33
@@ -388,7 +425,7 @@
 
                 If PItem.Item = Item_Enum.Refined_Crystal Then
                     Dim amount As Integer = Planet.Item_Point(P).Amount
-                    Select Case amount                        
+                    Select Case amount
                         Case Is < 50
                             Draw_Item_Tile(item_tile_texture_enum.Crystal_Container, 4, pos, Color.FromArgb(255, 255, 255, 255))
                         Case Is < 100
@@ -524,7 +561,7 @@
             pos.x = Light.Location.x - view_location_personal.x
             pos.y = Light.Location.y - view_location_personal.y
             d3d_sprite.Draw(effect_texture(Effects_Texture_Enum.Spot_256), Rectangle.Empty, New Vector3(0, 0, 0), New Vector3(pos.sngX, pos.sngY, 0), Light.LightColor)
-        Next       
+        Next
         Lights.Clear()
 
 
@@ -553,10 +590,10 @@
     Sub render_personal_level()
 
         Dim pos As PointD
-        Dim scale As Integer        
-        d3d_device.BeginScene()        
-        d3d_device.Clear(ClearFlags.Target, Color.Black, 1, 0)        
-        d3d_sprite.Begin(SpriteFlags.AlphaBlend)        
+        Dim scale As Integer
+        d3d_device.BeginScene()
+        d3d_device.Clear(ClearFlags.Target, Color.Black, 1, 0)
+        d3d_sprite.Begin(SpriteFlags.AlphaBlend)
         d3d_device.SetSamplerState(0, SamplerStageStates.MinFilter, TextureFilter.None)
         d3d_device.SetSamplerState(0, SamplerStageStates.MagFilter, TextureFilter.None)
         d3d_sprite.Transform = Matrix.Identity
@@ -1005,7 +1042,7 @@
                         If Ship.tile_map(x, y).type < tile_type_enum.Device_Base Then
                             pos.x = x * 32
                             pos.y = y * 32
-                            d3d_sprite.Draw(tile_texture(Ship.tile_map(x, y).type), New Rectangle(Ship.tile_map(x, y).sprite * 32, 0, 32, 32), New Vector3(0, 0, 0), New Vector3(pos.x, pos.y, 0), Color.White)                            
+                            d3d_sprite.Draw(tile_texture(Ship.tile_map(x, y).type), New Rectangle(Ship.tile_map(x, y).sprite * 32, 0, 32, 32), New Vector3(0, 0, 0), New Vector3(pos.x, pos.y, 0), Color.White)
                             'If TileMap(x, y).device_tile IsNot Nothing Then Draw_Device_Tile(TileMap(x, y).device_tile.type, TileMap(x, y).device_tile.sprite, Ship.device_list(TileMap(x, y).device_tile.device_ID).Sprite_Animation_Key, pos, TileMap(x, y).device_tile.rotate, TileMap(x, y).device_tile.flip, scale, Color.White)
                             If Ship.tile_map(x, y).device_tile IsNot Nothing Then Draw_Device_Tile(Ship.tile_map(x, y).device_tile.type, Ship.tile_map(x, y).device_tile.sprite, Ship.device_list(Ship.tile_map(x, y).device_tile.device_ID).Sprite_Animation_Key, pos.ToPointD, Ship.tile_map(x, y).device_tile.rotate, Ship.tile_map(x, y).device_tile.flip, scale, Color.White)
                             'If Ship.tile_map(x, y).sprite = room_sprite_enum.blank Then
@@ -1163,7 +1200,7 @@
         Dim MatStore As Matrix
         BB = d3d_device.GetRenderTarget(0)
 
-        d3d_device.SetRenderTarget(0, Off_tex.GetSurfaceLevel(0))        
+        d3d_device.SetRenderTarget(0, Off_tex.GetSurfaceLevel(0))
         d3d_sprite.Begin(SpriteFlags.AlphaBlend)
         d3d_device.SetSamplerState(0, SamplerStageStates.MinFilter, TextureFilter.None)
         d3d_device.SetSamplerState(0, SamplerStageStates.MagFilter, TextureFilter.None)
@@ -1212,7 +1249,7 @@
             pos.x = officer.Value.GetLocation.x
             pos.y = officer.Value.GetLocation.y
             'Draw_Crew(character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head, pos, Color.White)            
-            Draw_Officer(Get_Officer_Texture(officer.Key), officer.Value.Get_Sprite, pos, Color.White)            
+            Draw_Officer(Get_Officer_Texture(officer.Key), officer.Value.Get_Sprite, pos, Color.White)
         Next
 
         For Each crew In Ship.Crew_list
@@ -1248,7 +1285,7 @@
     End Sub
 
 
-    Sub render_ship_external_new(ByVal Ship As Ship)        
+    Sub render_ship_external_new(ByVal Ship As Ship)
         If Ship.Landed = True Then render_ship_external_Landed(Ship) : Exit Sub
         'Dim pos As PointD
         d3d_device.BeginScene()
@@ -1266,56 +1303,56 @@
         view_location_external.y = Ship.location.y - ((screen_size.y / 2) - (Ship.center_point.y * 32 + 16) * scale) / scale
 
         If Loaded_planet > -1 Then
-                Render_Planet_External(Ship)        
+            Render_Planet_External(Ship)
         End If
 
-            If External__LandingMode = True Then render_ship_external_Landing_Mode(Ship)
+        If External__LandingMode = True Then render_ship_external_Landing_Mode(Ship)
 
-            For Each Draw_Ship In u.Ship_List.Values
-                If external_zoom > 0.25 Then
-                    d3d_sprite.Transform = Matrix.Transformation2D(New Vector2(0, 0), 0, New Vector2(scale, scale), New Vector2((Draw_Ship.center_point.x * 32 + 16) * scale, (Draw_Ship.center_point.y * 32 + 16) * scale), CSng(Draw_Ship.rotation), New Vector2(CInt((Draw_Ship.location.x - view_location_external.x) * scale), CInt((Draw_Ship.location.y - view_location_external.y) * scale)))
-                    Render_Ship_External_close(Draw_Ship)
-                    d3d_sprite.Transform = Matrix.Transformation2D(New Vector2(0, 0), 0, New Vector2(scale, scale), New Vector2(0, 0), 0, New Vector2(0, 0))
-                Else
-                    d3d_sprite.Transform = Matrix.Transformation2D(New Vector2(0, 0), 0, New Vector2(scale * 8, scale * 8), New Vector2((Draw_Ship.center_point.x * 32 + 16) * scale, (Draw_Ship.center_point.y * 32 + 16) * scale), CSng(Draw_Ship.rotation), New Vector2(CInt((Draw_Ship.location.x - view_location_external.x) * scale), CInt((Draw_Ship.location.y - view_location_external.y) * scale)))
-                    d3d_sprite.Draw(Ship_Texture, Rectangle.Empty, New Vector3(0, 0, 0), New Vector3(0, 0, 0), Color.White)
-                    d3d_sprite.Transform = Matrix.Transformation2D(New Vector2(0, 0), 0, New Vector2(scale, scale), New Vector2(0, 0), 0, New Vector2(0, 0))
-                End If
-            Next
-
-
-            Dim x1 As Single
-            Dim y1 As Single
-            For Each pro In u.Projectiles
-                x1 = CSng(pro.Location.x - view_location_external.x - 16)
-                y1 = CSng(pro.Location.y - view_location_external.y - 16)
-                d3d_sprite.Transform = Matrix.Transformation2D(New Vector2(0, 0), 0, New Vector2(scale, scale), New Vector2(16 * scale, 16 * scale), CSng(pro.Rotation), New Vector2(x1 * scale, y1 * scale))
-                d3d_sprite.Draw(projectile_tile_texture(Projectile_Tile_Type_Enum.Energy1), Rectangle.Empty, Vector3.Empty, New Vector3(0, 0, 0), Color.White)
-            Next
+        For Each Draw_Ship In u.Ship_List.Values
+            If external_zoom > 0.25 Then
+                d3d_sprite.Transform = Matrix.Transformation2D(New Vector2(0, 0), 0, New Vector2(scale, scale), New Vector2((Draw_Ship.center_point.x * 32 + 16) * scale, (Draw_Ship.center_point.y * 32 + 16) * scale), CSng(Draw_Ship.rotation), New Vector2(CInt((Draw_Ship.location.x - view_location_external.x) * scale), CInt((Draw_Ship.location.y - view_location_external.y) * scale)))
+                Render_Ship_External_close(Draw_Ship)
+                d3d_sprite.Transform = Matrix.Transformation2D(New Vector2(0, 0), 0, New Vector2(scale, scale), New Vector2(0, 0), 0, New Vector2(0, 0))
+            Else
+                d3d_sprite.Transform = Matrix.Transformation2D(New Vector2(0, 0), 0, New Vector2(scale * 8, scale * 8), New Vector2((Draw_Ship.center_point.x * 32 + 16) * scale, (Draw_Ship.center_point.y * 32 + 16) * scale), CSng(Draw_Ship.rotation), New Vector2(CInt((Draw_Ship.location.x - view_location_external.x) * scale), CInt((Draw_Ship.location.y - view_location_external.y) * scale)))
+                d3d_sprite.Draw(Ship_Texture, Rectangle.Empty, New Vector3(0, 0, 0), New Vector3(0, 0, 0), Color.White)
+                d3d_sprite.Transform = Matrix.Transformation2D(New Vector2(0, 0), 0, New Vector2(scale, scale), New Vector2(0, 0), 0, New Vector2(0, 0))
+            End If
+        Next
 
 
-            d3d_sprite.Transform = Matrix.Identity
-            'Render UI
-            Draw_pipeline(Ship)
-            Draw_engine_Status(Ship)
-            render_ship_external_UI()
-
-            d3d_sprite.Draw(Ship_Map_Texture, Rectangle.Empty, New Vector3(0, 0, 0), New Vector3(screen_size.x - (Ship.shipsize.x + 1) * 4 - 20, 200, 0), Color.White)
-
-            d3d_sprite.Transform = Matrix.Identity
-            draw_text(u.Ship_List(0).target_rotation.ToString, New Rectangle(20, 700, 160, 20), CType(DrawTextFormat.Center + DrawTextFormat.VerticalCenter, DrawTextFormat), Color.White, d3d_font(d3d_font_enum.SB_small))
-            draw_text("Turn point: " + u.Ship_List(0).Turn_Point.ToString, New Rectangle(20, 720, 160, 20), CType(DrawTextFormat.Center + DrawTextFormat.VerticalCenter, DrawTextFormat), Color.White, d3d_font(d3d_font_enum.SB_small))
-            draw_text("Turn Left: " + u.Ship_List(0).Turn_Left.ToString, New Rectangle(20, 740, 160, 20), CType(DrawTextFormat.Center + DrawTextFormat.VerticalCenter, DrawTextFormat), Color.White, d3d_font(d3d_font_enum.SB_small))
-            draw_text("Stop Rot: " + u.Ship_List(0).Stop_Rotation.ToString, New Rectangle(20, 760, 160, 20), CType(DrawTextFormat.Center + DrawTextFormat.VerticalCenter, DrawTextFormat), Color.White, d3d_font(d3d_font_enum.SB_small))
-            draw_text("AV: " + u.Ship_List(0).angular_velocity.ToString, New Rectangle(20, 780, 160, 20), CType(DrawTextFormat.Center + DrawTextFormat.VerticalCenter, DrawTextFormat), Color.White, d3d_font(d3d_font_enum.SB_small))
-            draw_text("amp: " + External__LandingPosition.x.ToString + "  :  " + External__LandingPosition.y.ToString, New Rectangle(20, 800, 160, 20), CType(DrawTextFormat.Center + DrawTextFormat.VerticalCenter, DrawTextFormat), Color.White, d3d_font(d3d_font_enum.SB_small))
+        Dim x1 As Single
+        Dim y1 As Single
+        For Each pro In u.Projectiles
+            x1 = CSng(pro.Location.x - view_location_external.x - 16)
+            y1 = CSng(pro.Location.y - view_location_external.y - 16)
+            d3d_sprite.Transform = Matrix.Transformation2D(New Vector2(0, 0), 0, New Vector2(scale, scale), New Vector2(16 * scale, 16 * scale), CSng(pro.Rotation), New Vector2(x1 * scale, y1 * scale))
+            d3d_sprite.Draw(projectile_tile_texture(Projectile_Tile_Type_Enum.Energy1), Rectangle.Empty, Vector3.Empty, New Vector3(0, 0, 0), Color.White)
+        Next
 
 
-            'draw_text(CInt(Distance_from).ToString, New Rectangle(0, 500, 100, 20), CType(DrawTextFormat.Center + DrawTextFormat.VerticalCenter, DrawTextFormat), Color.White, d3d_font(d3d_font_enum.SB_small))
+        d3d_sprite.Transform = Matrix.Identity
+        'Render UI
+        Draw_pipeline(Ship)
+        Draw_engine_Status(Ship)
+        render_ship_external_UI()
 
-            d3d_sprite.End()
+        d3d_sprite.Draw(Ship_Map_Texture, Rectangle.Empty, New Vector3(0, 0, 0), New Vector3(screen_size.x - (Ship.shipsize.x + 1) * 4 - 20, 200, 0), Color.White)
 
-            'If Loaded_planet > -1 Then
+        d3d_sprite.Transform = Matrix.Identity
+        draw_text(u.Ship_List(0).target_rotation.ToString, New Rectangle(20, 700, 160, 20), CType(DrawTextFormat.Center + DrawTextFormat.VerticalCenter, DrawTextFormat), Color.White, d3d_font(d3d_font_enum.SB_small))
+        draw_text("Turn point: " + u.Ship_List(0).Turn_Point.ToString, New Rectangle(20, 720, 160, 20), CType(DrawTextFormat.Center + DrawTextFormat.VerticalCenter, DrawTextFormat), Color.White, d3d_font(d3d_font_enum.SB_small))
+        draw_text("Turn Left: " + u.Ship_List(0).Turn_Left.ToString, New Rectangle(20, 740, 160, 20), CType(DrawTextFormat.Center + DrawTextFormat.VerticalCenter, DrawTextFormat), Color.White, d3d_font(d3d_font_enum.SB_small))
+        draw_text("Stop Rot: " + u.Ship_List(0).Stop_Rotation.ToString, New Rectangle(20, 760, 160, 20), CType(DrawTextFormat.Center + DrawTextFormat.VerticalCenter, DrawTextFormat), Color.White, d3d_font(d3d_font_enum.SB_small))
+        draw_text("AV: " + u.Ship_List(0).angular_velocity.ToString, New Rectangle(20, 780, 160, 20), CType(DrawTextFormat.Center + DrawTextFormat.VerticalCenter, DrawTextFormat), Color.White, d3d_font(d3d_font_enum.SB_small))
+        draw_text("amp: " + External__LandingPosition.x.ToString + "  :  " + External__LandingPosition.y.ToString, New Rectangle(20, 800, 160, 20), CType(DrawTextFormat.Center + DrawTextFormat.VerticalCenter, DrawTextFormat), Color.White, d3d_font(d3d_font_enum.SB_small))
+
+
+        'draw_text(CInt(Distance_from).ToString, New Rectangle(0, 500, 100, 20), CType(DrawTextFormat.Center + DrawTextFormat.VerticalCenter, DrawTextFormat), Color.White, d3d_font(d3d_font_enum.SB_small))
+
+        d3d_sprite.End()
+
+        'If Loaded_planet > -1 Then
         For Each item In u.Planet_List
             render_external_Vector(item.Key)
         Next
@@ -1343,19 +1380,19 @@
 
         Next
 
-            d3d_device.EndScene()
+        d3d_device.EndScene()
 
-            Try
-                d3d_device.Present()
-            Catch e As DeviceLostException
-                DeviceLost = True
-            End Try
-            If DeviceLost = True Then AttemptRecovery()
+        Try
+            d3d_device.Present()
+        Catch e As DeviceLostException
+            DeviceLost = True
+        End Try
+        If DeviceLost = True Then AttemptRecovery()
 
     End Sub
 
 
-    Sub render_ship_external_Landed(ByVal Ship As Ship)        
+    Sub render_ship_external_Landed(ByVal Ship As Ship)
 
         d3d_device.BeginScene()
         External_redraw(Ship)
@@ -1478,10 +1515,10 @@
                     'May Need Fixing
                     render_personal_planet_item(New PointI(x, y), planet, pos)
 
-                    For Each building In planet.Build_List
-                        'Draw build Build overlay
-                        If building.Value.Tile_List.ContainsKey(New PointI(x, y)) AndAlso building.Value.Tile_List(New PointI(x, y)) > 0 Then Draw_Planet_Tile(planet_tile_type_enum.BuildingBuildOverlay, building.Value.Tile_List(New PointI(x, y)) - 1, pos, Color.FromArgb(255, 255, 255, 255))
-                    Next
+                    'For Each building In planet.Build_List
+                    'Draw build Build overlay
+                    'If building.Value.Tile_List.ContainsKey(New PointI(x, y)) AndAlso building.Value.Tile_List(New PointI(x, y)) > 0 Then Draw_Planet_Tile(planet_tile_type_enum.BuildingBuildOverlay, building.Value.Tile_List(New PointI(x, y)) - 1, pos, Color.FromArgb(255, 255, 255, 255))
+                    'Next
                     If TileMap(x, y).type = 1 AndAlso TileMap(x, y).sprite = 2 Then Lights.Add(New Lights_Type(New PointD(x * 32 - 112, y * 32 - 112), Set_Brighness(Color.Green, planet.Animation_Glow)))
                 End If
             Next
@@ -1508,7 +1545,7 @@
 
 
         Dim planet = u.Planet_List(Loaded_planet)
-        Dim planetpos As PointD        
+        Dim planetpos As PointD
         Dim pos As PointD
         If u.Planet_List(Loaded_planet).orbits_planet = True Then
             'moons
@@ -1529,7 +1566,7 @@
             pos.y = pos.y - view_location_external.y
         End If
 
-        
+
         d3d_device.RenderState.SourceBlend = Blend.SourceAlpha
         d3d_device.RenderState.DestinationBlend = Blend.InvSourceAlpha
 

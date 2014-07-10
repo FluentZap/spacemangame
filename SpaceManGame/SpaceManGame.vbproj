@@ -95,6 +95,7 @@
     <Import Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AiSpeech.vb" />
     <Compile Include="Animation.vb" />
     <Compile Include="BuildingLoader.vb" />
     <Compile Include="Crew.vb" />

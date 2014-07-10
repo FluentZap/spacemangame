@@ -32,6 +32,9 @@ End Class
     Public name As String
     Public location As PointD
 
+    Public Greeted As Boolean
+    Public InBuilding As Integer = -1
+
     Dim center_point As PointI
 
     Public speed As Double

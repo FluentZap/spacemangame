@@ -237,7 +237,7 @@
     Public view_location_personal_Last As PointD
 
     Public Panel_Menu As panel_enum '= panel_enum.Planet_Exchange_Panel
-
+    Public Panel_Menu_ID As Integer  '= panel_enum.Planet_Exchange_Panel
 
     'Public view_personal_Ambient As Color = Color.FromArgb(255, 200, 200, 220) 'Color.FromArgb(255, 20, 20, 40)
     Public view_personal_Ambient As Color = Color.FromArgb(255, 255, 255, 255) 'Color.FromArgb(255, 20, 20, 40)
@@ -454,17 +454,19 @@
 
         'fontcollection.AddFontFile("data/fonts/vanberger_stencil.ttf")
         'Dim myfont As New Drawing.Font(fontcollection.Families(0), 18, FontStyle.Bold)
+        ReDim d3d_font(2)
+
         Dim myfont As New Drawing.Font("Ariel", 18, FontStyle.Regular)
-
-
-
-        ReDim d3d_font(1)
         d3d_font(d3d_font_enum.Big_Button) = New Microsoft.DirectX.Direct3D.Font(d3d_device, myfont)
 
         myfont = New Drawing.Font("Ariel", 10, FontStyle.Regular)
         d3d_font(d3d_font_enum.SB_small) = New Microsoft.DirectX.Direct3D.Font(d3d_device, myfont)
-        Nebula_VB = New VertexBuffer(GetType(CustomVertex.TransformedColored), 17, d3d_device, 0, CustomVertex.TransformedColored.Format, Pool.Managed)
 
+        myfont = New Drawing.Font("Ariel", 8, FontStyle.Regular)
+        d3d_font(d3d_font_enum.ChatBubbleSmall) = New Microsoft.DirectX.Direct3D.Font(d3d_device, myfont)
+
+
+        Nebula_VB = New VertexBuffer(GetType(CustomVertex.TransformedColored), 17, d3d_device, 0, CustomVertex.TransformedColored.Format, Pool.Managed)
         Planet_VB = New VertexBuffer(GetType(CustomVertex.PositionColored), 65, d3d_device, 0, CustomVertex.PositionColored.Format, Pool.Managed)
         Orbit_VB = New VertexBuffer(GetType(CustomVertex.PositionColored), 65, d3d_device, 0, CustomVertex.PositionColored.Format, Pool.Managed)
         Orbit2_VB = New VertexBuffer(GetType(CustomVertex.PositionColored), 65, d3d_device, 0, CustomVertex.PositionColored.Format, Pool.Managed)
@@ -665,12 +667,13 @@
         Menu_Items_Personal_Level.Add(Personal_level_enums.Class_Scroll_Right, New Menu_button(button_texture_enum.PLV__Officer_ScrollRight, New Rectangle(pos.x, pos.y, 16, 108), button_style.Both, Color.White))
 
 
-        'Personal
+        'Panels
         Panel_Menu_Items.Add(panel_enum.Planet_Exchange_Panel, New Dictionary(Of Integer, Menu_button)())
-        Panel_Menu_Items(panel_enum.Planet_Exchange_Panel).Add(personal_menu_enum.Exchange_Panel1, New Menu_button(button_texture_enum.ship_build__device_panel, New Rectangle(screen_size.x \ 2 - 330, screen_size.y \ 2 - 240, 220, 480), button_style.DisplayOnly))
-        Panel_Menu_Items(panel_enum.Planet_Exchange_Panel).Add(personal_menu_enum.Exchange_Panel2, New Menu_button(button_texture_enum.ship_build__device_panel, New Rectangle(screen_size.x \ 2 - 110, screen_size.y \ 2 - 240, 220, 480), button_style.DisplayOnly))
-        Panel_Menu_Items(panel_enum.Planet_Exchange_Panel).Add(personal_menu_enum.Exchange_Panel3, New Menu_button(button_texture_enum.ship_build__device_panel, New Rectangle(screen_size.x \ 2 + 110, screen_size.y \ 2 - 240, 220, 480), button_style.DisplayOnly))
+        Panel_Menu_Items(panel_enum.Planet_Exchange_Panel).Add(Panel_menu_enum.Exchange_Panel, New Menu_button(button_texture_enum.Panel__Shop_Panel, New Rectangle(screen_size.x \ 2 - 330, screen_size.y \ 2 - 240, 660, 480), button_style.DisplayOnly))
+        
 
+        Panel_Menu_Items.Add(panel_enum.Shop_Panel, New Dictionary(Of Integer, Menu_button)())
+        Panel_Menu_Items(panel_enum.Shop_Panel).Add(Panel_menu_enum.Shop_Panel, New Menu_button(button_texture_enum.Panel__Shop_Panel, New Rectangle(screen_size.x \ 2 - 330, screen_size.y \ 2 - 240, 660, 480), button_style.DisplayOnly))
 
 
     End Sub
@@ -791,10 +794,16 @@
         'Fix movement
         'Add_Officer(0, New Officer(0, "Captian", Officer_location_enum.Planet, 0, pos, 1, 0.2, New Officer.sprite_list(character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head)))
 
-        Dim planet1 As Planet = New Planet(0, planet_type_enum.Desert, New PointI(512, 512), 0, 50000, False, 0.5, Planet_Level_Type.Town)
+        Dim planet1 As Planet = New Planet(0, planet_type_enum.Desert, New PointI(512, 512), 0, 50000, False, 0.5, Planet_Level_Type.City)
         u.Planet_List.Remove(0)
         u.Planet_List.Add(0, planet1)
         u.Planet_List(0).populate()
+        u.Planet_List(0).Exchange.List_Item(Item_Enum.Crystal, 20000, 0)
+        u.Planet_List(0).Exchange.List_Item(Item_Enum.Refined_Crystal, 20000, 0)
+        u.Planet_List(0).Exchange.List_Item(Item_Enum.Parts, 20000, 0)
+        u.Planet_List(0).Exchange.List_Item(Item_Enum.RawDesertProduce, 20000, 0)
+
+
         'planet1.populate(Planet_Level_Type.Outpost)
 
 
@@ -813,7 +822,7 @@
 
         Dim pos = New PointD(ship1.center_point.x * 32, ship1.center_point.y * 32)
         current_player = GetEmptyOfficerID()
-        Add_Officer(current_player, New Officer(0, "Captian", Officer_location_enum.Planet, 0, pos, 20, 0.2, New Officer.sprite_list(character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head)))
+        Add_Officer(current_player, New Officer(0, "Captian", Officer_location_enum.Planet, 0, pos, 6, 0.2, New Officer.sprite_list(character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head)))
         u.Officer_List(current_player).Officer_Classes.Add(New Officer_Class(Class_List_Enum.Mage, 0, 1))
         u.Officer_List(current_player).Officer_Classes.Add(New Officer_Class(Class_List_Enum.Spellsword, 0, 1))
         u.Officer_List(current_player).Officer_Classes.Add(New Officer_Class(Class_List_Enum.Shadow, 0, 1))
@@ -1222,6 +1231,17 @@
         End If
 
 
+        If pressedkeys.Contains(Keys.D2) Then
+            For Each B In u.Planet_List(u.Officer_List(current_player).Location_ID).Building_List
+                Dim rect As New Rectangle(B.Value.LandRect.X * 32, B.Value.LandRect.Y * 32, B.Value.LandRect.Width * 32, B.Value.LandRect.Height * 32)
+                If rect.Contains(u.Officer_List(current_player).find_rect) Then
+                    Panel_Menu_ID = B.Key
+                End If
+            Next            
+            If Panel_Menu = panel_enum.None Then Panel_Menu = panel_enum.Shop_Panel Else Panel_Menu = panel_enum.None
+            pressedkeys.Remove(Keys.D2)
+        End If
+
         If pressedkeys.Contains(Keys.W) Then Input_flage.MoveY = Move_Direction.Up : Input_flage.walking = True
         If pressedkeys.Contains(Keys.S) Then Input_flage.MoveY = Move_Direction.Down : Input_flage.walking = True
 
@@ -1305,15 +1325,21 @@
             End If
 
             Button_Selection(Panel_Menu_Items(Panel_Menu), mouse_info)
-            Select Case choice
-                Case Is = personal_menu_enum.Exchange_Panel1
-                Case Is = personal_menu_enum.Exchange_Panel1
-                Case Is = personal_menu_enum.Exchange_Panel1
-            End Select
+
+            If Panel_Menu = panel_enum.Shop_Panel Then ShopPanel(choice)
+
 
         End If
 
     End Sub
+
+
+    Sub ShopPanel(ByVal Choice As Integer)
+        Select Case Choice
+            Case Is = Panel_menu_enum.Exchange_Panel
+        End Select
+    End Sub
+
 
 
     Sub Populate_Panel()
@@ -1332,6 +1358,32 @@
                 Panel_Menu_Items(panel_enum.Planet_Exchange_Panel).Add(Id, New Menu_button(button_texture_enum.ship_build__room_button, New Rectangle(screen_size.x \ 2 - 260, screen_size.y \ 2 - 240 + (Id - 1000) * 32, 80, 32), button_style.Clickable, Color.LightCoral, item.Key.ToString + " " + item.Value.ToString, Color.Black, d3d_font_enum.SB_small))
                 Id += 1
             Next
+
+        End If
+
+        If Panel_Menu = panel_enum.Shop_Panel Then
+            Dim P As Planet = u.Planet_List(u.Officer_List(current_player).Location_ID)
+            Dim RemoveList As New List(Of Integer)()
+            For Each item In Panel_Menu_Items(panel_enum.Shop_Panel)
+                If item.Key >= 1000 Then RemoveList.Add(item.Key)
+            Next
+            For Each item In RemoveList
+                Panel_Menu_Items(panel_enum.Shop_Panel).Remove(item)
+            Next
+            Dim B As Planet_Building = P.Building_List(Panel_Menu_ID)
+            Dim Id As Integer = 1000
+
+            If B.Type = building_type_enum.Mine Then
+                Panel_Menu_Items(panel_enum.Shop_Panel).Add(Id, New Menu_button(button_texture_enum.ship_build__menu_item, New Rectangle(screen_size.x \ 2 - 260, screen_size.y \ 2 - 240 + (Id - 1000) * 40, 160, 40), button_style.Both, Color.Aquamarine, "Crystal  " + B.Get_Item(Item_Enum.Crystal).ToString, Color.Black, d3d_font_enum.SB_small)) : Id += 1
+                Panel_Menu_Items(panel_enum.Shop_Panel).Add(Id, New Menu_button(button_texture_enum.ship_build__menu_item, New Rectangle(screen_size.x \ 2 - 260, screen_size.y \ 2 - 240 + (Id - 1000) * 40, 160, 40), button_style.Both, Color.Aquamarine, "Minerals  " + B.Get_Item(Item_Enum.Minerals).ToString, Color.Black, d3d_font_enum.SB_small)) : Id += 1
+                Panel_Menu_Items(panel_enum.Shop_Panel).Add(Id, New Menu_button(button_texture_enum.ship_build__menu_item, New Rectangle(screen_size.x \ 2 - 260, screen_size.y \ 2 - 240 + (Id - 1000) * 40, 160, 40), button_style.Both, Color.Aquamarine, "Carbon  " + B.Get_Item(Item_Enum.Carbon).ToString, Color.Black, d3d_font_enum.SB_small)) : Id += 1
+                Panel_Menu_Items(panel_enum.Shop_Panel).Add(Id, New Menu_button(button_texture_enum.ship_build__menu_item, New Rectangle(screen_size.x \ 2 - 260, screen_size.y \ 2 - 240 + (Id - 1000) * 40, 160, 40), button_style.Both, Color.Aquamarine, "Water  " + B.Get_Item(Item_Enum.Water).ToString, Color.Black, d3d_font_enum.SB_small))
+            End If
+
+            If B.Type = building_type_enum.Refinery Then
+                Panel_Menu_Items(panel_enum.Shop_Panel).Add(Id, New Menu_button(button_texture_enum.ship_build__menu_item, New Rectangle(screen_size.x \ 2 - 260, screen_size.y \ 2 - 240 + (Id - 1000) * 40, 160, 40), button_style.Both, Color.Aquamarine, "Refined Crystal  " + B.Get_Item(Item_Enum.Refined_Crystal).ToString, Color.Black, d3d_font_enum.SB_small)) : Id += 1
+            End If
+            
 
         End If
     End Sub
@@ -2075,7 +2127,7 @@
 
 
         GSTFrequency += 1
-        If GSTFrequency = 1 Then
+        If GSTFrequency = 10 Then
             GSTFrequency = 0
             GST += 1
             If GST > 3000 Then GST = 0
