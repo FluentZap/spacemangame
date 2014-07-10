@@ -233,10 +233,11 @@
 
     'Public Rview_location_personal As PointD
     Public view_location_personal As PointD
-
     Public view_location_weapon_control As PointD
-
     Public view_location_personal_Last As PointD
+
+    Public Panel_Menu As panel_enum '= panel_enum.Planet_Exchange_Panel
+
 
     'Public view_personal_Ambient As Color = Color.FromArgb(255, 200, 200, 220) 'Color.FromArgb(255, 20, 20, 40)
     Public view_personal_Ambient As Color = Color.FromArgb(255, 255, 255, 255) 'Color.FromArgb(255, 20, 20, 40)
@@ -248,6 +249,10 @@
     Public External_Menu_Items As New Dictionary(Of Integer, Menu_button)()
     Public External_Menu_Items_Weapon_Control As New Dictionary(Of Integer, Menu_button)()
     Public External_Menu_Items_Weapon_Control_Buttons As New Dictionary(Of Integer, Menu_button)()
+
+    Public Personal_Menu_Items As New Dictionary(Of Integer, Menu_button)()
+
+    Public Panel_Menu_Items As New Dictionary(Of panel_enum, Dictionary(Of Integer, Menu_button))()
 
     Public Menu_Items_Personal_Level As New Dictionary(Of Integer, Menu_button)()
 
@@ -642,16 +647,12 @@
         Menu_Items_Personal_Level.Add(Personal_level_enums.Officer_5, New Menu_button(button_texture_enum.Blank, New Rectangle(pos.x, pos.y, 72, 108), button_style.DisplayOnly, Color.White)) : pos.y += 115
         Menu_Items_Personal_Level.Add(Personal_level_enums.Officer_ScrollDown, New Menu_button(button_texture_enum.PLV__Officer_ScrollDown, New Rectangle(pos.x, pos.y, 72, 16), button_style.Both, Color.White))
 
-
         pos.x = 640
         pos.y = 604
         Menu_Items_Personal_Level.Add(Personal_level_enums.Class_Engineer, New Menu_button(button_texture_enum.Blank, New Rectangle(pos.x, pos.y, 96, 16), button_style.DisplayOnly, Color.White)) : pos.y += 32
         Menu_Items_Personal_Level.Add(Personal_level_enums.Class_Security, New Menu_button(button_texture_enum.Blank, New Rectangle(pos.x, pos.y, 96, 16), button_style.DisplayOnly, Color.White)) : pos.y += 32
         Menu_Items_Personal_Level.Add(Personal_level_enums.Class_Scientist, New Menu_button(button_texture_enum.Blank, New Rectangle(pos.x, pos.y, 96, 16), button_style.DisplayOnly, Color.White)) : pos.y += 32
         Menu_Items_Personal_Level.Add(Personal_level_enums.Class_Aviator, New Menu_button(button_texture_enum.Blank, New Rectangle(pos.x, pos.y, 96, 16), button_style.DisplayOnly, Color.White)) : pos.y += 32
-
-
-
 
         pos.y = 604
         pos.x = 780
@@ -662,6 +663,15 @@
         Menu_Items_Personal_Level.Add(Personal_level_enums.Class_4, New Menu_button(button_texture_enum.Blank, New Rectangle(pos.x, pos.y, 72, 108), button_style.DisplayOnly, Color.White)) : pos.x += 92
         Menu_Items_Personal_Level.Add(Personal_level_enums.Class_5, New Menu_button(button_texture_enum.Blank, New Rectangle(pos.x, pos.y, 72, 108), button_style.DisplayOnly, Color.White)) : pos.x += 92
         Menu_Items_Personal_Level.Add(Personal_level_enums.Class_Scroll_Right, New Menu_button(button_texture_enum.PLV__Officer_ScrollRight, New Rectangle(pos.x, pos.y, 16, 108), button_style.Both, Color.White))
+
+
+        'Personal
+        Panel_Menu_Items.Add(panel_enum.Planet_Exchange_Panel, New Dictionary(Of Integer, Menu_button)())
+        Panel_Menu_Items(panel_enum.Planet_Exchange_Panel).Add(personal_menu_enum.Exchange_Panel1, New Menu_button(button_texture_enum.ship_build__device_panel, New Rectangle(screen_size.x \ 2 - 330, screen_size.y \ 2 - 240, 220, 480), button_style.DisplayOnly))
+        Panel_Menu_Items(panel_enum.Planet_Exchange_Panel).Add(personal_menu_enum.Exchange_Panel2, New Menu_button(button_texture_enum.ship_build__device_panel, New Rectangle(screen_size.x \ 2 - 110, screen_size.y \ 2 - 240, 220, 480), button_style.DisplayOnly))
+        Panel_Menu_Items(panel_enum.Planet_Exchange_Panel).Add(personal_menu_enum.Exchange_Panel3, New Menu_button(button_texture_enum.ship_build__device_panel, New Rectangle(screen_size.x \ 2 + 110, screen_size.y \ 2 - 240, 220, 480), button_style.DisplayOnly))
+
+
 
     End Sub
 
@@ -758,16 +768,42 @@
         Return Officer_Texture
     End Function
 
+    Function GetEmptyOfficerID() As Integer
+        Dim ID As Integer
+        For a = 0 To 1000000
+            If Not u.Officer_List.ContainsKey(a) Then ID = a : Exit For
+        Next
+        Return ID
+    End Function
 
     Sub main_loop()
+        'Dim planet2 As Planet = New Planet(1, planet_type_enum.Desert, New PointI(512, 512), 0, 50000, False, 100)
+        'u.Planet_List.Remove(1)
+        'u.Planet_List.Add(1, planet2)
+
+        'planet2.populate(Planet_Level_Type.Outpost)
+
+        'u.Planet_List.Remove(2)
+        'u.Planet_List.Remove(3)
+        'u.Planet_List.Remove(4)
+        'planet1.landed_ships.Add(0, New PointI(0, 0))
+
+        'Fix movement
+        'Add_Officer(0, New Officer(0, "Captian", Officer_location_enum.Planet, 0, pos, 1, 0.2, New Officer.sprite_list(character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head)))
+
+        Dim planet1 As Planet = New Planet(0, planet_type_enum.Desert, New PointI(512, 512), 0, 50000, False, 0.5, Planet_Level_Type.Town)
+        u.Planet_List.Remove(0)
+        u.Planet_List.Add(0, planet1)
+        u.Planet_List(0).populate()
+        'planet1.populate(Planet_Level_Type.Outpost)
+
+
         Dim ship1 As Ship = load_ship_schematic()
-        Dim pos = New PointD(ship1.center_point.x * 32, ship1.center_point.y * 32)
         ship1.location = New PointD(0, 0)
 
         ship1.Refresh()
-        ship1.Faction = 0                
+        ship1.Faction = 0
         u.Ship_List.Add(0, ship1)
-
 
         Dim ship2 As Ship = load_ship_schematic()
         ship2.location = New PointD(0, -2000)
@@ -775,73 +811,54 @@
         u.Ship_List.Add(1, ship2)
 
 
-
-        Dim planet1 As Planet = New Planet(0, planet_type_enum.Desert, New PointI(512, 512), 0, 50000, False, 0.5)
-        'u.Planet_List = u.Planet_List
-        u.Planet_List.Remove(0)
-        u.Planet_List.Add(0, planet1)
-
-        planet1.populate()
-
-        Dim planet2 As Planet = New Planet(1, planet_type_enum.Desert, New PointI(512, 512), 0, 50000, False, 100)
-        u.Planet_List.Remove(1)
-        u.Planet_List.Add(1, planet2)
-
-        planet2.populate()
-
-        'u.Planet_List.Remove(2)
-        'u.Planet_List.Remove(3)
-        'u.Planet_List.Remove(4)
-        'planet1.landed_ships.Add(0, New PointI(0, 0))
-        
-        'Fix movement
-        Add_Officer(0, New Officer(0, "Captian", Officer_location_enum.Planet, 0, pos, 1, 0.2, New Officer.sprite_list(character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head)))
-
-
-        u.Officer_List(0).Officer_Classes.Add(New Officer_Class(Class_List_Enum.Mage, 0, 1))
-        u.Officer_List(0).Officer_Classes.Add(New Officer_Class(Class_List_Enum.Spellsword, 0, 1))
-        u.Officer_List(0).Officer_Classes.Add(New Officer_Class(Class_List_Enum.Shadow, 0, 1))
-        u.Officer_List(0).Officer_Classes.Add(New Officer_Class(Class_List_Enum.Thief, 0, 1))
-        u.Officer_List(0).Officer_Classes.Add(New Officer_Class(Class_List_Enum.Inventor, 0, 1))
-        u.Officer_List(0).Officer_Classes.Add(New Officer_Class(Class_List_Enum.PlaceHolder, 20, 10))
-        u.Officer_List(0).Officer_Classes.Add(New Officer_Class(Class_List_Enum.Eye_Of_The_Placeholder, 56, 1))
+        Dim pos = New PointD(ship1.center_point.x * 32, ship1.center_point.y * 32)
+        current_player = GetEmptyOfficerID()
+        Add_Officer(current_player, New Officer(0, "Captian", Officer_location_enum.Planet, 0, pos, 20, 0.2, New Officer.sprite_list(character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head)))
+        u.Officer_List(current_player).Officer_Classes.Add(New Officer_Class(Class_List_Enum.Mage, 0, 1))
+        u.Officer_List(current_player).Officer_Classes.Add(New Officer_Class(Class_List_Enum.Spellsword, 0, 1))
+        u.Officer_List(current_player).Officer_Classes.Add(New Officer_Class(Class_List_Enum.Shadow, 0, 1))
+        u.Officer_List(current_player).Officer_Classes.Add(New Officer_Class(Class_List_Enum.Thief, 0, 1))
+        u.Officer_List(current_player).Officer_Classes.Add(New Officer_Class(Class_List_Enum.Inventor, 0, 1))
+        u.Officer_List(current_player).Officer_Classes.Add(New Officer_Class(Class_List_Enum.PlaceHolder, 20, 10))
+        u.Officer_List(current_player).Officer_Classes.Add(New Officer_Class(Class_List_Enum.Eye_Of_The_Placeholder, 56, 1))
 
 
 
-        u.Officer_List(0).Current_Class = Class_List_Enum.Mage
+        u.Officer_List(current_player).Current_Class = Class_List_Enum.Mage
 
-        Add_Officer(1, New Officer(0, "Skippy", Officer_location_enum.Ship, 0, pos, 1, 0.2, New Officer.sprite_list(0, 0)))
-        u.Officer_List(1).Current_Class = Class_List_Enum.Engineer
-        Add_Officer(2, New Officer(0, "Perpa", Officer_location_enum.Ship, 0, pos, 1, 0.2, New Officer.sprite_list(0, 0)))
-        u.Officer_List(2).Current_Class = Class_List_Enum.Mage
-        Add_Officer(3, New Officer(0, "Surpa", Officer_location_enum.Ship, 0, pos, 1, 0.2, New Officer.sprite_list(0, 0)))
-        u.Officer_List(3).Current_Class = Class_List_Enum.Aviator
-        Add_Officer(4, New Officer(0, "Kerpa", Officer_location_enum.Ship, 0, pos, 1, 0.2, New Officer.sprite_list(0, 0)))
-        u.Officer_List(4).Current_Class = Class_List_Enum.Scientist
-        Add_Officer(5, New Officer(0, "Kilki", Officer_location_enum.Ship, 0, pos, 1, 0.2, New Officer.sprite_list(0, 0)))
-        u.Officer_List(5).Current_Class = Class_List_Enum.Security
-        Add_Officer(6, New Officer(0, "Stan", Officer_location_enum.Ship, 0, pos, 1, 0.2, New Officer.sprite_list(0, 0)))
-        u.Officer_List(6).Current_Class = Class_List_Enum.Mage
-        Add_Officer(7, New Officer(0, "Vextorz", Officer_location_enum.Ship, 0, pos, 1, 0.2, New Officer.sprite_list(0, 0)))
-        u.Officer_List(7).Current_Class = Class_List_Enum.Aviator
-        Player_Data.Officer_List.Add(1)
-        Player_Data.Officer_List.Add(2)
-        Player_Data.Officer_List.Add(3)
-        Player_Data.Officer_List.Add(4)
-        Player_Data.Officer_List.Add(5)
-        Player_Data.Officer_List.Add(6)
-        Player_Data.Officer_List.Add(7)
-
-
-        u.Officer_List(0).sprite.Head_SpriteSet = character_sprite_set_enum.Human_Renagade_1
-        u.Officer_List(0).sprite.Torso_SpriteSet = character_sprite_set_enum.Human_Renagade_1
-        u.Officer_List(0).sprite.Left_Arm_SpriteSet = character_sprite_set_enum.Human_Renagade_1
-        u.Officer_List(0).sprite.Right_Arm_SpriteSet = character_sprite_set_enum.Human_Renagade_1
-        u.Officer_List(0).sprite.Left_Leg_SpriteSet = character_sprite_set_enum.Human_Renagade_1
-        u.Officer_List(0).sprite.Right_Leg_SpriteSet = character_sprite_set_enum.Human_Renagade_1
+        'Add_Officer(1, New Officer(0, "Skippy", Officer_location_enum.Ship, 0, pos, 1, 0.2, New Officer.sprite_list(0, 0)))
+        'u.Officer_List(1).Current_Class = Class_List_Enum.Engineer
+        'Add_Officer(2, New Officer(0, "Perpa", Officer_location_enum.Ship, 0, pos, 1, 0.2, New Officer.sprite_list(0, 0)))
+        'u.Officer_List(2).Current_Class = Class_List_Enum.Mage
+        'Add_Officer(3, New Officer(0, "Surpa", Officer_location_enum.Ship, 0, pos, 1, 0.2, New Officer.sprite_list(0, 0)))
+        'u.Officer_List(3).Current_Class = Class_List_Enum.Aviator
+        'Add_Officer(4, New Officer(0, "Kerpa", Officer_location_enum.Ship, 0, pos, 1, 0.2, New Officer.sprite_list(0, 0)))
+        'u.Officer_List(4).Current_Class = Class_List_Enum.Scientist
+        'Add_Officer(5, New Officer(0, "Kilki", Officer_location_enum.Ship, 0, pos, 1, 0.2, New Officer.sprite_list(0, 0)))
+        'u.Officer_List(5).Current_Class = Class_List_Enum.Security
+        'Add_Officer(6, New Officer(0, "Stan", Officer_location_enum.Ship, 0, pos, 1, 0.2, New Officer.sprite_list(0, 0)))
+        'u.Officer_List(6).Current_Class = Class_List_Enum.Mage
+        ''Add_Officer(7, New Officer(0, "Vextorz", Officer_location_enum.Ship, 0, pos, 1, 0.2, New Officer.sprite_list(0, 0)))
+        'u.Officer_List(7).Current_Class = Class_List_Enum.Aviator
+        'Player_Data.Officer_List.Add(1)
+        'Player_Data.Officer_List.Add(2)
+        'Player_Data.Officer_List.Add(3)
+        'Player_Data.Officer_List.Add(4)
+        'Player_Data.Officer_List.Add(5)
+        'Player_Data.Officer_List.Add(6)
+        'Player_Data.Officer_List.Add(7)
 
 
-        current_player = 0
+        u.Officer_List(current_player).sprite.Head_SpriteSet = character_sprite_set_enum.Human_Renagade_1
+        u.Officer_List(current_player).sprite.Torso_SpriteSet = character_sprite_set_enum.Human_Renagade_1
+        u.Officer_List(current_player).sprite.Left_Arm_SpriteSet = character_sprite_set_enum.Human_Renagade_1
+        u.Officer_List(current_player).sprite.Right_Arm_SpriteSet = character_sprite_set_enum.Human_Renagade_1
+        u.Officer_List(current_player).sprite.Left_Leg_SpriteSet = character_sprite_set_enum.Human_Renagade_1
+        u.Officer_List(current_player).sprite.Right_Leg_SpriteSet = character_sprite_set_enum.Human_Renagade_1
+
+
+
+
         'Officer_List.Add (0,
         'Do initial planet rotation
         'For A = 0 To 10000
@@ -975,18 +992,25 @@
         Loop
     End Sub
 
-    Sub Add_Officer(ByVal Id As Integer, ByVal Officer As Officer)
+    Sub Add_Officer(ByVal Id As Integer, ByVal Planet As Planet, ByVal Officer As Officer)
         u.Officer_List.Add(Id, Officer)
-
-        Select Case Officer.region
-            Case Is = Officer_location_enum.Ship
-                u.Ship_List(Officer.Location_ID).Officer_List.Add(Id, Officer)
-            Case Is = Officer_location_enum.Planet
-                u.Planet_List(Officer.Location_ID).officer_list.Add(Id, Officer)
-        End Select
-
+        Planet.officer_list.Add(Id, Officer)
     End Sub
 
+    Sub Add_Officer(ByVal Id As Integer, ByVal Ship As Ship, ByVal Officer As Officer)
+        u.Officer_List.Add(Id, Officer)
+        Ship.Officer_List.Add(Id, Officer)
+    End Sub
+
+    Sub Add_Officer(ByVal Id As Integer, ByVal Officer As Officer)
+        u.Officer_List.Add(Id, Officer)
+        Select Case Officer.region
+            Case Is = Officer_location_enum.Planet
+                u.Planet_List(Officer.Location_ID).officer_list.Add(Id, Officer)
+            Case Is = Officer_location_enum.Ship
+                u.Ship_List(Officer.Location_ID).Officer_List.Add(Id, Officer)
+        End Select
+    End Sub
 
     Sub Add_Crew(ByVal Id As Integer, ByVal Crew As Crew)
         u.Crew_List.Add(Id, Crew)
@@ -1122,8 +1146,17 @@
 
 #Region "UI"
     Sub Personal_UI(ByVal rate As Double)
-
+        Dim mouse_info As New MainForm.mouse_info_type
+        Dim mouse_click As Boolean
+        Dim left_down_point As PointI = Nothing
+        Dim left_release_point As PointI = Nothing
+        MainForm.getUI(pressedkeys, mouse_info)
+        Dim choice As Integer = -1
         Dim amount As Double = 1
+
+        Populate_Panel()
+
+
         If pressedkeys.Contains(Keys.ShiftKey) Then amount = 50
         If pressedkeys.Contains(Keys.Z) Then personal_zoom = personal_zoom + 1 : pressedkeys.Remove(Keys.Z)
 
@@ -1182,6 +1215,13 @@
         Input_flage.walking = False
         Input_flage.MoveX = Move_Direction.None
         Input_flage.MoveY = Move_Direction.None
+
+        If pressedkeys.Contains(Keys.D1) Then
+            If Panel_Menu = panel_enum.None Then Panel_Menu = panel_enum.Planet_Exchange_Panel Else Panel_Menu = panel_enum.None
+            pressedkeys.Remove(Keys.D1)
+        End If
+
+
         If pressedkeys.Contains(Keys.W) Then Input_flage.MoveY = Move_Direction.Up : Input_flage.walking = True
         If pressedkeys.Contains(Keys.S) Then Input_flage.MoveY = Move_Direction.Down : Input_flage.walking = True
 
@@ -1248,8 +1288,54 @@
         End If
 
         If pressedkeys.Contains(Keys.Tab) Then current_view = current_view_enum.ship_external : pressedkeys.Remove(Keys.Tab)
-        
+
+
+
+        If Not Panel_Menu = panel_enum.None Then
+
+            If mouse_info.get_left_click(left_down_point, left_release_point) Then
+                mouse_click = True
+                For Each Button In Panel_Menu_Items(Panel_Menu)
+                    If Button.Value.enabled = True Then
+                        If Button.Value.bounds.Contains(left_down_point.x, left_down_point.y) And Button.Value.bounds.Contains(left_release_point.x, left_release_point.y) Then
+                            choice = Button.Key
+                        End If
+                    End If
+                Next
+            End If
+
+            Button_Selection(Panel_Menu_Items(Panel_Menu), mouse_info)
+            Select Case choice
+                Case Is = personal_menu_enum.Exchange_Panel1
+                Case Is = personal_menu_enum.Exchange_Panel1
+                Case Is = personal_menu_enum.Exchange_Panel1
+            End Select
+
+        End If
+
     End Sub
+
+
+    Sub Populate_Panel()
+        If Panel_Menu = panel_enum.Planet_Exchange_Panel Then
+            Dim P As Planet = u.Planet_List(u.Officer_List(current_player).Location_ID)
+            Dim RemoveList As New List(Of Integer)()
+            For Each item In Panel_Menu_Items(panel_enum.Planet_Exchange_Panel)
+                If item.Key >= 1000 Then RemoveList.Add(item.Key)
+            Next
+            For Each item In RemoveList
+                Panel_Menu_Items(panel_enum.Planet_Exchange_Panel).Remove(item)
+            Next
+
+            Dim Id As Integer = 1000
+            For Each item In P.Exchange.ExchangeInventory
+                Panel_Menu_Items(panel_enum.Planet_Exchange_Panel).Add(Id, New Menu_button(button_texture_enum.ship_build__room_button, New Rectangle(screen_size.x \ 2 - 260, screen_size.y \ 2 - 240 + (Id - 1000) * 32, 80, 32), button_style.Clickable, Color.LightCoral, item.Key.ToString + " " + item.Value.ToString, Color.Black, d3d_font_enum.SB_small))
+                Id += 1
+            Next
+
+        End If
+    End Sub
+
 
     Sub test_ui()
         If pressedkeys.Contains(Keys.W) Then view_location_internal.y -= 1

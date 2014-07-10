@@ -312,6 +312,7 @@
         Forest_Planet = 0
         Desert_Planet = 1
         Desert_Mine = 2
+        Desert_Capitol = 3
         Road
         Shipyard
         House
@@ -572,6 +573,7 @@
     End Enum
 
     Enum Planet_Level_Type
+        Barren
         Outpost
         Village
         Town
@@ -660,10 +662,20 @@
 
     Enum Item_Enum
         None
+
         Crystal
+        Minerals        
+        Carbon
+        Water
+
+
+        Deuterium
+        HeavyCoin
         Refined_Crystal
-        Refined_Crystal_Piece
+        CrystalCoin
         Parts
+        RawDesertProduce
+        DesertFood
 
     End Enum
 
@@ -737,6 +749,12 @@
         Class_Scroll_Right
     End Enum
 
+    Enum personal_menu_enum
+        Exchange_Panel1
+        Exchange_Panel2
+        Exchange_Panel3
+
+    End Enum
 
     Enum Move_Direction As Byte
         None = 0
@@ -746,7 +764,12 @@
         Down = 4
     End Enum
 
+    Enum panel_enum As Integer
+        None
+        Planet_Exchange_Panel
 
+
+    End Enum
 
     Enum Internal_menu_items_Enum As Byte
         Neww

@@ -5,23 +5,23 @@
 
     Public SellAdvance As New Dictionary(Of Item_Enum, Integer)() 'Keeps track of what items are listed by what buildings(for payout)
 
-    Sub List_Item(ByVal Item As Item_Enum, ByVal BuildingID As Integer)
+    Sub List_Item(ByVal Item As Item_Enum, ByVal Amount As Integer, ByVal BuildingID As Integer)
         If ExchangeInventory.ContainsKey(Item) Then
-            ExchangeInventory(Item) += 1
+            ExchangeInventory(Item) += Amount
         Else
-            ExchangeInventory.Add(Item, 1)
+            ExchangeInventory.Add(Item, Amount)
         End If
         If Not SellLists.ContainsKey(Item) Then SellLists.Add(Item, New Dictionary(Of Integer, Integer))
         If Not SellLists(Item).ContainsKey(BuildingID) Then SellLists(Item).Add(BuildingID, 0)
 
-        SellLists(Item)(BuildingID) += 1
+        SellLists(Item)(BuildingID) += Amount
 
     End Sub
 
 
-    Function Buy_Item(ByVal Item As Item_Enum) As Boolean
-        If ExchangeInventory.ContainsKey(Item) AndAlso SellLists.ContainsKey(Item) AndAlso ExchangeInventory(Item) > 0 Then
-            ExchangeInventory(Item) -= 1
+    Function Buy_Item(ByVal Item As Item_Enum, ByVal Amount As Integer) As Boolean
+        If ExchangeInventory.ContainsKey(Item) AndAlso SellLists.ContainsKey(Item) AndAlso ExchangeInventory(Item) > Amount Then
+            ExchangeInventory(Item) -= Amount
         Else
             Return False
         End If
@@ -33,20 +33,17 @@
 
         For Each Sell In SellLists(Item)
             If SellAdvance(Item) = advance Then sellId = Sell.Key : Exit For
-            advance += 1
+            advance += Amount
         Next
 
-        SellLists(Item)(sellId) -= 1
-        If HeldMoney.ContainsKey(sellId) Then
-            HeldMoney(sellId) += 10
-        Else
-            HeldMoney.Add(sellId, 10)
-        End If
+        SellLists(Item)(sellId) -= Amount
+        If Not HeldMoney.ContainsKey(sellId) Then HeldMoney.Add(sellId, 0)
+        HeldMoney(sellId) += Amount * Get_Price(Item)
 
 
         If SellLists(Item)(sellId) <= 0 Then SellLists(Item).Remove(sellId)
 
-        SellAdvance(Item) += 1
+        SellAdvance(Item) += Amount
         If SellAdvance(Item) > SellLists(Item).Count - 1 Then SellAdvance(Item) = 0
 
         Return True
@@ -74,6 +71,18 @@
         Else
             Return 0
         End If
+    End Function
+
+
+    Function Get_Price(ByVal Item As Item_Enum) As Integer
+        Select Case Item
+            'Case Is = Item_Enum.Crystal : Return 10
+            'Case Is = Item_Enum.Crystal : Return 10
+            'Case Is = Item_Enum.Crystal : Return 10
+            'Case Is = Item_Enum.Crystal : Return 10
+            'Case Is = Item_Enum.Crystal : Return 10
+        End Select
+        Return 10
     End Function
 
 End Class
