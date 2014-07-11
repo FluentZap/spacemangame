@@ -231,7 +231,9 @@
         'P.Building_List(ID).access_point.Add(New PointI(pos.x + 8, pos.y + 9), New Building_Access_Point_Type(BAP_Type.Worker))
         'P.Building_List(ID).access_point.Add(New PointI(pos.x + 13, pos.y + 9), New Building_Access_Point_Type(BAP_Type.Worker))
         'P.Building_List(ID).access_point.Add(New PointI(pos.x + 18, pos.y + 9), New Building_Access_Point_Type(BAP_Type.Worker))
-
+        P.Building_List(ID).Customer_Slots.Add(New PointI(19, 10), -1)
+        P.Building_List(ID).Customer_Slots.Add(New PointI(21, 10), -1)
+        P.Building_List(ID).Customer_Slots.Add(New PointI(23, 10), -1)
         For y = 1 To 4
             'P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + 3, pos.y + y), New Item_Slots_Type(False))
             'P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + 4, pos.y + y), New Item_Slots_Type(False))
@@ -277,7 +279,9 @@
         'P.Building_List(ID).access_point.Add(New PointI(pos.x + 6, pos.y + 19), New Building_Access_Point_Type(BAP_Type.Worker))
         'P.Building_List(ID).access_point.Add(New PointI(pos.x + 10, pos.y + 19), New Building_Access_Point_Type(BAP_Type.Worker))
         'P.Building_List(ID).access_point.Add(New PointI(pos.x + 14, pos.y + 19), New Building_Access_Point_Type(BAP_Type.Worker))
-
+        P.Building_List(ID).Customer_Slots.Add(New PointI(19, 10), -1)
+        P.Building_List(ID).Customer_Slots.Add(New PointI(21, 10), -1)
+        P.Building_List(ID).Customer_Slots.Add(New PointI(23, 10), -1)
         For y = 22 To 29
             'P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + 2, pos.y + y), New Item_Slots_Type(False))
             'P.Building_List(ID).Item_Slots.Add(New PointI(pos.x + 3, pos.y + y), New Item_Slots_Type(False))
@@ -322,7 +326,9 @@
         'P.Building_List(ID).access_point.Add(New PointI(pos.x + 17, pos.y + 6), New Building_Access_Point_Type(BAP_Type.Worker))
         'P.Building_List(ID).access_point.Add(New PointI(pos.x + 14, pos.y + 10), New Building_Access_Point_Type(BAP_Type.Worker))
         'P.Building_List(ID).access_point.Add(New PointI(pos.x + 17, pos.y + 10), New Building_Access_Point_Type(BAP_Type.Worker))
-
+        P.Building_List(ID).Customer_Slots.Add(New PointI(19, 10), -1)
+        P.Building_List(ID).Customer_Slots.Add(New PointI(21, 10), -1)
+        P.Building_List(ID).Customer_Slots.Add(New PointI(23, 10), -1)
 
         'P.Building_List(ID).access_point.Add(New PointI(pos.x + 20, pos.y + 8), New Building_Access_Point_Type(BAP_Type.Transporter))
 
@@ -354,7 +360,9 @@
         P.Building_List(ID).LandRect = New Rectangle(pos.x, pos.y, 16, 32)
 
         'P.Building_List(ID).PickupPoint = New PointI(pos.x + 8, pos.y + 11)
-
+        P.Building_List(ID).Customer_Slots.Add(New PointI(19, 10), -1)
+        P.Building_List(ID).Customer_Slots.Add(New PointI(21, 10), -1)
+        P.Building_List(ID).Customer_Slots.Add(New PointI(23, 10), -1)
         'P.Building_List(ID).access_point.Add(New PointI(pos.x + 6, pos.y + 14), New Building_Access_Point_Type(BAP_Type.Worker))
         'P.Building_List(ID).access_point.Add(New PointI(pos.x + 10, pos.y + 14), New Building_Access_Point_Type(BAP_Type.Worker))
         'P.Building_List(ID).access_point.Add(New PointI(pos.x + 6, pos.y + 17), New Building_Access_Point_Type(BAP_Type.Worker))
@@ -389,6 +397,13 @@
     Sub Build_FactoryH(ByVal ID As Integer, ByVal OwnerID As Integer, ByVal pos As PointI, ByVal P As Planet)
         Build_From_File(building_type_enum.Factory, Block_Return_Type_Enum.HorizontalTop, P, pos, False)
         P.Building_List(ID).LandRect = New Rectangle(pos.x, pos.y, 32, 16)
+
+        P.Building_List(ID).BuildingRect.Add(0, New Rectangle(pos.x + 16, pos.y + 1, 15, 14))
+
+
+        P.Building_List(ID).Customer_Slots.Add(New PointI(19, 10), -1)
+        P.Building_List(ID).Customer_Slots.Add(New PointI(21, 10), -1)
+        P.Building_List(ID).Customer_Slots.Add(New PointI(23, 10), -1)
 
         'P.Building_List.Add(ID, New Planet_Building(OwnerID, New Rectangle(pos.x, pos.y, 32, 32), building_type_enum.Factory))
 
@@ -425,6 +440,11 @@
     Sub Build_FactoryV(ByVal ID As Integer, ByVal OwnerID As Integer, ByVal pos As PointI, ByVal P As Planet)
         Build_From_File(building_type_enum.Factory, Block_Return_Type_Enum.VerticalL, P, pos, False)
         P.Building_List(ID).LandRect = New Rectangle(pos.x, pos.y, 16, 32)
+
+
+        P.Building_List(ID).Customer_Slots.Add(New PointI(19, 10), -1)
+        P.Building_List(ID).Customer_Slots.Add(New PointI(21, 10), -1)
+        P.Building_List(ID).Customer_Slots.Add(New PointI(23, 10), -1)
 
         'P.Building_List.Add(ID, New Planet_Building(OwnerID, New Rectangle(pos.x, pos.y, 32, 32), building_type_enum.Factory))
 
@@ -579,6 +599,7 @@
         Build_From_File(building_type_enum.Exchange, Block_Return_Type_Enum.WholeTile, P, pos, False)
 
         P.Building_List(ID).LandRect = New Rectangle(pos.x, pos.y, 32, 32)
+
         'P.Building_List.Add(ID, New Planet_Building(OwnerID, New Rectangle(pos.x, pos.y, 32, 32), building_type_enum.Exchange))
 
 

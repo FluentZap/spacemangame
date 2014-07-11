@@ -11,7 +11,7 @@
     'Customers
     Customer_DoSomething
     Customer_EatDrink
-
+    Customer_Browse_Shops
 End Enum
 
 Module Crew_Scripts
@@ -43,6 +43,8 @@ Module Crew_Scripts
                     Case crew_script_enum.Customer_DoSomething : crew_script_customer_do_something(Crew_List(key), key)
 
                     Case crew_script_enum.Customer_EatDrink : crew_script_customer_EatDrink(Crew_List(key), key)
+
+                    Case crew_script_enum.Customer_Browse_Shops : crew_script_customer_Browse_Shops(Crew_List(key), key)
 
                 End Select
                 If Crew_List(key).command_queue.First.status = script_status_enum.complete Then Crew_List(key).command_queue.Dequeue()
@@ -237,15 +239,37 @@ Module Crew_Scripts
         Dim Slot As Slot_Return_Type
 
         'Go to Pub
-        Slot = P.GetNearistCustomerSlot(building_type_enum.Pub, crew_member.find_tile, Id)
-        If Not Slot.ID = -1 Then
-            Dim AdjustedPos As PointI
-            AdjustedPos.x = P.Building_List(Slot.ID).LandRect.X + Slot.Point.x
-            AdjustedPos.y = P.Building_List(Slot.ID).LandRect.Y + Slot.Point.y
-            P.MoveCrewTo(crew_member.find_tile, AdjustedPos, crew_member)
-            crew_member.command_queue.Enqueue(New Crew.Command_Customer_EatDrink(Slot))
-            command.status = script_status_enum.complete
-        End If
+        Select Case random(0, 1)
+            Case Is = 0
+                Slot = P.GetNearistCustomerSlot(building_type_enum.Pub, crew_member.find_tile, Id)
+                If Not Slot.ID = -1 Then
+                    Dim AdjustedPos As PointI
+                    AdjustedPos.x = P.Building_List(Slot.ID).LandRect.X + Slot.Point.x
+                    AdjustedPos.y = P.Building_List(Slot.ID).LandRect.Y + Slot.Point.y
+                    P.MoveCrewTo(crew_member.find_tile, AdjustedPos, crew_member)
+                    crew_member.command_queue.Enqueue(New Crew.Command_Customer_EatDrink(Slot))
+                    command.status = script_status_enum.complete
+                End If
+
+            Case Is = 1
+                Dim Building As building_type_enum
+                Select Case random(0, 2)
+                    Case Is = 0 : Building = building_type_enum.Mine
+                    Case Is = 1 : Building = building_type_enum.Factory
+                    Case Is = 2 : Building = building_type_enum.Refinery
+                End Select
+                Slot = P.GetNearistCustomerSlot(Building, crew_member.find_tile, Id)
+                If Not Slot.ID = -1 Then
+                    Dim AdjustedPos As PointI
+                    AdjustedPos.x = P.Building_List(Slot.ID).LandRect.X + Slot.Point.x
+                    AdjustedPos.y = P.Building_List(Slot.ID).LandRect.Y + Slot.Point.y
+                    P.MoveCrewTo(crew_member.find_tile, AdjustedPos, crew_member)
+                    crew_member.command_queue.Enqueue(New Crew.Command_hold(random(100, 100)))
+                    crew_member.command_queue.Enqueue(New Crew.Command_Customer_Browse_Shops(Slot, Building))
+                    command.status = script_status_enum.complete
+                End If
+        End Select
+        
 
     End Sub
 
@@ -270,6 +294,26 @@ Module Crew_Scripts
     End Sub
 
 
+    Public Sub crew_script_customer_Browse_Shops(ByRef crew_member As Crew, ByVal Id As Integer)
+        Dim command As Crew.Command_Customer_Browse_Shops = DirectCast(crew_member.command_queue.First, Crew.Command_Customer_Browse_Shops)
+        Dim P As Planet = u.Planet_List(crew_member.Location_ID)
+
+        If command.Duration = -1 Then
+            command.Duration = random(200, 300)
+            If command.BuildingType = building_type_enum.Mine Then GetAiSpeech(crew_member, Speech_Enum.Customer_Browsing)
+            If command.BuildingType = building_type_enum.Refinery Then GetAiSpeech(crew_member, Speech_Enum.Customer_Browsing)
+            If command.BuildingType = building_type_enum.Factory Then GetAiSpeech(crew_member, Speech_Enum.Customer_Browsing)            
+        End If
+
+        If command.Duration > 0 Then
+            command.Duration -= 1
+            'Need to add buying?
+        Else
+            P.Building_List(command.slot.ID).Customer_Slots(command.slot.Point) = -1
+            command.status = script_status_enum.complete
+            crew_member.command_queue.Enqueue(New Crew.Command_Customer_Do_Something)
+        End If
+    End Sub
 
 
 
