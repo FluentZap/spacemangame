@@ -1,6 +1,6 @@
 ﻿Public Enum Speech_Enum
     Shopkeeper_Greeting
-
+    Customer_Browsing
 End Enum
 Module AiSpeech
 
@@ -47,6 +47,13 @@ Module AiSpeech
                             Case 0 To 1000 'Night
                                 S.Add("Your out late", D)
                         End Select
+                End Select
+            Case Is = Speech_Enum.Customer_Browsing
+                Select Case random(0, 3)
+                    Case Is = 0 : S.Add("Have any guns?", D)
+                    Case Is = 1 : S.Add("How much is this?", D)
+                    Case Is = 2 : S.Add("I'll take it!", D)
+                    Case Is = 3 : S.Add("One of these please", D)
                 End Select
         End Select
     End Sub

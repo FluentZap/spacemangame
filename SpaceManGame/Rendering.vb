@@ -236,8 +236,10 @@
     Sub render_chatbubble(ByVal Pos As PointD, ByVal Text As String)
         Pos.y -= 22
         Pos.x += 6
-        d3d_sprite.Draw(icon_texture(3), Rectangle.Empty, Vector3.Empty, New Vector3(Pos.sngX, Pos.sngY, 1), Color.White)
-        draw_text(Text, New Rectangle(Pos.intX, Pos.intY, 64, 32), CType(DrawTextFormat.Center + DrawTextFormat.Left + DrawTextFormat.WordBreak, DrawTextFormat), Color.Black, d3d_font(d3d_font_enum.ChatBubbleSmall))
+        If Not Text = "" Then
+            d3d_sprite.Draw(icon_texture(3), Rectangle.Empty, Vector3.Empty, New Vector3(Pos.sngX, Pos.sngY, 1), Color.White)
+            draw_text(Text, New Rectangle(Pos.intX, Pos.intY, 64, 32), CType(DrawTextFormat.Center + DrawTextFormat.Left + DrawTextFormat.WordBreak, DrawTextFormat), Color.Black, d3d_font(d3d_font_enum.ChatBubbleSmall))
+        End If
     End Sub
 
 

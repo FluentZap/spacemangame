@@ -652,7 +652,7 @@ Public Class Planet
         For Each Officer In officer_list            
             If Officer.Value.Greeted = False AndAlso Officer.Value.InBuilding > -1 Then
                 If Building_List(Officer.Value.InBuilding).GetWorker > -1 Then
-                    GetAiSpeech(crew_list(Building_List(Officer.Value.InBuilding).GetWorker), Speech_Enum.Shopkeeper_Greeting)                    
+                    GetAiSpeech(crew_list(Building_List(Officer.Value.InBuilding).GetWorker), Speech_Enum.Shopkeeper_Greeting)
                     Officer.Value.Greeted = True
                 End If
             End If

@@ -116,6 +116,19 @@ End Class
         End Sub
     End Class
 
+
+    <Serializable()> Public Class Command_Customer_Browse_Shops
+        Inherits Crew_Command_script
+        Public Duration As Integer = -1
+        Public slot As Slot_Return_Type
+        Public BuildingType As building_type_enum
+        Sub New(ByVal Slot As Slot_Return_Type, ByVal BuildingType As building_type_enum)
+            type = crew_script_enum.Customer_Browse_Shops
+            Me.slot = Slot
+            Me.BuildingType = BuildingType
+        End Sub
+    End Class
+
 #End Region
 
 
