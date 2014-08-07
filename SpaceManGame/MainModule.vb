@@ -353,7 +353,7 @@
         Near_planet = -1
         Loaded_planet = -1
 
-        Player_Data.Officer_List.Add(0)
+        'Player_Data.Officer_List.Add(0)
 
         Load_tech_list()
         set_device_map()
@@ -794,6 +794,16 @@
         'Fix movement
         'Add_Officer(0, New Officer(0, "Captian", Officer_location_enum.Planet, 0, pos, 1, 0.2, New Officer.sprite_list(character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head)))
 
+
+        Dim remove_List As New HashSet(Of Integer)
+        For Each Planet In u.Planet_List
+            If Planet.Value.orbit_point = 0 AndAlso Planet.Value.orbits_planet = True Then remove_List.Add(Planet.Key)
+        Next
+        For Each item In remove_List
+            u.Planet_List.Remove(item)
+        Next
+
+
         Dim planet1 As Planet = New Planet(0, planet_type_enum.Desert, New PointI(512, 512), 0, 50000, False, 0.5, Planet_Level_Type.City)
         u.Planet_List.Remove(0)
         u.Planet_List.Add(0, planet1)
@@ -802,6 +812,7 @@
         u.Planet_List(0).Exchange.List_Item(Item_Enum.Refined_Crystal, 20000, 0)
         u.Planet_List(0).Exchange.List_Item(Item_Enum.Parts, 20000, 0)
         u.Planet_List(0).Exchange.List_Item(Item_Enum.RawDesertProduce, 20000, 0)
+
 
 
         'planet1.populate(Planet_Level_Type.Outpost)
@@ -821,8 +832,22 @@
 
 
         Dim pos = New PointD(ship1.center_point.x * 32, ship1.center_point.y * 32)
+
+        For a = 0 To 20
+            Dim id As Integer
+            For id = 0 To 500
+                If Not u.Crew_List.ContainsKey(id) Then Exit For
+            Next
+            Add_Crew(id, New Crew(0, pos, 0, Officer_location_enum.Ship, 1, character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head, New crew_resource_type(10, 10)))
+            'u.Ship_List(0).Crew_list.Add(id, New Crew(0, pos, 1, character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head, New crew_resource_type(10, 10)))
+            'ship1.Crew_list.Add(0, New Crew(pos, 1, 100, character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head, New crew_resource_type(10, 10)))
+        Next
+
+
+
+
         current_player = GetEmptyOfficerID()
-        Add_Officer(current_player, New Officer(0, "Captian", Officer_location_enum.Planet, 0, pos, 6, 0.2, New Officer.sprite_list(character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head)))
+        Add_Officer(current_player, New Officer(0, "Captian", Officer_location_enum.Ship, 0, pos, 6, 0.2, New Officer.sprite_list(character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head)))
         u.Officer_List(current_player).Officer_Classes.Add(New Officer_Class(Class_List_Enum.Mage, 0, 1))
         u.Officer_List(current_player).Officer_Classes.Add(New Officer_Class(Class_List_Enum.Spellsword, 0, 1))
         u.Officer_List(current_player).Officer_Classes.Add(New Officer_Class(Class_List_Enum.Shadow, 0, 1))
@@ -830,15 +855,23 @@
         u.Officer_List(current_player).Officer_Classes.Add(New Officer_Class(Class_List_Enum.Inventor, 0, 1))
         u.Officer_List(current_player).Officer_Classes.Add(New Officer_Class(Class_List_Enum.PlaceHolder, 20, 10))
         u.Officer_List(current_player).Officer_Classes.Add(New Officer_Class(Class_List_Enum.Eye_Of_The_Placeholder, 56, 1))
-
+        Player_Data.Officer_List.Add(current_player)
 
 
         u.Officer_List(current_player).Current_Class = Class_List_Enum.Mage
 
-        'Add_Officer(1, New Officer(0, "Skippy", Officer_location_enum.Ship, 0, pos, 1, 0.2, New Officer.sprite_list(0, 0)))
-        'u.Officer_List(1).Current_Class = Class_List_Enum.Engineer
-        'Add_Officer(2, New Officer(0, "Perpa", Officer_location_enum.Ship, 0, pos, 1, 0.2, New Officer.sprite_list(0, 0)))
-        'u.Officer_List(2).Current_Class = Class_List_Enum.Mage
+        Dim OID As Integer = GetEmptyOfficerID()
+        Add_Officer(OID, New Officer(0, "Skippy", Officer_location_enum.Ship, 0, pos, 1, 0.2, New Officer.sprite_list(0, 0)))
+        u.Officer_List(OID).Current_Class = Class_List_Enum.Engineer
+
+        Player_Data.Officer_List.Add(OID)
+
+        OID = GetEmptyOfficerID()
+        Add_Officer(OID, New Officer(0, "Perpa", Officer_location_enum.Ship, 0, pos, 1, 0.2, New Officer.sprite_list(0, 0)))
+        u.Officer_List(OID).Officer_Classes.Add(New Officer_Class(Class_List_Enum.Mage, 12, 3))
+        u.Officer_List(OID).Current_Class = Class_List_Enum.Mage
+        Player_Data.Officer_List.Add(OID)
+
         'Add_Officer(3, New Officer(0, "Surpa", Officer_location_enum.Ship, 0, pos, 1, 0.2, New Officer.sprite_list(0, 0)))
         'u.Officer_List(3).Current_Class = Class_List_Enum.Aviator
         'Add_Officer(4, New Officer(0, "Kerpa", Officer_location_enum.Ship, 0, pos, 1, 0.2, New Officer.sprite_list(0, 0)))
@@ -849,9 +882,7 @@
         'u.Officer_List(6).Current_Class = Class_List_Enum.Mage
         ''Add_Officer(7, New Officer(0, "Vextorz", Officer_location_enum.Ship, 0, pos, 1, 0.2, New Officer.sprite_list(0, 0)))
         'u.Officer_List(7).Current_Class = Class_List_Enum.Aviator
-        'Player_Data.Officer_List.Add(1)
-        'Player_Data.Officer_List.Add(2)
-        'Player_Data.Officer_List.Add(3)
+
         'Player_Data.Officer_List.Add(4)
         'Player_Data.Officer_List.Add(5)
         'Player_Data.Officer_List.Add(6)
@@ -876,7 +907,7 @@
 
         planet_theta_offset = 1
 
-        u.Ship_List(0).location = Get_Planet_Location(1)
+        'u.Ship_List(0).location = Get_Planet_Location(1)
         'current_selected_planet_view = 1
 
         'Dim render_start, render_end, time_current, cps, rate As Long
@@ -912,7 +943,7 @@
                         'Next
                         u.Planet_List(0).DoEvents()
                         update_Planet_Movements()
-                        check_near_planet(current_selected_ship_view)
+                        'check_near_planet(current_selected_ship_view)
 
 
                     Case Is = current_view_enum.ship_external
@@ -923,8 +954,8 @@
                         External_UI()
                         update_Planet_Movements()
                         Handle_Projectiles()
-                        check_near_planet(current_selected_ship_view)
-                        'Near_planet = 0
+                        'check_near_planet(current_selected_ship_view)
+                        Near_planet = 0
 
                     Case Is = current_view_enum.planet
                         For Each ship In u.Ship_List.Values
@@ -1259,8 +1290,8 @@
 
         If u.Officer_List(current_player).region = Officer_location_enum.Ship Then
 
-            view_location_personal.x = u.Ship_List(current_selected_ship_view).GetOfficer.Item(0).GetLocationD.x + 16 - ((screen_size.x / 2) / personal_zoom)
-            view_location_personal.y = u.Ship_List(current_selected_ship_view).GetOfficer.Item(0).GetLocationD.y + 16 - ((screen_size.y / 2) / personal_zoom)
+            view_location_personal.x = u.Ship_List(current_selected_ship_view).GetOfficer.Item(current_player).GetLocationD.x + 16 - ((screen_size.x / 2) / personal_zoom)
+            view_location_personal.y = u.Ship_List(current_selected_ship_view).GetOfficer.Item(current_player).GetLocationD.y + 16 - ((screen_size.y / 2) / personal_zoom)
 
 
             If view_location_personal.x < -(screen_size.x / 2) Then view_location_personal.x = -(screen_size.x \ 2)
@@ -1905,27 +1936,35 @@
             Case Is = Personal_level_enums.Officer_ScrollDown
                 If PLV__Officer_Scroll < Player_Data.Officer_List.Count - 5 Then PLV__Officer_Scroll += 1
             Case Is = Personal_level_enums.Officer_1
-                PLV__Selected_Officer = PLV__Officer_Scroll
-                PLV__Selected_Class = u.Officer_List(PLV__Selected_Officer).Current_Class
-                u.Officer_List(PLV__Selected_Officer).Recalculate_Abilities_Buffs()
+                If PLV__Officer_Scroll + 1 <= Player_Data.Officer_List.Count Then
+                    PLV__Selected_Officer = Player_Data.Officer_List(PLV__Officer_Scroll)
+                    PLV__Selected_Class = u.Officer_List(PLV__Selected_Officer).Current_Class
+                    u.Officer_List(PLV__Selected_Officer).Recalculate_Abilities_Buffs()
+                End If
             Case Is = Personal_level_enums.Officer_2
-                PLV__Selected_Officer = PLV__Officer_Scroll + 1
-                PLV__Selected_Class = u.Officer_List(PLV__Selected_Officer).Current_Class
-                u.Officer_List(PLV__Selected_Officer).Recalculate_Abilities_Buffs()
+                If PLV__Officer_Scroll + 2 <= Player_Data.Officer_List.Count Then
+                    PLV__Selected_Officer = Player_Data.Officer_List(PLV__Officer_Scroll + 1)
+                    PLV__Selected_Class = u.Officer_List(PLV__Selected_Officer).Current_Class
+                    u.Officer_List(PLV__Selected_Officer).Recalculate_Abilities_Buffs()
+                End If
             Case Is = Personal_level_enums.Officer_3
-                PLV__Selected_Officer = PLV__Officer_Scroll + 2
-                PLV__Selected_Class = u.Officer_List(PLV__Selected_Officer).Current_Class
-                u.Officer_List(PLV__Selected_Officer).Recalculate_Abilities_Buffs()
+                If PLV__Officer_Scroll + 3 <= Player_Data.Officer_List.Count Then
+                    PLV__Selected_Officer = Player_Data.Officer_List(PLV__Officer_Scroll + 2)
+                    PLV__Selected_Class = u.Officer_List(PLV__Selected_Officer).Current_Class
+                    u.Officer_List(PLV__Selected_Officer).Recalculate_Abilities_Buffs()
+                End If
             Case Is = Personal_level_enums.Officer_4
-                PLV__Selected_Officer = PLV__Officer_Scroll + 3
-                PLV__Selected_Class = u.Officer_List(PLV__Selected_Officer).Current_Class
-                u.Officer_List(PLV__Selected_Officer).Recalculate_Abilities_Buffs()
+                If PLV__Officer_Scroll + 4 <= Player_Data.Officer_List.Count Then
+                    PLV__Selected_Officer = Player_Data.Officer_List(PLV__Officer_Scroll + 3)
+                    PLV__Selected_Class = u.Officer_List(PLV__Selected_Officer).Current_Class
+                    u.Officer_List(PLV__Selected_Officer).Recalculate_Abilities_Buffs()
+                End If
             Case Is = Personal_level_enums.Officer_5
-                PLV__Selected_Officer = PLV__Officer_Scroll + 4
-                PLV__Selected_Class = u.Officer_List(PLV__Selected_Officer).Current_Class
-                u.Officer_List(PLV__Selected_Officer).Recalculate_Abilities_Buffs()
-
-
+                If PLV__Officer_Scroll + 5 <= Player_Data.Officer_List.Count Then
+                    PLV__Selected_Officer = Player_Data.Officer_List(PLV__Officer_Scroll + 4)
+                    PLV__Selected_Class = u.Officer_List(PLV__Selected_Officer).Current_Class
+                    u.Officer_List(PLV__Selected_Officer).Recalculate_Abilities_Buffs()
+                End If
             Case Is = Personal_level_enums.Class_Scroll_Left
                 If PLV__Class_Scroll > 0 Then PLV__Class_Scroll -= 1
             Case Is = Personal_level_enums.Class_Scroll_Right
@@ -1944,11 +1983,11 @@
 
 
             Case Is = Personal_level_enums.Class_Engineer
-                PLV__Selected_Class = Class_List_Enum.Engineer                
+                PLV__Selected_Class = Class_List_Enum.Engineer
             Case Is = Personal_level_enums.Class_Security
-                PLV__Selected_Class = Class_List_Enum.Security                
+                PLV__Selected_Class = Class_List_Enum.Security
             Case Is = Personal_level_enums.Class_Scientist
-                PLV__Selected_Class = Class_List_Enum.Scientist                
+                PLV__Selected_Class = Class_List_Enum.Scientist
             Case Is = Personal_level_enums.Class_Aviator
                 PLV__Selected_Class = Class_List_Enum.Aviator
 
