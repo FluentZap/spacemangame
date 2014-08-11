@@ -467,28 +467,28 @@
 
 
         Nebula_VB = New VertexBuffer(GetType(CustomVertex.TransformedColored), 17, d3d_device, 0, CustomVertex.TransformedColored.Format, Pool.Managed)
-        Planet_VB = New VertexBuffer(GetType(CustomVertex.PositionColored), 65, d3d_device, 0, CustomVertex.PositionColored.Format, Pool.Managed)
-        Orbit_VB = New VertexBuffer(GetType(CustomVertex.PositionColored), 65, d3d_device, 0, CustomVertex.PositionColored.Format, Pool.Managed)
-        Orbit2_VB = New VertexBuffer(GetType(CustomVertex.PositionColored), 65, d3d_device, 0, CustomVertex.PositionColored.Format, Pool.Managed)
+        Planet_VB = New VertexBuffer(GetType(CustomVertex.PositionColored), 129, d3d_device, 0, CustomVertex.PositionColored.Format, Pool.Managed)
+        Orbit_VB = New VertexBuffer(GetType(CustomVertex.PositionColored), 129, d3d_device, 0, CustomVertex.PositionColored.Format, Pool.Managed)
+        Orbit2_VB = New VertexBuffer(GetType(CustomVertex.PositionColored), 129, d3d_device, 0, CustomVertex.PositionColored.Format, Pool.Managed)
 
-        Dim ver(64) As CustomVertex.PositionColored
+        Dim ver(128) As CustomVertex.PositionColored
         Dim x, y As Single
         Dim theta As Single = 0
-        For p = 0 To 64
+        For p = 0 To 128
             y = CSng(Math.Cos(theta)) ' * external_zoom
             x = CSng(Math.Sin(theta)) ' * external_zoom
             ver(p) = New CustomVertex.PositionColored(x, y, 0, Color.Gold.ToArgb)
-            theta += CSng(PI / 32)
+            theta += CSng(PI / 64)
         Next
 
         Planet_VB.SetData(ver, 0, LockFlags.None)
 
-        For p = 0 To 64
+        For p = 0 To 128
             ver(p).Color = Color.Green.ToArgb
         Next
         Orbit_VB.SetData(ver, 0, LockFlags.None)
 
-        For p = 0 To 64
+        For p = 0 To 128
             ver(p).Color = Color.Silver.ToArgb
         Next
         Orbit2_VB.SetData(ver, 0, LockFlags.None)
@@ -628,7 +628,7 @@
         External_Menu_Items.Add(External_menu_items_Enum.Menu_weapon_control, New Menu_button(button_texture_enum.ship_build__room_button, New Rectangle(0, screen_size.y - 224, 80, 32), button_style.Both, Color.White, "Weapon Control", Color.Black, d3d_font_enum.SB_small, False))
 
         External_Menu_Items.Add(External_menu_items_Enum.LandOnPlanet, New Menu_button(button_texture_enum.ship_build__room_button, New Rectangle(screen_size.x - 80, screen_size.y \ 2 - 16, 80, 32), button_style.Both, Color.LightBlue, "Land", Color.Black, d3d_font_enum.SB_small))
-
+        External_Menu_Items.Add(External_menu_items_Enum.LeavePlanet, New Menu_button(button_texture_enum.ship_build__room_button, New Rectangle(screen_size.x - 80, screen_size.y \ 2 + 48, 80, 32), button_style.Both, Color.LightBlue, "Take Off", Color.Black, d3d_font_enum.SB_small))
 
         'Weapon Control
         External_Menu_Items_Weapon_Control.Add(External_Weapon_Control_Enums.Control_Group_Panel, New Menu_button(button_texture_enum.ship_build__device_panel, New Rectangle(0, 32, 0, 0), button_style.DisplayOnly, Color.Blue))
@@ -748,8 +748,9 @@
 
                 Dim distance As Double = Math.Sqrt(((shipcenter.x - pos.x) ^ 2) + ((shipcenter.y - pos.y) ^ 2))
                 If distance < planet.Value.size.x * 32 Then
-                    Near_planet = planet.Key
+                    Near_planet = planet.Key                
                     u.Ship_List(ship).orbiting = planet.Key
+                    If planet.Value.Generated = False Then planet.Value.populate()
                 End If
 
             End If
@@ -797,7 +798,7 @@
 
         Dim remove_List As New HashSet(Of Integer)
         For Each Planet In u.Planet_List
-            If Planet.Value.orbit_point = 0 AndAlso Planet.Value.orbits_planet = True Then remove_List.Add(Planet.Key)
+            If Planet.Value.orbit_point = 0 AndAlso Planet.Value.orbits_planet = True Then remove_List.Add(Planet.Key)            
         Next
         For Each item In remove_List
             u.Planet_List.Remove(item)
@@ -836,7 +837,7 @@
         For a = 0 To 20
             Dim id As Integer
             For id = 0 To 500
-                If Not u.Crew_List.ContainsKey(id) Then Exit For
+                If Not u.Ship_List(0).Crew_list.ContainsKey(id) Then Exit For
             Next
             Add_Crew(id, New Crew(0, pos, 0, Officer_location_enum.Ship, 1, character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head, New crew_resource_type(10, 10)))
             'u.Ship_List(0).Crew_list.Add(id, New Crew(0, pos, 1, character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head, New crew_resource_type(10, 10)))
@@ -938,10 +939,10 @@
                         For Each ship In u.Ship_List.Values
                             ship.DoEvents()
                         Next
-                        'For Each Planet In Planet_List.Values
-                        'Planet.DoEvents()
-                        'Next
-                        u.Planet_List(0).DoEvents()
+                        For Each Planet In u.Planet_List.Values
+                            Planet.DoEvents()
+                        Next
+                        'u.Planet_List(0).DoEvents()
                         update_Planet_Movements()
                         'check_near_planet(current_selected_ship_view)
 
@@ -954,8 +955,8 @@
                         External_UI()
                         update_Planet_Movements()
                         Handle_Projectiles()
-                        'check_near_planet(current_selected_ship_view)
-                        Near_planet = 0
+                        check_near_planet(current_selected_ship_view)
+                        'Near_planet = 0
 
                     Case Is = current_view_enum.planet
                         For Each ship In u.Ship_List.Values
@@ -1053,7 +1054,7 @@
     End Sub
 
     Sub Add_Crew(ByVal Id As Integer, ByVal Crew As Crew)
-        u.Crew_List.Add(Id, Crew)
+        'u.Crew_List.Add(Id, Crew)
 
         Select Case Crew.region
             Case Is = Officer_location_enum.Ship
@@ -1306,6 +1307,12 @@
                 If Crew.Value.find_rect.Contains(adj_mouse.ToPoint) Then Mouse_Target = Crew.Key
             Next
 
+            If pressedkeys.Contains(Keys.L) Then
+                Dim ship As Ship = u.Ship_List(u.Officer_List(current_player).Location_ID)
+                Dim pos As PointI = u.Officer_List(current_player).find_tile
+                ship.Activate_LandingBay(ship.tile_map(pos.x, pos.y).device_tile.device_ID)
+                pressedkeys.Remove(Keys.L)
+            End If
         End If
 
         If u.Officer_List(current_player).region = Officer_location_enum.Planet Then
@@ -1336,6 +1343,17 @@
             Dim ad_mouse As PointI = New PointI(mouse_info.position.x / personal_zoom + view_location_personal.x, mouse_info.position.y / personal_zoom + view_location_personal.y)
             Tile_Target = New PointI(ad_mouse.x \ 32, ad_mouse.y \ 32)
 
+
+            If pressedkeys.Contains(Keys.L) Then
+                Dim ship As Ship = u.Ship_List(0) 'FIX
+                Dim TilePos As PointI = u.Officer_List(current_player).find_tile
+                Dim ShipPos As PointI = u.Planet_List(Loaded_planet).landed_ships(0)
+                Dim pos As PointI = TilePos - ShipPos
+                If ship.tile_map(pos.x, pos.y).device_tile IsNot Nothing Then
+                    ship.Activate_LandingBay(ship.tile_map(pos.x, pos.y).device_tile.device_ID)
+                End If
+                pressedkeys.Remove(Keys.L)
+            End If
         End If
 
         If pressedkeys.Contains(Keys.Tab) Then current_view = current_view_enum.ship_external : pressedkeys.Remove(Keys.Tab)
@@ -1550,6 +1568,12 @@
             Case Is = External_menu_items_Enum.LandOnPlanet
                 If External__LandingMode = False Then External__LandingMode = True Else External__LandingMode = False
 
+
+            Case Is = External_menu_items_Enum.LeavePlanet
+                u.Planet_List(Loaded_planet).landed_ships.Remove(u.Ship_List(u.Officer_List(current_player).Location_ID).Ship_ID)
+                u.Ship_List(current_selected_ship_view).Landed = False
+
+
             Case 1000 To 1999
                 For Each weapon In ship.Weapon_control_groups(choice - 1000).Connected_Weapons
                     ship.Fire_Weapon(weapon)
@@ -1563,18 +1587,18 @@
         If Loaded_planet > -1 Then
             If External__LandingMode = True Then
                 Dim LandingPos As PointI
-                Dim PlanetPos As PointD = Get_Planet_Location(Loaded_planet)
+                Dim PlanetPos As PointD = Get_Planet_Location(Near_planet)
                 PlanetPos.x -= view_location_external.x
                 PlanetPos.y -= view_location_external.y
-                PlanetPos.x -= (u.Planet_List(Loaded_planet).size.x * 16) / 2
-                PlanetPos.y -= (u.Planet_List(Loaded_planet).size.y * 16) / 2
+                PlanetPos.x -= (u.Planet_List(Near_planet).size.x * 16) / 2
+                PlanetPos.y -= (u.Planet_List(Near_planet).size.y * 16) / 2
 
                 LandingPos.x = CInt((mouse_info.position.x - ship.center_point.x * 16 * external_zoom) / external_zoom - PlanetPos.x) \ 16
                 LandingPos.y = CInt((mouse_info.position.y - ship.center_point.y * 16 * external_zoom) / external_zoom - PlanetPos.y) \ 16
                 External__LandingPosition = LandingPos
             End If
 
-            If External__LandingPosition.x >= 0 AndAlso External__LandingPosition.x + ship.shipsize.x <= u.Planet_List(Loaded_planet).size.x AndAlso External__LandingPosition.y >= 0 AndAlso External__LandingPosition.y + ship.shipsize.y <= u.Planet_List(Loaded_planet).size.y Then
+            If External__LandingPosition.x >= 0 AndAlso External__LandingPosition.x + ship.shipsize.x <= u.Planet_List(Near_planet).size.x AndAlso External__LandingPosition.y >= 0 AndAlso External__LandingPosition.y + ship.shipsize.y <= u.Planet_List(Near_planet).size.y Then
                 External__LandingAllow = True
             Else
                 External__LandingAllow = False
@@ -1583,13 +1607,14 @@
             If mouse_info.left_down = True AndAlso External__LandingMode = True AndAlso External__LandingAllow = True Then
                 External__LandingMode = False
                 External__LandingAllow = False
-                u.Planet_List(Loaded_planet).landed_ships.Add(current_selected_ship_view, External__LandingPosition)
+                u.Planet_List(Near_planet).landed_ships.Add(current_selected_ship_view, External__LandingPosition)
                 'Need to set autoland
                 u.Ship_List(current_selected_ship_view).Landed = True
                 u.Ship_List(current_selected_ship_view).rotation = 0
                 u.Ship_List(current_selected_ship_view).vector_velocity.x = 0
                 u.Ship_List(current_selected_ship_view).vector_velocity.y = 0
                 u.Ship_List(current_selected_ship_view).angular_velocity = 0
+                u.Ship_List(current_selected_ship_view).LandedPlanet = Near_planet
             End If
         End If
 

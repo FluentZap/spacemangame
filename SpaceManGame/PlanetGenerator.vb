@@ -34,18 +34,20 @@
             Next
         Next
 
+
         'Add resource Points
         For a = 1 To P.Resource_Count
-            Dim po As New PointI(random(1, 14), random(1, 14))
+            Dim po As New PointI(random(1, (P.size.x \ 32) - 2), random(1, (P.size.y \ 32) - 2))
             If P.Resource_Points.ContainsKey(po) OrElse P.Farm_Points.ContainsKey(po) Then
                 a -= 1
             Else
                 P.Resource_Points.Add(po, False)
             End If
         Next
+
         'Add farm Points
         For a = 1 To P.Farm_Count
-            Dim po As New PointI(random(1, 14), random(1, 14))
+            Dim po As New PointI(random(1, (P.size.x \ 32) - 2), random(1, (P.size.y \ 32) - 2))
             If P.Resource_Points.ContainsKey(po) OrElse P.Farm_Points.ContainsKey(po) Then
                 a -= 1
             Else
