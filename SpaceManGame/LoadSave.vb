@@ -192,6 +192,7 @@
 
         device_tile_texture(device_tile_type_enum.Thruster_MK1) = Direct3D.TextureLoader.FromFile(d3d_device, Application.StartupPath + "\Data\Textures\Devices\Thruster_MK1.png", 64, 32, 0, Direct3D.Usage.None, Texture_Format, Direct3D.Pool.Managed, Filter, MipFilter, Color.FromArgb(255, 0, 255, 0).ToArgb)
 
+        device_tile_texture(device_tile_type_enum.Landing_Bay_Small) = Direct3D.TextureLoader.FromFile(d3d_device, Application.StartupPath + "\Data\Textures\Devices\Landing_Bay_Small.png", 128, 32, 0, Direct3D.Usage.None, Texture_Format, Direct3D.Pool.Managed, Filter, MipFilter, Color.FromArgb(255, 0, 255, 0).ToArgb)
 
 
         device_tile_texture(device_tile_type_enum.Pipeline_energy_Small) = Direct3D.TextureLoader.FromFile(d3d_device, Application.StartupPath + "\Data\Textures\Devices\Pipeline_energy.png", 480, 32, 0, Direct3D.Usage.None, Texture_Format, Direct3D.Pool.Managed, Filter, MipFilter, Color.FromArgb(255, 0, 255, 0).ToArgb)

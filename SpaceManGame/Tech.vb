@@ -68,6 +68,8 @@ Public Module Tech
         Thruster_MK1
 
         Weapon__Projectile_MK1
+
+        Landing_Bay_Small
     End Enum
 
     Enum planet_tech_list_enum
@@ -250,6 +252,8 @@ Public Module Tech
 
         Tech_list.Add(tech_list_enum.Computer_MK1, New Tech_type("Basic Main Computer", Tech_type_enum.Device, tech_list_enum.Bridge))
 
+        Tech_list.Add(tech_list_enum.Landing_Bay_Small, New Tech_type("Small Landing Bay", Tech_type_enum.Device, tech_list_enum.All_rooms))
+
 
         'Armor
         Tech_list.Add(tech_list_enum.ArmorLV1, New Tech_type("ArmorLV1", Tech_type_enum.Armor, tile_type_enum.Armor_1, 6))
@@ -265,6 +269,8 @@ Public Module Tech
 
     Sub Load_Description()
         Tech_list(tech_list_enum.Airlock).Description = "The Airlock is used to allow the passage into and out of the vessel."
+
+        Tech_list(tech_list_enum.Landing_Bay_Small).Description = "Small landing bay used to exit ship to planets."
 
     End Sub
 
@@ -483,6 +489,13 @@ Public Module Tech
         Pipe.Add(New Device_Pipeline(Pipeline_type_enum.Data, 50))
         Device_tech_list.Add(tech_list_enum.Airlock_MK1, New device_data(device_type_enum.door, 100, New crew_resource_type(0, 0), New PointI(0, 1), c_map, Pipe, device_tile_type_enum.Airlock_MK1, True, flip_enum.Both, True))
 
+
+        c_map = New Byte(1)() {}
+        c_map(0) = New Byte() {R, R}
+        c_map(1) = New Byte() {R, R}
+        Pipe = New HashSet(Of Device_Pipeline)
+        Pipe.Add(New Device_Pipeline(Pipeline_type_enum.Data, 50))
+        Device_tech_list.Add(tech_list_enum.Landing_Bay_Small, New device_data(device_type_enum.landing_bay, 100, New crew_resource_type(0, 0), New PointI(0, 0), c_map, Pipe, device_tile_type_enum.Landing_Bay_Small, False, flip_enum.None))
 
 
     End Sub

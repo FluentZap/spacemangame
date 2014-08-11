@@ -279,7 +279,7 @@
     Sub render_personal_planet(ByVal player As Integer)
         Dim atsize As Integer = Convert.ToInt32(32 * personal_zoom)
         Dim scale As Single = CSng(personal_zoom)
-        Dim planet As Planet = u.Planet_List(u.Officer_List(current_player).Location_ID)
+        Dim planet As Planet = u.Planet_List(Near_planet)
         Dim TileMap(,) As Planet_tile
         TileMap = planet.tile_map
         Dim pos As PointD
@@ -1362,7 +1362,6 @@
 
         For Each item In u.Planet_List
             Dim pos As PointD
-
             If item.Value.orbits_planet = True Then
                 pos = Get_Planet_Location(item.Value.orbit_point)
             Else
@@ -1371,15 +1370,11 @@
 
             pos.x = (pos.x - view_location_external.x) * external_zoom
             pos.y = (pos.y - view_location_external.y) * external_zoom
-
             If item.Value.orbits_planet = True Then
                 render_Vector_Circle(pos, New PointD(external_zoom * item.Value.orbit_distance, external_zoom * item.Value.orbit_distance), Orbit2_VB)
             Else
                 render_Vector_Circle(pos, New PointD(external_zoom * item.Value.orbit_distance, external_zoom * item.Value.orbit_distance), Orbit_VB)
             End If
-
-
-
         Next
 
         d3d_device.EndScene()
@@ -1721,7 +1716,7 @@
         d3d_device.Transform.World = Matrix.Scaling(Size.sngX, Size.sngY, 1) * Matrix.Translation(Position.sngX, Position.sngY, 0)
         d3d_device.RenderState.Lighting = False
 
-        d3d_device.DrawPrimitives(PrimitiveType.LineStrip, 0, 64)
+        d3d_device.DrawPrimitives(PrimitiveType.LineStrip, 0, 128)
         d3d_device.Transform.World = Matrix.Identity
     End Sub
 

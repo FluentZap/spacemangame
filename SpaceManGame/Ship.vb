@@ -111,6 +111,7 @@ Public Class Ship
 
 
     'Dim destination As PointI
+    Public Ship_ID As Integer
     Private path_find As A_star
     Public tile_map(,) As Ship_tile
     Public Build_ship As Ship
@@ -130,6 +131,7 @@ Public Class Ship
     Public Projectiles As New HashSet(Of Projectile)()
 
     Public Landed As Boolean
+    Public LandedPlanet As Integer
 
     Sub Load_Pathfinding()
         path_find = New A_star
@@ -142,6 +144,7 @@ Public Class Ship
         Me.type = type
         Me.shipclass = shipclass
         Me.shipsize = shipsize
+        Me.Ship_ID = id
     End Sub
 
     Sub New(ByVal s As Ship_Save)
@@ -338,6 +341,82 @@ Public Class Ship
 #End Region
 
 #Region "ship scripts"
+
+    Sub Activate_LandingBay(ByVal ID As Integer)
+        If Landed = True Then
+            Dim device As Ship_device = device_list(ID)
+            If device.Activated = False Then
+                
+                For Each Tile In device.tile_list
+                    Dim IdList(Officer_List.Count - 1) As Integer
+                    Officer_List.Keys.CopyTo(IdList, 0)
+                    For Each OID In IdList
+                        If Officer_List(OID).find_tile = Tile Then
+                            Officer_List.Remove(OID)
+                            u.Planet_List(Loaded_planet).officer_list.Add(OID, u.Officer_List(OID))
+                            u.Officer_List(OID).region = Officer_location_enum.Planet
+                            u.Officer_List(OID).Location_ID = Loaded_planet
+                            Dim newPos As PointD
+                            newPos.x = u.Planet_List(Loaded_planet).landed_ships(current_selected_ship_view).x * 32
+                            newPos.y = u.Planet_List(Loaded_planet).landed_ships(current_selected_ship_view).y * 32
+                            newPos.x += u.Officer_List(OID).location.x
+                            newPos.y += u.Officer_List(OID).location.y
+                            u.Officer_List(OID).location = newPos
+                        End If
+                    Next
+
+                Next
+                device.Activated = True
+            Else
+                Dim P As Planet = u.Planet_List(LandedPlanet)
+
+                For Each Tile In device.tile_list
+                    Dim IdList(P.officer_list.Count - 1) As Integer
+                    P.officer_list.Keys.CopyTo(IdList, 0)
+                    For Each OID In IdList
+                        Dim TilePos As PointI = P.officer_list(OID).find_tile
+                        Dim ShipPos As PointI = P.landed_ships(Ship_ID)
+                        If TilePos - ShipPos = Tile Then
+                            P.officer_list.Remove(OID)
+                            Officer_List.Add(OID, u.Officer_List(OID))
+                            u.Officer_List(OID).region = Officer_location_enum.Ship
+                            u.Officer_List(OID).Location_ID = Ship_ID
+                            Dim newPos As PointD
+
+                            'newPos.x = (TilePos.x - ShipPos.x) * 32
+                            'newPos.y = (TilePos.y - ShipPos.y) * 32
+                            newPos.x = u.Officer_List(OID).location.x - (ShipPos.x) * 32
+                            newPos.y = u.Officer_List(OID).location.y - (ShipPos.y) * 32
+                            u.Officer_List(OID).location = newPos
+                        End If
+                    Next
+                Next
+
+                'Dim IdList(u.Planet_List(Loaded_planet).officer_list.Count - 1) As Integer
+                'u.Planet_List(Loaded_planet).officer_list.Keys.CopyTo(IdList, 0)
+                'For Each OID In IdList
+                'For Each Tile In device.tile_list
+                'If Officer_List(OID).find_tile = Tile Then
+                'Officer_List.Remove(OID)
+                'u.Planet_List(Loaded_planet).officer_list.Add(OID, u.Officer_List(OID))
+                'u.Officer_List(OID).region = Officer_location_enum.Planet
+                'u.Officer_List(OID).Location_ID = Loaded_planet
+                'Dim newPos As PointD
+                'newPos.x = u.Planet_List(Loaded_planet).landed_ships(current_selected_ship_view).x * 32
+                'newPos.y = u.Planet_List(Loaded_planet).landed_ships(current_selected_ship_view).y * 32
+                'newPos.x += u.Officer_List(OID).location.x
+                'newPos.y += u.Officer_List(OID).location.y
+                'u.Officer_List(OID).location = newPos
+                'End If
+                'Next
+                'Next
+
+
+                device.Activated = False
+            End If
+        End If
+    End Sub
+
 
     Function open_door(ByRef point As PointI) As Boolean
         If tile_map(point.x, point.y).device_tile IsNot Nothing Then
@@ -612,7 +691,7 @@ Public Class Ship
     End Sub
 
 
-    Sub Detonate_Local_Projectile(ByVal Pro As Projectile)        
+    Sub Detonate_Local_Projectile(ByVal Pro As Projectile)
         Dim contact_Point As PointI = New PointI(Pro.Location.intX \ 32, Pro.Location.intY \ 32)
         tile_map(contact_Point.x, contact_Point.y).color = Color.Red
 
@@ -677,7 +756,7 @@ Public Class Ship
         End If
 
 
-        
+
         If orbiting > -1 Then
             Dim planetPos As PointD
             Dim planetPosNext As PointD
@@ -954,7 +1033,7 @@ Public Class Ship
     End Sub
 
 
-    Sub Fire_Weapon(ByVal DeviceID As Integer)        
+    Sub Fire_Weapon(ByVal DeviceID As Integer)
         Dim Fire_Point As PointD
         Dim Vector As PointD
         Dim rotate As Double

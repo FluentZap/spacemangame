@@ -1299,11 +1299,11 @@
                                 If selection_tile_map(x + 1, y + 1) < 253 Then
                                     If Build_ship.tile_map(x, y).type = tile_type_enum.empty Then Build_ship.tile_map(x, y) = New Ship_tile(Convert.ToByte(device_to_room_id), tile_type_enum.Device_Base, 0, 0, room_sprite_enum.empty, walkable_type_enum.Walkable)
 
-                                    If Device_tech_list(Build_selection).IsDoor = True Then
-                                        Build_ship.tile_map(x, y).walkable = walkable_type_enum.Door
-                                    Else
-                                        Build_ship.tile_map(x, y).walkable = walkable_type_enum.HasDevice
-                                    End If
+                                    Build_ship.tile_map(x, y).walkable = walkable_type_enum.HasDevice
+                                    If Device_tech_list(Build_selection).IsDoor = True Then Build_ship.tile_map(x, y).walkable = walkable_type_enum.Door
+                                    If Device_tech_list(Build_selection).type = device_type_enum.landing_bay Then Build_ship.tile_map(x, y).walkable = walkable_type_enum.Walkable
+
+
                                     Build_ship.tile_map(x, y).device_tile = New Device_tile(id, selection_tile_map(x + 1, y + 1), Device_rotation, Device_Flip, 0, Device_tech_list(Build_selection).tile_type)
                                     tile_list.Add(New PointI(x, y))
                                 End If
@@ -1327,7 +1327,7 @@
                                             'Set IdHash for Device Base
                                             If Build_ship.tile_map(x, y).device_tile.type = device_tile_type_enum.Device_Base Then
                                                 Build_ship.tile_map(x, y).device_tile.IDhash.Add(id)
-                                            End If                                            
+                                            End If
                                         End If
                                     End If
                                 End If
@@ -2353,7 +2353,7 @@
         Player_Tech.Add(tech_list_enum.Pipe_Data_100)
         Player_Tech.Add(tech_list_enum.Pipe_Energy_100)
 
-
+        Player_Tech.Add(tech_list_enum.Landing_Bay_Small)
 
 
         Create_build_ship()

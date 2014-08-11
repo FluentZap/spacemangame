@@ -34,6 +34,9 @@ End Class
     Public Active_Point As PointI
     Public Thrust_Direction As Direction_Enum
 
+    'LandingBay
+    Public Activated As Boolean = False
+
     'Public Weapon_Point As PointI
     Public Center_Angle As Double
     Public Center_Distance As Double    

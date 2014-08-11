@@ -222,6 +222,8 @@
             Case Else
                 p = New Planet(planetID, planet_type_enum.Vacuum, size, orbit, orbit_distance, orbits_planet, theta_offset, Planet_Level_Type.Barren)
         End Select
+
+        p = New Planet(planetID, planet_type_enum.Desert, size, orbit, orbit_distance, orbits_planet, theta_offset, Planet_Level_Type.Barren)
         u.Planet_List.Add(planetID, p)
     End Sub
 

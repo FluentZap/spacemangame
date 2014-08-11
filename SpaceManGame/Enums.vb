@@ -87,6 +87,9 @@
             Return New PointI(P1.x + P2.x, P1.y + P2.y)
         End Operator
 
+        Public Shared Operator -(ByVal P1 As PointI, ByVal P2 As PointI) As PointI
+            Return New PointI(P1.x - P2.x, P1.y - P2.y)
+        End Operator
     End Structure
 
 
@@ -182,6 +185,7 @@
         elevator
         light
         launch_bay
+        landing_bay
         comm
         ai_comp
         control_panel
@@ -342,6 +346,7 @@
         Pipeline_data_Large
 
         Thruster_MK1
+        Landing_Bay_Small
     End Enum
     Enum walkable_type_enum As Byte
         Impassable
@@ -349,7 +354,7 @@
         HasDevice
         Walkable
         Door
-        OpenDoor
+        OpenDoor        
     End Enum
     Enum button_texture_enum As Integer
         Blank = 0
@@ -669,7 +674,7 @@
         Menu_star_map
 
         LandOnPlanet
-
+        LeavePlanet
 
         Change_Alert
         Alert1
