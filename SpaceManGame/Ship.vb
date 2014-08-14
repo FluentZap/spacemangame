@@ -185,8 +185,24 @@ Public Class Ship
         Calculate_Engines()
         Process_Engines()
 
-        Update_Locataion()
+        If Landed = False Then
+            Update_Locataion()
+        End If
+        'Update_Orbiting()
+
         Handle_Projectiles()
+    End Sub
+
+
+    Sub Update_Orbiting()
+        If orbiting > -1 Then
+            Dim planetPos As PointD
+            Dim planetPosNext As PointD
+            planetPos = Get_Planet_Location(orbiting)
+            planetPosNext = Get_Planet_Location(orbiting, 0.05)
+            location.x += planetPosNext.x - planetPos.x
+            location.y += planetPosNext.y - planetPos.y
+        End If
     End Sub
 
     Public Sub Refresh()
@@ -753,17 +769,6 @@ Public Class Ship
             'If angular_velocity + Friction > 0 Then angular_velocity = 0 Else angular_velocity += Friction
         Else
             'If angular_velocity - Friction < 0 Then angular_velocity = 0 Else angular_velocity -= Friction
-        End If
-
-
-
-        If orbiting > -1 Then
-            Dim planetPos As PointD
-            Dim planetPosNext As PointD
-            planetPos = Get_Planet_Location(orbiting)
-            planetPosNext = Get_Planet_Location(orbiting, 0.05)
-            location.x += planetPosNext.x - planetPos.x
-            location.y += planetPosNext.y - planetPos.y
         End If
 
 

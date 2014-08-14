@@ -805,7 +805,7 @@
         Next
 
 
-        Dim planet1 As Planet = New Planet(0, planet_type_enum.Desert, New PointI(512, 512), 0, 50000, False, 0.5, Planet_Level_Type.City)
+        Dim planet1 As Planet = New Planet(0, planet_type_enum.Desert, New PointI(512, 512), 0, 100, False, 0.5, Planet_Level_Type.City)
         u.Planet_List.Remove(0)
         u.Planet_List.Add(0, planet1)
         u.Planet_List(0).populate()
@@ -857,7 +857,7 @@
         u.Officer_List(current_player).Officer_Classes.Add(New Officer_Class(Class_List_Enum.PlaceHolder, 20, 10))
         u.Officer_List(current_player).Officer_Classes.Add(New Officer_Class(Class_List_Enum.Eye_Of_The_Placeholder, 56, 1))
         Player_Data.Officer_List.Add(current_player)
-
+        Near_planet = 0
 
         u.Officer_List(current_player).Current_Class = Class_List_Enum.Mage
 
@@ -1291,15 +1291,15 @@
 
         If u.Officer_List(current_player).region = Officer_location_enum.Ship Then
 
-            view_location_personal.x = u.Ship_List(current_selected_ship_view).GetOfficer.Item(current_player).GetLocationD.x + 16 - ((screen_size.x / 2) / personal_zoom)
-            view_location_personal.y = u.Ship_List(current_selected_ship_view).GetOfficer.Item(current_player).GetLocationD.y + 16 - ((screen_size.y / 2) / personal_zoom)
-
+            'view_location_personal.x = u.Ship_List(current_selected_ship_view).GetOfficer.Item(current_player).GetLocationD.x + 16 - ((screen_size.x / 2) / personal_zoom)
+            'view_location_personal.y = u.Ship_List(current_selected_ship_view).GetOfficer.Item(current_player).GetLocationD.y + 16 - ((screen_size.y / 2) / personal_zoom)
 
             If view_location_personal.x < -(screen_size.x / 2) Then view_location_personal.x = -(screen_size.x \ 2)
             'If view_location_personal.x > Ship_List.Item(current_selected_ship_view).GetShipSize.x * 32 * personal_zoom - screen_size.x / 2 Then view_location_personal.x = CInt(Ship_List.Item(current_selected_ship_view).GetShipSize.x * 32 * personal_zoom) - screen_size.x / 2
 
             If view_location_personal.y < -(screen_size.y / 2) Then view_location_personal.y = -(screen_size.y \ 2)
             If view_location_personal.y > u.Ship_List.Item(current_selected_ship_view).GetShipSize.y * 32 * personal_zoom - screen_size.y / 2 Then view_location_personal.y = CInt(u.Ship_List.Item(current_selected_ship_view).GetShipSize.y * 32 * personal_zoom) - screen_size.y / 2
+            view_location_personal_Last = view_location_personal
 
             Mouse_Target = -1
             For Each Crew In u.Ship_List(current_selected_ship_view).Crew_list
@@ -1330,6 +1330,8 @@
             'If pressedkeys.Contains(Keys.S) Then view_location_personal.y += 1 'CInt(3 * rate)
             'If pressedkeys.Contains(Keys.A) Then view_location_personal.x -= 1 'CInt(3 * rate)
             'If pressedkeys.Contains(Keys.D) Then view_location_personal.x += 1 'CInt(3 * rate)
+
+
 
             view_location_personal_Last = view_location_personal
 
@@ -1570,7 +1572,7 @@
 
 
             Case Is = External_menu_items_Enum.LeavePlanet
-                u.Planet_List(Loaded_planet).landed_ships.Remove(u.Ship_List(u.Officer_List(current_player).Location_ID).Ship_ID)
+                u.Planet_List(Loaded_planet).landed_ships.Remove(u.Ship_List(current_selected_ship_view).Ship_ID)
                 u.Ship_List(current_selected_ship_view).Landed = False
 
 
@@ -1615,6 +1617,8 @@
                 u.Ship_List(current_selected_ship_view).vector_velocity.y = 0
                 u.Ship_List(current_selected_ship_view).angular_velocity = 0
                 u.Ship_List(current_selected_ship_view).LandedPlanet = Near_planet
+                u.Ship_List(current_selected_ship_view).location.x = Get_Planet_Location(Near_planet).x - (u.Planet_List(Near_planet).size.x \ 2) * 32 + External__LandingPosition.x * 32
+                u.Ship_List(current_selected_ship_view).location.y = Get_Planet_Location(Near_planet).y - (u.Planet_List(Near_planet).size.y \ 2) * 32 + External__LandingPosition.y * 32
             End If
         End If
 
