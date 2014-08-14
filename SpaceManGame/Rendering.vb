@@ -121,6 +121,9 @@
 
         'Render on ship
         If u.Officer_List(player).region = Officer_location_enum.Ship Then
+            view_location_personal.x = u.Ship_List(current_selected_ship_view).GetOfficer.Item(current_player).GetLocationD.x + 16 - ((screen_size.x / 2) / personal_zoom)
+            view_location_personal.y = u.Ship_List(current_selected_ship_view).GetOfficer.Item(current_player).GetLocationD.y + 16 - ((screen_size.y / 2) / personal_zoom)
+
             Dim ship As Ship = u.Ship_List(u.Officer_List(player).Location_ID)
 
 
@@ -157,6 +160,7 @@
         If u.Officer_List(player).region = Officer_location_enum.Planet Then
             view_location_personal.x = u.Officer_List(current_player).GetLocationD.x + 16 - CInt((screen_size.x / 2) / personal_zoom)
             view_location_personal.y = u.Officer_List(current_player).GetLocationD.y + 16 - CInt((screen_size.y / 2) / personal_zoom)
+
             'view_location_personal.x += 1
             Dim planet As Planet = u.Planet_List(u.Officer_List(player).Location_ID)
             'For a = 0 To 100
@@ -1496,17 +1500,20 @@
         Dim planet As Planet = u.Planet_List(Loaded_planet)
         Dim TileMap(,) As Planet_tile
         TileMap = planet.tile_map
-        Dim pos As PointD
-        Dim ShipPos As PointI = planet.landed_ships(current_selected_ship_view)
-        Dim viewRect As Rectangle = New Rectangle(CInt(ShipPos.x * external_zoom) \ atsize, CInt(ShipPos.y * external_zoom) \ atsize, (screen_size.x \ atsize) + 1, (screen_size.y \ atsize) + 1)
+        Dim pos As PointD = Get_Planet_Location(Loaded_planet)
+        Dim planetPos As PointD = Get_Planet_Location(Loaded_planet)
 
+        Dim ShipPos As PointI = planet.landed_ships(current_selected_ship_view)
+        Dim viewRect As Rectangle ' = New Rectangle(CInt(ShipPos.x * external_zoom) \ atsize, CInt(ShipPos.y * external_zoom) \ atsize, (screen_size.x \ atsize) + 1, (screen_size.y \ atsize) + 1)
+
+        viewRect = New Rectangle(0, 0, 512, 512)
         For x = viewRect.X To viewRect.Right
             For y = viewRect.Y To viewRect.Bottom
-                pos.x = (x * 32) '- view_location_external.x
-                pos.y = (y * 32) '- view_location_external.y
+                pos.x = planetPos.x - (u.Planet_List(Near_planet).size.x \ 2) * 32 + (x * 32) - view_location_external.x
+                pos.y = planetPos.y - (u.Planet_List(Near_planet).size.y \ 2) * 32 + (y * 32) - view_location_external.y
                 If x >= 0 AndAlso x <= planet.size.x AndAlso y >= 0 AndAlso y <= planet.size.y Then
                     If TileMap(x, y).type < planet_tile_type_enum.empty Then
-                        Draw_Planet_Tile(TileMap(x, y).type, TileMap(x, y).sprite, pos, Color.FromArgb(255, 255, 255, 255))
+                        'Draw_Planet_Tile(TileMap(x, y).type, TileMap(x, y).sprite, pos, Color.FromArgb(255, 255, 255, 255))
                     End If
 
                     'May Need Fixing
@@ -1520,6 +1527,11 @@
                 End If
             Next
         Next
+
+        'pos = Get_Planet_Location(Loaded_planet)
+        'pos.x -= view_location_external.x
+        'pos.y -= view_location_external.y
+        'd3d_sprite.Draw(external_planet_texture(0), Rectangle.Empty, New Vector3(0, 0, 0), New Vector3(pos.sngX, pos.sngY, 0), Color.White)
 
 
         Dim x1 As Single
