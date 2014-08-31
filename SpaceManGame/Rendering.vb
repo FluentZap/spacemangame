@@ -485,6 +485,10 @@
             Next
         End If
 
+
+        'DrawAbilitys
+
+
     End Sub
 
 
@@ -1347,12 +1351,17 @@
 
         d3d_sprite.Transform = Matrix.Identity
         draw_text(u.Ship_List(0).target_rotation.ToString, New Rectangle(20, 700, 160, 20), CType(DrawTextFormat.Center + DrawTextFormat.VerticalCenter, DrawTextFormat), Color.White, d3d_font(d3d_font_enum.SB_small))
-        draw_text("Turn point: " + u.Ship_List(0).Turn_Point.ToString, New Rectangle(20, 720, 160, 20), CType(DrawTextFormat.Center + DrawTextFormat.VerticalCenter, DrawTextFormat), Color.White, d3d_font(d3d_font_enum.SB_small))
+
+        draw_text("Rotation " + u.Ship_List(0).rotation.ToString, New Rectangle(20, 680, 160, 20), CType(DrawTextFormat.Center + DrawTextFormat.VerticalCenter, DrawTextFormat), Color.White, d3d_font(d3d_font_enum.SB_small))
+
+        draw_text("Turn point: " + u.Ship_List(0).Nav_Angle.ToString, New Rectangle(20, 720, 160, 20), CType(DrawTextFormat.Center + DrawTextFormat.VerticalCenter, DrawTextFormat), Color.White, d3d_font(d3d_font_enum.SB_small))
         draw_text("Turn Left: " + u.Ship_List(0).Turn_Left.ToString, New Rectangle(20, 740, 160, 20), CType(DrawTextFormat.Center + DrawTextFormat.VerticalCenter, DrawTextFormat), Color.White, d3d_font(d3d_font_enum.SB_small))
         draw_text("Stop Rot: " + u.Ship_List(0).Stop_Rotation.ToString, New Rectangle(20, 760, 160, 20), CType(DrawTextFormat.Center + DrawTextFormat.VerticalCenter, DrawTextFormat), Color.White, d3d_font(d3d_font_enum.SB_small))
         draw_text("AV: " + u.Ship_List(0).angular_velocity.ToString, New Rectangle(20, 780, 160, 20), CType(DrawTextFormat.Center + DrawTextFormat.VerticalCenter, DrawTextFormat), Color.White, d3d_font(d3d_font_enum.SB_small))
         draw_text("amp: " + External__LandingPosition.x.ToString + "  :  " + External__LandingPosition.y.ToString, New Rectangle(20, 800, 160, 20), CType(DrawTextFormat.Center + DrawTextFormat.VerticalCenter, DrawTextFormat), Color.White, d3d_font(d3d_font_enum.SB_small))
 
+        draw_text("Start " + u.Ship_List(0).StartCy.ToString, New Rectangle(20, 820, 160, 20), CType(DrawTextFormat.Center + DrawTextFormat.VerticalCenter, DrawTextFormat), Color.White, d3d_font(d3d_font_enum.SB_small))
+        draw_text("Stop " + u.Ship_List(0).StopCy.ToString, New Rectangle(20, 840, 160, 20), CType(DrawTextFormat.Center + DrawTextFormat.VerticalCenter, DrawTextFormat), Color.White, d3d_font(d3d_font_enum.SB_small))
 
         'draw_text(CInt(Distance_from).ToString, New Rectangle(0, 500, 100, 20), CType(DrawTextFormat.Center + DrawTextFormat.VerticalCenter, DrawTextFormat), Color.White, d3d_font(d3d_font_enum.SB_small))
 
@@ -1447,7 +1456,7 @@
 
         d3d_sprite.Transform = Matrix.Identity
         draw_text(u.Ship_List(0).target_rotation.ToString, New Rectangle(20, 700, 160, 20), CType(DrawTextFormat.Center + DrawTextFormat.VerticalCenter, DrawTextFormat), Color.White, d3d_font(d3d_font_enum.SB_small))
-        draw_text("Turn point: " + u.Ship_List(0).Turn_Point.ToString, New Rectangle(20, 720, 160, 20), CType(DrawTextFormat.Center + DrawTextFormat.VerticalCenter, DrawTextFormat), Color.White, d3d_font(d3d_font_enum.SB_small))
+        draw_text("Turn point: " + u.Ship_List(0).Nav_Angle.ToString, New Rectangle(20, 720, 160, 20), CType(DrawTextFormat.Center + DrawTextFormat.VerticalCenter, DrawTextFormat), Color.White, d3d_font(d3d_font_enum.SB_small))
         draw_text("Turn Left: " + u.Ship_List(0).Turn_Left.ToString, New Rectangle(20, 740, 160, 20), CType(DrawTextFormat.Center + DrawTextFormat.VerticalCenter, DrawTextFormat), Color.White, d3d_font(d3d_font_enum.SB_small))
         draw_text("Stop Rot: " + u.Ship_List(0).Stop_Rotation.ToString, New Rectangle(20, 760, 160, 20), CType(DrawTextFormat.Center + DrawTextFormat.VerticalCenter, DrawTextFormat), Color.White, d3d_font(d3d_font_enum.SB_small))
         draw_text("AV: " + u.Ship_List(0).angular_velocity.ToString, New Rectangle(20, 780, 160, 20), CType(DrawTextFormat.Center + DrawTextFormat.VerticalCenter, DrawTextFormat), Color.White, d3d_font(d3d_font_enum.SB_small))

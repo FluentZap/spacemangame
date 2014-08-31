@@ -67,7 +67,9 @@
     Public Const DIAGONAL_SPEED_MODIFIER As Double = 0.70710678118654757
 
 
-    Public Const PI As Double = 3.14159265358979
+    'Public Const PI As Double = 3.14159265358979
+    Public Const PI As Double = 3.1415926535897931
+
 
     Public Const ACCEPTABLE_MARGIN As Double = 0
 
@@ -320,6 +322,7 @@
     'Personal view
     Public Mouse_Target As Integer
     Public Tile_Target As PointI
+    Public Ability_List_Select As Byte
 
     'Dim region(100, 100) As Region_Type
     'Dim ship_view_Region As Point
@@ -666,6 +669,20 @@
         Menu_Items_Personal_Level.Add(Personal_level_enums.Class_5, New Menu_button(button_texture_enum.Blank, New Rectangle(pos.x, pos.y, 72, 108), button_style.DisplayOnly, Color.White)) : pos.x += 92
         Menu_Items_Personal_Level.Add(Personal_level_enums.Class_Scroll_Right, New Menu_button(button_texture_enum.PLV__Officer_ScrollRight, New Rectangle(pos.x, pos.y, 16, 108), button_style.Both, Color.White))
 
+        pos.x = screen_size.x \ 2 - 100
+        pos.y = screen_size.y - 80
+        Personal_Menu_Items.Add(Personal_Menu_Item_Enum.Attack1, New Menu_button(button_texture_enum.Personal__Ability_Icon, New Rectangle(pos.x, pos.y, 32, 32), button_style.Both, Color.White)) : pos.x += 40
+        Personal_Menu_Items.Add(Personal_Menu_Item_Enum.Attack2, New Menu_button(button_texture_enum.Personal__Ability_Icon, New Rectangle(pos.x, pos.y, 32, 32), button_style.Both, Color.White)) : pos.x += 40
+        Personal_Menu_Items.Add(Personal_Menu_Item_Enum.Attack3, New Menu_button(button_texture_enum.Personal__Ability_Icon, New Rectangle(pos.x, pos.y, 32, 32), button_style.Both, Color.White)) : pos.x += 40
+        Personal_Menu_Items.Add(Personal_Menu_Item_Enum.Attack4, New Menu_button(button_texture_enum.Personal__Ability_Icon, New Rectangle(pos.x, pos.y, 32, 32), button_style.Both, Color.White)) : pos.x += 40
+
+        pos.x = screen_size.x \ 2 - 100
+        pos.y = screen_size.y - 40
+        Personal_Menu_Items.Add(Personal_Menu_Item_Enum.Ability1, New Menu_button(button_texture_enum.Personal__Ability_Icon, New Rectangle(pos.x, pos.y, 32, 32), button_style.Both, Color.White)) : pos.x += 40
+        Personal_Menu_Items.Add(Personal_Menu_Item_Enum.Ability2, New Menu_button(button_texture_enum.Personal__Ability_Icon, New Rectangle(pos.x, pos.y, 32, 32), button_style.Both, Color.White)) : pos.x += 40
+        Personal_Menu_Items.Add(Personal_Menu_Item_Enum.Ability3, New Menu_button(button_texture_enum.Personal__Ability_Icon, New Rectangle(pos.x, pos.y, 32, 32), button_style.Both, Color.White)) : pos.x += 40
+        Personal_Menu_Items.Add(Personal_Menu_Item_Enum.Ability4, New Menu_button(button_texture_enum.Personal__Ability_Icon, New Rectangle(pos.x, pos.y, 32, 32), button_style.Both, Color.White)) : pos.x += 40
+
 
         'Panels
         Panel_Menu_Items.Add(panel_enum.Planet_Exchange_Panel, New Dictionary(Of Integer, Menu_button)())
@@ -848,7 +865,7 @@
 
 
         current_player = GetEmptyOfficerID()
-        Add_Officer(current_player, New Officer(0, "Captian", Officer_location_enum.Ship, 0, pos, 6, 0.2, New Officer.sprite_list(character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head)))
+        Add_Officer(current_player, New Officer(0, "Captian", Officer_location_enum.Planet, 0, pos, 6, 0.2, New Officer.sprite_list(character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head)))
         u.Officer_List(current_player).Officer_Classes.Add(New Officer_Class(Class_List_Enum.Mage, 0, 1))
         u.Officer_List(current_player).Officer_Classes.Add(New Officer_Class(Class_List_Enum.Spellsword, 0, 1))
         u.Officer_List(current_player).Officer_Classes.Add(New Officer_Class(Class_List_Enum.Shadow, 0, 1))
@@ -859,7 +876,7 @@
         Player_Data.Officer_List.Add(current_player)
         Near_planet = 0
 
-        u.Officer_List(current_player).Current_Class = Class_List_Enum.Mage
+        u.Officer_List(current_player).Current_Class = Class_List_Enum.Incendium
 
         Dim OID As Integer = GetEmptyOfficerID()
         Add_Officer(OID, New Officer(0, "Skippy", Officer_location_enum.Ship, 0, pos, 1, 0.2, New Officer.sprite_list(0, 0)))
@@ -928,55 +945,56 @@
             u.Ship_List(1).angular_velocity = 0.001
             'Logic
             QueryPerformanceCounter(time_current)
-            If Logic_Time >= 1 Then
-                Logic_Time -= 1
-                UpdateGST()
-                Select Case current_view
-                    Case Is = current_view_enum.ship_internal
-                        test_ui()
-                    Case Is = current_view_enum.personal
-                        Personal_UI(1)
-                        For Each ship In u.Ship_List.Values
-                            ship.DoEvents()
-                        Next
-                        For Each Planet In u.Planet_List.Values
-                            Planet.DoEvents()
-                        Next
-                        'u.Planet_List(0).DoEvents()
-                        update_Planet_Movements()
-                        'check_near_planet(current_selected_ship_view)
+            Do Until Logic_Time < 1
+                If Logic_Time >= 1 Then
+                    Logic_Time -= 1
+                    UpdateGST()
+                    Select Case current_view
+                        Case Is = current_view_enum.ship_internal
+                            test_ui()
+                        Case Is = current_view_enum.personal
+                            Personal_UI(1)
+                            For Each ship In u.Ship_List.Values
+                                ship.DoEvents()
+                            Next
+                            For Each Planet In u.Planet_List.Values
+                                Planet.DoEvents()
+                            Next
+                            'u.Planet_List(0).DoEvents()
+                            update_Planet_Movements()
+                            'check_near_planet(current_selected_ship_view)
 
 
-                    Case Is = current_view_enum.ship_external
+                        Case Is = current_view_enum.ship_external
 
-                        For Each ship In u.Ship_List.Values
-                            ship.DoEvents()
-                        Next
-                        External_UI()
-                        update_Planet_Movements()
-                        Handle_Projectiles()
-                        check_near_planet(current_selected_ship_view)
-                        'Near_planet = 0
+                            For Each ship In u.Ship_List.Values
+                                ship.DoEvents()
+                            Next
+                            External_UI()
+                            update_Planet_Movements()
+                            Handle_Projectiles()
+                            check_near_planet(current_selected_ship_view)
+                            'Near_planet = 0
 
-                    Case Is = current_view_enum.planet
-                        For Each ship In u.Ship_List.Values
-                            run_crew_scrips(ship.Crew_list)
-                            ship.Process_Devices()
-                        Next
-                        Planet_UI()
-                    Case Is = current_view_enum.star_map
-                        update_Planet_Movements()
-                        Starmap_UI()
-                    Case Is = current_view_enum.Weapon_control
-                        Weapon_Control_UI()
-                    Case Is = current_view_enum.personal_level_screen
-                        Personal_Level_UI()
-                End Select
-                'System.Threading.Thread.Sleep(random(0, 32))
-                Logic_loops += 1
-            End If
-            Logic_Duration = Current_Time() - time_current
-
+                        Case Is = current_view_enum.planet
+                            For Each ship In u.Ship_List.Values
+                                run_crew_scrips(ship.Crew_list)
+                                ship.Process_Devices()
+                            Next
+                            Planet_UI()
+                        Case Is = current_view_enum.star_map
+                            update_Planet_Movements()
+                            Starmap_UI()
+                        Case Is = current_view_enum.Weapon_control
+                            Weapon_Control_UI()
+                        Case Is = current_view_enum.personal_level_screen
+                            Personal_Level_UI()
+                    End Select
+                    'System.Threading.Thread.Sleep(random(0, 32))
+                    Logic_loops += 1
+                End If
+                Logic_Duration = Current_Time() - time_current
+            Loop
 
             'Render
             QueryPerformanceCounter(time_current)
@@ -1153,11 +1171,11 @@
 
     Sub Activate_Ability(ByVal player As Integer, ByVal Ability As Ability_List_Enum)
         Select Case Ability
-            Case Is = Ability_List_Enum.Mage__Fireball
+            Case Is = Ability_List_Enum.Incendium__Imolate
                 Dim start_Point As PointD = u.Officer_List(player).GetLocationD
                 Dim Vector_Velocity As PointD
                 Dim Rotation As Double
-                Dim velocity As Double = 5
+                Dim velocity As Double = 10
                 start_Point.x += 15 : start_Point.y += 15
 
                 Select Case u.Officer_List(player).input_flages.Facing
@@ -1172,9 +1190,9 @@
                 End Select
                 Select Case u.Officer_List(player).region
                     Case Is = Officer_location_enum.Planet
-                        u.Planet_List(u.Officer_List(player).Location_ID).Projectiles.Add(New Projectile(start_Point, Vector_Velocity, Rotation, 100))
+                        u.Planet_List(u.Officer_List(player).Location_ID).Projectiles.Add(New Projectile(start_Point, Vector_Velocity, Rotation, 200))
                     Case Is = Officer_location_enum.Ship
-                        u.Ship_List(u.Officer_List(player).Location_ID).Projectiles.Add(New Projectile(start_Point, Vector_Velocity, Rotation, 500))
+                        u.Ship_List(u.Officer_List(player).Location_ID).Projectiles.Add(New Projectile(start_Point, Vector_Velocity, Rotation, 200))
                     Case Is = Officer_location_enum.Enemy_Ship
                 End Select
 
@@ -1197,6 +1215,7 @@
 
         Populate_Panel()
 
+        Button_Selection(Personal_Menu_Items, mouse_info)
 
         If pressedkeys.Contains(Keys.ShiftKey) Then amount = 50
         If pressedkeys.Contains(Keys.Z) Then personal_zoom = personal_zoom + 1 : pressedkeys.Remove(Keys.Z)
@@ -1225,7 +1244,7 @@
 
 
         If pressedkeys.Contains(Keys.OemQuestion) Then
-            Activate_Ability(current_player, Ability_List_Enum.Mage__Fireball)
+            Activate_Ability(current_player, Ability_List_Enum.Incendium__Imolate)
             pressedkeys.Remove(Keys.OemQuestion)
         End If
 
@@ -1661,9 +1680,9 @@
             If rot < 0 Then rot += PI * 2
             'If rot < -PI Then rot += PI * 2
             'Ships(current_selected_ship_view).target_rotation = rot
-            u.Ship_List(current_selected_ship_view).angular_velocity = 0
-            u.Ship_List(current_selected_ship_view).rotation = 0
-            rot = PI / 2
+            'u.Ship_List(current_selected_ship_view).angular_velocity = 0
+            'u.Ship_List(current_selected_ship_view).rotation = 1
+            'rot = PI * 1.5
             u.Ship_List(current_selected_ship_view).SetFullTurn(rot)
             mouse_info.right_down = False
         End If
