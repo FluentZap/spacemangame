@@ -100,8 +100,9 @@ Public Class Ship
     Public angular_velocity As Double
     Public location As PointD
 
-    Public Turn_Point As Double
+    Public Nav_Angle As Double
     Public Turn_Left As Boolean
+    Public TurnPassZero As Boolean
     Public Stop_Rotation As Boolean
     Public NavControl As Boolean
 
@@ -132,6 +133,9 @@ Public Class Ship
 
     Public Landed As Boolean
     Public LandedPlanet As Integer
+
+    'Temps
+    Public StartCy, StopCy As Integer
 
     Sub Load_Pathfinding()
         path_find = New A_star
@@ -735,8 +739,8 @@ Public Class Ship
         End If
         'Move Ship
 
-        location.x += vector_velocity.x * 20
-        location.y += vector_velocity.y * 20
+        location.x += vector_velocity.x ' * 20
+        location.y += vector_velocity.y ' * 20
         rotation += angular_velocity
 
         'vector_velocity.x = 0
@@ -746,9 +750,11 @@ Public Class Ship
         If rotation > PI * 2 Then rotation -= PI * 2
 
         'FRICTION
-        vector_velocity.x -= vector_velocity.x * Drag
-        vector_velocity.y -= vector_velocity.y * Drag
-        angular_velocity -= angular_velocity * Drag
+        'vector_velocity.x -= vector_velocity.x * Drag
+        'vector_velocity.y -= vector_velocity.y * Drag
+        'angular_velocity -= angular_velocity * Drag
+        'Dim limit As Integer = 1
+        
 
         'Exit Sub
 
@@ -845,6 +851,7 @@ Public Class Ship
 
         Dim LeftR As Double
         Dim RightR As Double
+        Dim RotNext As Double
 
         For Each engine In Engine_Coltrol_Group(Direction_Enum.RotateL)
             If device_list(engine.Key).type = device_type_enum.thruster Then
@@ -868,54 +875,59 @@ Public Class Ship
         'To point (distance / angular_velocity)
 
         If Stop_Rotation = False Then
-            If rotation <> target_rotation Then
+            StartCy += 1
 
-                If Turn_Left = True Then
-                    If rotation > Turn_Point Then
-                        For Each engine In Engine_Coltrol_Group(Direction_Enum.RotateL)
-                            Set_Engine_Throttle(engine.Key, 1)
+            If Turn_Left = True Then
+
+                RotNext = rotation + angular_velocity + LeftR
+
+                If rotation - RotNext > Nav_Angle Then
+                    For Each engine In Engine_Coltrol_Group(Direction_Enum.RotateL)
+                        Set_Engine_Throttle(engine.Key, 1)
+                    Next
+                    Nav_Angle += rotation - RotNext
+
+                ElseIf rotation - RotNext < Nav_Angle Then
+
+                    Stop_Rotation = True
+                    For Each group In Engine_Coltrol_Group
+                        For Each engine In group.Value
+                            Set_Engine_Throttle(engine.Key, 0)
                         Next
-                    End If
-
-                    If rotation < Turn_Point Then
-                        Stop_Rotation = True
-                        For Each group In Engine_Coltrol_Group
-                            For Each engine In group.Value
-                                Set_Engine_Throttle(engine.Key, 0)
-                            Next
-                        Next
-                    End If
-
-                Else
-                    If rotation < Turn_Point Then
-                        For Each engine In Engine_Coltrol_Group(Direction_Enum.RotateR)
-                            Set_Engine_Throttle(engine.Key, 1)
-                        Next
-                    End If
-
-                    If rotation > Turn_Point Then
-                        Stop_Rotation = True
-                        For Each group In Engine_Coltrol_Group
-                            For Each engine In group.Value
-                                Set_Engine_Throttle(engine.Key, 0)
-                            Next
-                        Next
-                    End If
-
+                    Next
+                    Nav_Angle = 0
                 End If
+
+            Else
+                RotNext = rotation + angular_velocity + RightR
+
+
+                If RotNext - rotation < Nav_Angle Then
+                    For Each engine In Engine_Coltrol_Group(Direction_Enum.RotateR)
+                        Set_Engine_Throttle(engine.Key, 1)
+                    Next
+                    Nav_Angle -= RotNext - rotation
+
+                ElseIf RotNext - rotation > Nav_Angle Then
+
+                    Stop_Rotation = True
+                    For Each group In Engine_Coltrol_Group
+                        For Each engine In group.Value
+                            Set_Engine_Throttle(engine.Key, 0)
+                        Next
+                    Next
+                    Nav_Angle = 0
+            End If
+
             End If
         End If
 
 
 
-
-
-        Exit Sub
-
         If Stop_Rotation = True Then
+            StopCy += 1
             If angular_velocity > 0 Then
                 If angular_velocity + LeftR < 0 Then
-                    angular_velocity = 0
                     NavControl = False
                     For Each engine In Engine_Coltrol_Group(Direction_Enum.RotateL)
                         Set_Engine_Throttle(engine.Key, 0)
@@ -932,7 +944,6 @@ Public Class Ship
 
             If angular_velocity < 0 Then
                 If angular_velocity + RightR > 0 Then
-                    angular_velocity = 0
                     NavControl = False
                     For Each engine In Engine_Coltrol_Group(Direction_Enum.RotateR)
                         Set_Engine_Throttle(engine.Key, 0)
@@ -965,6 +976,7 @@ Public Class Ship
         For Each engine In Engine_Coltrol_Group(Direction_Enum.RotateL)
             If device_list(engine.Key).type = device_type_enum.thruster Then LeftR += engine.Value.r
         Next
+
         For Each engine In Engine_Coltrol_Group(Direction_Enum.RotateR)
             If device_list(engine.Key).type = device_type_enum.thruster Then RightR += engine.Value.r
         Next
@@ -994,25 +1006,27 @@ Public Class Ship
         If tar > rot Then left = (PI * 2 + rot) - tar
         If tar < rot Then left = rot - tar
 
-
+        'Turn Right
         If left > right Then
-            Dim ratio As Double = Math.Abs(LeftR) / Math.Abs(RightR)
-            Turn_Point = (rotation + right * (ratio / 2)) + If(LeftR <> 0, angular_velocity / LeftR, 0)
             Turn_Left = False
 
-            '(RightR*100)
 
-            't = log(Vf * V0) / log(1 - d)
+            Dim ratio As Double = Math.Abs(LeftR) / Math.Abs(RightR)
+            Nav_Angle = right * ratio * 0.5 ' + If(LeftR <> 0, angular_velocity / LeftR, 0)
 
-            Dim t As Double = Math.Log(0.00001 / angular_velocity) / Math.Log(1 - 0.01)
+            'Nav_Angle = ratio * 0.5 * right(rotation + right * (ratio * 0.5)) + If(LeftR <> 0, angular_velocity / LeftR, 0)
+            'Check if turn point is past zero
+            'If Nav_Angle > PI * 2 Then Nav_Angle -= PI * 2
 
         End If
 
-
+        'Turn Left
         If left < right Then
-            Dim ratio As Double = Math.Abs(LeftR) / Math.Abs(RightR)
-            Turn_Point = (rotation - left * (ratio / 2)) + If(RightR <> 0, angular_velocity / RightR, 0)
             Turn_Left = True
+
+            Dim ratio As Double = Math.Abs(LeftR) / Math.Abs(RightR)
+            'Turn_Point = tar + ((rotation - tar) * (ratio * 0.5)) '+ If(RightR <> 0, angular_velocity / RightR, 0)
+            Nav_Angle = -left * ratio * 0.5 ' + If(RightR <> 0, angular_velocity / RightR, 0)
         End If
 
     End Sub
@@ -1103,8 +1117,7 @@ Public Class Ship
         'Dim ThrustMax As Double
         For Each Device In Me.device_list
             If Device.Value.type = device_type_enum.engine OrElse Device.Value.type = device_type_enum.thruster Then
-                'Dim Thrust_Point As New PointD(Device.Value.Active_Point.ToPointD.x + 16, Device.Value.Active_Point.ToPointD.y + 16)
-                Me.Apply_Force(Device.Value.Thrust_Power, Device.Value.Active_Point.ToPointD, Device.Value.Thrust_Direction)
+                'Dim Thrust_Point As New PointD(Device.Value.Active_Point.ToPointD.x + 16, Device.Value.Active_Point.ToPointD.y + 16)                
 
                 Dim T As Double = Device.Value.Throttle
                 Dim Acc As Double = Device_tech_list(Device.Value.tech_ID).Acceleration
@@ -1135,7 +1148,7 @@ Public Class Ship
                     If Device.Value.Thrust_Power < 0 Then Device.Value.Thrust_Power = 0
                 End If
 
-
+                Me.Apply_Force(Device.Value.Thrust_Power, Device.Value.Active_Point.ToPointD, Device.Value.Thrust_Direction)
             End If
 
         Next

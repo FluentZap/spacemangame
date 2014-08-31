@@ -422,6 +422,10 @@
 
         Personal__HealthOverlay
 
+        Personal__Ability_Icon
+
+        Ability_Icons
+
 
         Panel__Shop_Panel
 
@@ -730,9 +734,23 @@
         Class_Scroll_Right
     End Enum
 
+    Enum Personal_Menu_Item_Enum As Byte
+        Attack1
+        Attack2
+        Attack3
+        Attack4
+
+
+        Ability1
+        Ability2
+        Ability3
+        Ability4
+
+    End Enum
+
     Enum Panel_menu_enum
         Exchange_Panel
-        
+
 
         Shop_Panel
         Shop_Button

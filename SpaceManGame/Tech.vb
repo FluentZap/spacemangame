@@ -403,7 +403,7 @@ Public Module Tech
         Pipe.Add(New Device_Pipeline(Pipeline_type_enum.Energy, -25))
         Pipe.Add(New Device_Pipeline(Pipeline_type_enum.Data, -10))
         Device_tech_list.Add(tech_list_enum.Combustion_Engine_MK1, New device_data(device_type_enum.engine, 100, New crew_resource_type(10, 0), New PointI(2, 2), c_map, Pipe, device_tile_type_enum.Combustion_engine_MK1, True, flip_enum.Both))
-        Device_tech_list(tech_list_enum.Combustion_Engine_MK1).Thrust_Power = 25
+        Device_tech_list(tech_list_enum.Combustion_Engine_MK1).Thrust_Power = 5
         Device_tech_list(tech_list_enum.Combustion_Engine_MK1).Acceleration = 0.05
         Device_tech_list(tech_list_enum.Combustion_Engine_MK1).Deceleration = 0.25
         Device_tech_list(tech_list_enum.Combustion_Engine_MK1).Active_Point = New PointI(2, 4)
@@ -459,9 +459,9 @@ Public Module Tech
         Pipe.Add(New Device_Pipeline(Pipeline_type_enum.Energy, -5))
         Pipe.Add(New Device_Pipeline(Pipeline_type_enum.Data, -10))
         Device_tech_list.Add(tech_list_enum.Thruster_MK1, New device_data(device_type_enum.thruster, 100, New crew_resource_type(0, 0), New PointI(4, 0), c_map, Pipe, device_tile_type_enum.Thruster_MK1, True, flip_enum.Flip_X))
-        Device_tech_list(tech_list_enum.Thruster_MK1).Thrust_Power = 0.5
-        Device_tech_list(tech_list_enum.Thruster_MK1).Acceleration = 0.5
-        Device_tech_list(tech_list_enum.Thruster_MK1).Deceleration = 0.5
+        Device_tech_list(tech_list_enum.Thruster_MK1).Thrust_Power = 0.1
+        Device_tech_list(tech_list_enum.Thruster_MK1).Acceleration = 0.1
+        Device_tech_list(tech_list_enum.Thruster_MK1).Deceleration = 0.1
         Device_tech_list(tech_list_enum.Thruster_MK1).Active_Point = New PointI(3, 0)
 
 
@@ -523,7 +523,11 @@ Public Module Tech
 
 
     Enum Ability_List_Enum As Byte
-        Mage__Fireball
+        Incendium__Imolate
+        Incendium__WallOfFire
+        Incendium__Incinerate
+        Incendium__Order
+
 
 
     End Enum
@@ -537,6 +541,8 @@ Public Module Tech
         Aviator
 
         'Extended Classes
+        Incendium
+
         Mage
         Spellsword
         Thief
@@ -649,19 +655,19 @@ Public Module Tech
                 'Set class tech tree
                 Case Is = Class_List_Enum.Engineer
                     B.Add(Buff_List_Enum.Buffs)
-                    A.Add(Ability_List_Enum.Mage__Fireball)
+                    A.Add(Ability_List_Enum.Incendium__Imolate)
                     P = New PointI(0, 0)
                     Skills.Add(Skill_List_Enum.Engineer__A, New Skill_Item(B, A, P, 0, Skill_List_Enum.None, 0, 1))
                     Reset_List(A, B)
 
                     B.Add(Buff_List_Enum.Buffs)
-                    A.Add(Ability_List_Enum.Mage__Fireball)
+                    A.Add(Ability_List_Enum.Incendium__Imolate)
                     P = New PointI(0, 1)
                     Skills.Add(Skill_List_Enum.Engineer__B, New Skill_Item(B, A, P, 1, Skill_List_Enum.Engineer__A, 5, 1))
                     Reset_List(A, B)
 
                     B.Add(Buff_List_Enum.Buffs)
-                    A.Add(Ability_List_Enum.Mage__Fireball)
+                    A.Add(Ability_List_Enum.Incendium__Imolate)
                     P = New PointI(0, 2)
                     Skills.Add(Skill_List_Enum.Engineer__C, New Skill_Item(B, A, P, 2, Skill_List_Enum.Engineer__B, 10, 1))
                     Reset_List(A, B)
@@ -670,7 +676,15 @@ Public Module Tech
 
                 Case Is = Class_List_Enum.Mage
                     B.Add(Buff_List_Enum.Buffs)
-                    A.Add(Ability_List_Enum.Mage__Fireball)
+                    A.Add(Ability_List_Enum.Incendium__Imolate)
+                    P = New PointI(0, 0)
+                    Skills.Add(Skill_List_Enum.Engineer__A, New Skill_Item(B, A, P, 3, Skill_List_Enum.None, 0, 0, True))
+                    Reset_List(A, B)
+
+
+                Case Is = Class_List_Enum.Incendium
+                    B.Add(Buff_List_Enum.Buffs)
+                    A.Add(Ability_List_Enum.Incendium__Imolate)
                     P = New PointI(0, 0)
                     Skills.Add(Skill_List_Enum.Engineer__A, New Skill_Item(B, A, P, 3, Skill_List_Enum.None, 0, 0, True))
                     Reset_List(A, B)
