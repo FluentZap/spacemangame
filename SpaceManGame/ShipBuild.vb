@@ -727,7 +727,7 @@
                 shipsize.y = 10
             Case ship_class_enum.frigate
                 MiniMap_Scale = 4
-                shipsize.x = 40
+                shipsize.x = 20
                 shipsize.y = 60
             Case ship_class_enum.destroyer
                 MiniMap_Scale = 2
