@@ -1667,7 +1667,7 @@
         mouse_info.wheel = 0
         Math.Round(external_zoom, 2)
         If external_zoom > 5 Then external_zoom = 5
-        If external_zoom < 0.0000001 Then external_zoom = 0.0000001
+        If external_zoom < 0.000001 Then external_zoom = 0.000001
 
 
 
@@ -1680,9 +1680,9 @@
             If rot < 0 Then rot += PI * 2
             'If rot < -PI Then rot += PI * 2
             'Ships(current_selected_ship_view).target_rotation = rot
-            'u.Ship_List(current_selected_ship_view).angular_velocity = 0
-            'u.Ship_List(current_selected_ship_view).rotation = 1
-            'rot = PI * 1.5
+            u.Ship_List(current_selected_ship_view).angular_velocity = 0
+            u.Ship_List(current_selected_ship_view).rotation = 0
+            rot = PI * 0.5
             u.Ship_List(current_selected_ship_view).SetFullTurn(rot)
             mouse_info.right_down = False
         End If

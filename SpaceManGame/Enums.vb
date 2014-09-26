@@ -170,7 +170,7 @@
         Fighter_Control        
 
     End Enum
-    Enum device_type_enum As Byte
+    Enum device_type_enum As Byte        
         thruster
         inter_planet_engine
         life_support
@@ -193,6 +193,13 @@
         engine
         main_computer
     End Enum
+
+    Enum thrust_type_enum As Byte
+        All
+        Thruster
+        Engine
+    End Enum
+
     Enum pf_status As Byte
         no_map
         no_goal
