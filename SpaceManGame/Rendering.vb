@@ -211,10 +211,20 @@
         draw_text("Logic  " + LPS.ToString, New Rectangle(0, 100, 100, 20), CType(DrawTextFormat.Center + DrawTextFormat.VerticalCenter, DrawTextFormat), Color.White, d3d_font(d3d_font_enum.SB_small))
         render_personal_health_overlay(New PointI(256, screen_size.y - 96), u.Officer_List(current_player).Health)
 
-        If u.Crew_List.ContainsKey(Mouse_Target) Then
-            render_personal_health_overlay(New PointI(128, screen_size.y - 96), u.Crew_List(Mouse_Target).Health)
+
+        If u.Officer_List(player).region = Officer_location_enum.Planet Then
+            If u.Planet_List(u.Officer_List(player).Location_ID).crew_list.ContainsKey(Mouse_Target) Then
+                render_personal_health_overlay(New PointI(128, screen_size.y - 96), u.Planet_List(u.Officer_List(player).Location_ID).crew_list(Mouse_Target).Health)
+            End If
         End If
 
+        If u.Officer_List(player).region = Officer_location_enum.Ship Then
+            If u.Ship_List(u.Officer_List(player).Location_ID).Crew_list.ContainsKey(Mouse_Target) Then
+                render_personal_health_overlay(New PointI(128, screen_size.y - 96), u.Ship_List(u.Officer_List(player).Location_ID).Crew_list(Mouse_Target).Health)
+            End If
+        End If
+
+        
         If Tile_Target.x >= 0 AndAlso Tile_Target.y >= 0 AndAlso Tile_Target.x <= 512 AndAlso Tile_Target.y <= 512 Then
             If u.Planet_List(u.Officer_List(player).Location_ID).Item_Point.ContainsKey(Tile_Target) Then
                 Dim tile As Item_Point_Type = u.Planet_List(u.Officer_List(player).Location_ID).Item_Point(Tile_Target)
@@ -1838,7 +1848,7 @@
 
 
                     Throttle = CInt(SD.Throttle * 64)
-                    Power = CInt((SD.Thrust_Power / Device_tech_list(SD.tech_ID).Thrust_Power) * 64)
+                    Power = CInt((SD.device_efficiency) * 64)
 
                     If PipeSupply > 64 Then PipeSupply = 64
                     If CrewSupply > 64 Then CrewSupply = 64

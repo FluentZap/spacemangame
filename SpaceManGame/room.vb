@@ -1,6 +1,6 @@
 ﻿<Serializable()> Public Class crew_resource_type
-    Public engineering As Double
-    Public science As Double
+    Public engineering As Decimal
+    Public science As Decimal
 
     Sub New(ByVal Eng As Integer, ByVal Sci As Integer)
         engineering = Eng

@@ -10,6 +10,11 @@
     End Sub
 End Class
 
+<Serializable()> Public Class Engine_Ratio_Type
+    Public X As Decimal
+    Public Y As Decimal
+    Public R As Decimal
+End Class
 
 
 
@@ -23,13 +28,15 @@ End Class
     Public integrityMax As Integer
     Public temperature As Byte
     Public required_Points As crew_resource_type
-    Public crew_efficiency As Double
-    Public supply_efficiency As Double
+    Public crew_efficiency As Decimal
+    Public supply_efficiency As Decimal
+
+    Public device_efficiency As Decimal
 
     'Engine/Thruster Power
-    Public Thrust_Power As Double
-    Public Thrust_Max As Double
-    Public Throttle As Double    
+    Public Engine_Ratio As Engine_Ratio_Type
+    Public Engine_Power As Decimal
+    Public Throttle As Decimal
 
     Public Active_Point As PointI
     Public Thrust_Direction As Direction_Enum
@@ -39,7 +46,7 @@ End Class
 
     'Public Weapon_Point As PointI
     Public Center_Angle As Double
-    Public Center_Distance As Double    
+    Public Center_Distance As Double
     Public Device_Face As rotate_enum
 
     Public Sprite_Animation_Key As Integer

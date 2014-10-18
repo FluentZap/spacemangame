@@ -153,7 +153,7 @@ Public Module Tech
         Public Description As String
         Public Device_room_type As tech_list_enum
         Public tile_type As Integer
-        Public weight As Double
+        Public weight As Decimal
         Public device_map(,) As Ship_tile
         Public device_data As device_data
 
@@ -164,7 +164,7 @@ Public Module Tech
         End Sub
 
         'Room constructor
-        Sub New(ByVal Name As String, ByVal base_type As Tech_type_enum, ByVal tile_type As tile_type_enum, ByVal Weight As Double)
+        Sub New(ByVal Name As String, ByVal base_type As Tech_type_enum, ByVal tile_type As tile_type_enum, ByVal Weight As Decimal)
             Me.Name = Name
             Me.Base_type = base_type
             Me.tile_type = tile_type
@@ -289,9 +289,9 @@ Public Module Tech
         Public Flipable As flip_enum
         Public Ship_Weapon As Ship_weapon_enum
         'Engine
-        Public Acceleration As Double
-        Public Deceleration As Double
-        Public Thrust_Power As Double
+        Public Acceleration As Decimal
+        Public Deceleration As Decimal
+        Public Thrust_Power As Decimal
         Public Active_Point As PointI
 
 
@@ -403,9 +403,9 @@ Public Module Tech
         Pipe.Add(New Device_Pipeline(Pipeline_type_enum.Energy, -25))
         Pipe.Add(New Device_Pipeline(Pipeline_type_enum.Data, -10))
         Device_tech_list.Add(tech_list_enum.Combustion_Engine_MK1, New device_data(device_type_enum.engine, 100, New crew_resource_type(10, 0), New PointI(2, 2), c_map, Pipe, device_tile_type_enum.Combustion_engine_MK1, True, flip_enum.Both))
-        Device_tech_list(tech_list_enum.Combustion_Engine_MK1).Thrust_Power = 10
-        Device_tech_list(tech_list_enum.Combustion_Engine_MK1).Acceleration = 0.01
-        Device_tech_list(tech_list_enum.Combustion_Engine_MK1).Deceleration = 0.02
+        Device_tech_list(tech_list_enum.Combustion_Engine_MK1).Thrust_Power = 40000
+        Device_tech_list(tech_list_enum.Combustion_Engine_MK1).Acceleration = 1000
+        Device_tech_list(tech_list_enum.Combustion_Engine_MK1).Deceleration = 300
         Device_tech_list(tech_list_enum.Combustion_Engine_MK1).Active_Point = New PointI(2, 4)
 
 
@@ -443,9 +443,9 @@ Public Module Tech
 
 
         c_map = New Byte(2)() {}
-        c_map(0) = New Byte() {RE, R, R, RB}
-        c_map(1) = New Byte() {RE, R, R, RB}
-        c_map(2) = New Byte() {RE, AP, AP, RB}
+        c_map(0) = New Byte() {RE, R, R, RE}
+        c_map(1) = New Byte() {RE, R, R, RE}
+        c_map(2) = New Byte() {RE, AP, AP, RE}
         Pipe = New HashSet(Of Device_Pipeline)
         Pipe.Add(New Device_Pipeline(Pipeline_type_enum.Energy, 50))
         Pipe.Add(New Device_Pipeline(Pipeline_type_enum.Data, -10))
@@ -459,19 +459,19 @@ Public Module Tech
         Pipe.Add(New Device_Pipeline(Pipeline_type_enum.Energy, -5))
         Pipe.Add(New Device_Pipeline(Pipeline_type_enum.Data, -10))
         Device_tech_list.Add(tech_list_enum.Thruster_MK1, New device_data(device_type_enum.thruster, 100, New crew_resource_type(0, 0), New PointI(4, 0), c_map, Pipe, device_tile_type_enum.Thruster_MK1, True, flip_enum.Flip_X))
-        Device_tech_list(tech_list_enum.Thruster_MK1).Thrust_Power = 0.1
-        Device_tech_list(tech_list_enum.Thruster_MK1).Acceleration = 0.001
-        Device_tech_list(tech_list_enum.Thruster_MK1).Deceleration = 0.001
+        Device_tech_list(tech_list_enum.Thruster_MK1).Thrust_Power = 25D
+        Device_tech_list(tech_list_enum.Thruster_MK1).Acceleration = 1D
+        Device_tech_list(tech_list_enum.Thruster_MK1).Deceleration = 1D
         Device_tech_list(tech_list_enum.Thruster_MK1).Active_Point = New PointI(3, 0)
 
 
 
         c_map = New Byte(1)() {}
-        c_map(0) = New Byte() {R, R, R}
-        c_map(1) = New Byte() {R, AP, R}
+        c_map(0) = New Byte() {W}
+        c_map(1) = New Byte() {AP}
         Pipe = New HashSet(Of Device_Pipeline)
         Pipe.Add(New Device_Pipeline(Pipeline_type_enum.Data, 10))
-        Device_tech_list.Add(tech_list_enum.Bridge_Control_Panel, New device_data(device_type_enum.generator, 100, New crew_resource_type(0, 0), New PointI(1, 1), c_map, Pipe, device_tile_type_enum.Bridge_Control_Panel, True, flip_enum.Both))
+        Device_tech_list.Add(tech_list_enum.Bridge_Control_Panel, New device_data(device_type_enum.generator, 100, New crew_resource_type(0, 10), New PointI(0, 0), c_map, Pipe, device_tile_type_enum.Bridge_Control_Panel, True, flip_enum.Both))
 
 
 
@@ -509,7 +509,7 @@ Public Module Tech
 
 
     Sub Set_Weapon_Tech()
-        Weapon_tech_list.Add(Ship_weapon_enum.Projectile_MK1, New Ship_Weapon(Weapon_fire_mode_enum.Projectile_Single, 100, 1, 100, 1, 1))
+        Weapon_tech_list.Add(Ship_weapon_enum.Projectile_MK1, New Ship_Weapon(Weapon_fire_mode_enum.Projectile_Single, 1000, 1, 100, 1, 10))
 
     End Sub
 
