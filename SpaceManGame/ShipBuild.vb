@@ -2166,7 +2166,7 @@
 
     Sub Set_Mass()
 
-        Dim Mass As Double
+        Dim Mass As Decimal
         For Each Tile In Build_ship.tile_map
             If Tile.type < tile_type_enum.Device_Base Then
                 Mass += Tech_list(Build_ship.room_list(Tile.roomID).type).weight

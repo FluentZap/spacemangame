@@ -68,7 +68,7 @@
 
 
     'Public Const PI As Double = 3.14159265358979
-    Public Const PI As Double = 3.1415926535897931
+    Public Const PI As Decimal = 3.1415926535897931D
 
 
     Public Const ACCEPTABLE_MARGIN As Double = 0
@@ -285,7 +285,7 @@
     Public Drag As Double = 0.02
     Public Near_planet As Integer
     Public Loaded_planet As Integer
-    Public GST As Integer = 2750
+    Public GST As Integer
     Public GSTFrequency As Integer
 
     Public external_planet_texture(15) As Texture
@@ -843,10 +843,10 @@
         ship1.Faction = 0
         u.Ship_List.Add(0, ship1)
 
-        Dim ship2 As Ship = load_ship_schematic()
-        ship2.location = New PointD(0, -2000)
-        ship2.Refresh()
-        u.Ship_List.Add(1, ship2)
+        'Dim ship2 As Ship = load_ship_schematic()
+        'ship2.location = New PointD(0, -2000)
+        'ship2.Refresh()
+        'u.Ship_List.Add(1, ship2)
 
 
         Dim pos = New PointD(ship1.center_point.x * 32, ship1.center_point.y * 32)
@@ -863,9 +863,8 @@
 
 
 
-
         current_player = GetEmptyOfficerID()
-        Add_Officer(current_player, New Officer(0, "Captian", Officer_location_enum.Planet, 0, pos, 6, 0.2, New Officer.sprite_list(character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head)))
+        Add_Officer(current_player, New Officer(0, "Captian", Officer_location_enum.Ship, 0, pos, 2, 0.2, New Officer.sprite_list(character_sprite_set_enum.Human_Renagade_1, character_sprite_enum.Head)))
         u.Officer_List(current_player).Officer_Classes.Add(New Officer_Class(Class_List_Enum.Mage, 0, 1))
         u.Officer_List(current_player).Officer_Classes.Add(New Officer_Class(Class_List_Enum.Spellsword, 0, 1))
         u.Officer_List(current_player).Officer_Classes.Add(New Officer_Class(Class_List_Enum.Shadow, 0, 1))
@@ -914,16 +913,16 @@
         u.Officer_List(current_player).sprite.Left_Leg_SpriteSet = character_sprite_set_enum.Human_Renagade_1
         u.Officer_List(current_player).sprite.Right_Leg_SpriteSet = character_sprite_set_enum.Human_Renagade_1
 
-
+        GST = 1200
 
 
         'Officer_List.Add (0,
         'Do initial planet rotation
-        'For A = 0 To 10000
-        'planet_theta_offset += 0.1
-        'Next
+        For A = 0 To 10000
+            planet_theta_offset += 0.1
+        Next
 
-        planet_theta_offset = 1
+        'planet_theta_offset = 1
 
         'u.Ship_List(0).location = Get_Planet_Location(1)
         'current_selected_planet_view = 1
@@ -942,7 +941,7 @@
         Do Until terminate
             'Get keys/mouse
             MainForm.getUI(pressedkeys, mouse_info)
-            u.Ship_List(1).angular_velocity = 0.001
+            'u.Ship_List(1).angular_velocity = 0.001
             'Logic
             QueryPerformanceCounter(time_current)
             Do Until Logic_Time < 1
@@ -1701,11 +1700,11 @@
         'If pressedkeys.Contains(Keys.A) Then Ships(0).Apply_Force(0.01, New PointD(15, 18), Direction_Enum.Left)
         'If pressedkeys.Contains(Keys.D) Then Ships(0).Apply_Force(0.01, New PointD(15, 18), Direction_Enum.Right)
 
-        Dim percent As Double = 0.01
+        Dim percent As Decimal = 0.01D
 
         If u.Ship_List(current_selected_ship_view).NavControl = False Then
 
-            If pressedkeys.Contains(Keys.ShiftKey) Then percent = -0.01
+            If pressedkeys.Contains(Keys.ShiftKey) Then percent = -0.01D
 
             If pressedkeys.Contains(Keys.Q) Then
                 For Each Device In u.Ship_List(current_selected_ship_view).Engine_Coltrol_Group(Direction_Enum.Right)
@@ -1746,6 +1745,7 @@
 
 
             If pressedkeys.Contains(Keys.D) Then percent = 1 Else percent = 0
+            'percent = 1
             For Each Device In u.Ship_List(current_selected_ship_view).Engine_Coltrol_Group(Direction_Enum.RotateR)
                 If u.Ship_List(current_selected_ship_view).device_list(Device.Key).type = device_type_enum.thruster Then
                     u.Ship_List(current_selected_ship_view).Set_Engine_Throttle(Device.Key, percent)
@@ -1753,13 +1753,13 @@
             Next
 
 
-            If pressedkeys.Contains(Keys.X) Then
-                For Each group In u.Ship_List(current_selected_ship_view).Engine_Coltrol_Group
-                    For Each Device In group.Value
-                        u.Ship_List(current_selected_ship_view).Set_Engine_Throttle(Device.Key, 0)
-                    Next
+        If pressedkeys.Contains(Keys.X) Then
+            For Each group In u.Ship_List(current_selected_ship_view).Engine_Coltrol_Group
+                For Each Device In group.Value
+                    u.Ship_List(current_selected_ship_view).Set_Engine_Throttle(Device.Key, 0)
                 Next
-            End If
+            Next
+        End If
 
         End If
 
@@ -2180,7 +2180,7 @@
 
     Sub update_Planet_Movements()
 
-        'planet_theta_offset += 0.0005
+        planet_theta_offset += 0.0005
         'planet_cloud_theta += 0.0001
     End Sub
 
@@ -2208,8 +2208,11 @@
         'If GST > 0 AndAlso GST < 1500 Then view_personal_Ambient = Color.FromArgb(0, 0, 0, 0)
         '0 to 1500
 
+
         'view_personal_Ambient=color.FromArgb(
-        view_personal_Ambient = Color.FromArgb(255, 240, 240, 220)
+
+        If u.Officer_List(current_player).region = Officer_location_enum.Ship Then view_personal_Ambient = Color.FromArgb(255, 240, 240, 220)
+
         'view_personal_Ambient = Color.FromArgb(255, 40, 40, 60)
 
 
