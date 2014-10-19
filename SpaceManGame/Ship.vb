@@ -142,6 +142,8 @@ Public Class Ship
     Public StartCy, StopCy As Double
     Public force As Decimal
     Public cycles As Integer = -2
+    Public BurnTime As Integer
+
 
     Sub Load_Pathfinding()
         path_find = New A_star
@@ -192,12 +194,27 @@ Public Class Ship
 
         close_doors()
         Process_Devices()
+        Calculate_Engine_Ratios()
         Calculate_Engines()
 
-        If NavControl = True Then Nav_Computer()
+        If NavControl = True Then Nav_Computer_Next()
 
         Process_Engines()
-        
+
+        cycles += 1
+        If cycles < 50 Then
+            For Each Device In u.Ship_List(current_selected_ship_view).Engine_Coltrol_Group(Direction_Enum.RotateR)
+                'u.Ship_List(current_selected_ship_view).Set_Engine_Throttle(Device.Key, 1)
+            Next
+        End If
+
+        If cycles = 50 Then
+            cycles = 100
+            For Each Device In u.Ship_List(current_selected_ship_view).Engine_Coltrol_Group(Direction_Enum.RotateR)
+                'u.Ship_List(current_selected_ship_view).Set_Engine_Throttle(Device.Key, 0)
+            Next
+        End If
+
         If Landed = False Then
             Update_Locataion()
         End If
@@ -758,20 +775,20 @@ Public Class Ship
         If Math.Abs(vector_velocity.x) < Engine_BalanceX Then
             vector_velocity.x = 0
         Else
-            If vector_velocity.x > 0 Then vector_velocity.x -= Engine_BalanceX Else vector_velocity.x += Engine_BalanceX
+            'If vector_velocity.x > 0 Then vector_velocity.x -= Engine_BalanceX Else vector_velocity.x += Engine_BalanceX
         End If
 
         If Math.Abs(vector_velocity.y) < Engine_BalanceY Then
             vector_velocity.y = 0
         Else
-            If vector_velocity.y > 0 Then vector_velocity.y -= Engine_BalanceY Else vector_velocity.y += Engine_BalanceY
+            'If vector_velocity.y > 0 Then vector_velocity.y -= Engine_BalanceY Else vector_velocity.y += Engine_BalanceY
         End If
 
 
         If Math.Abs(angular_velocity) < Engine_BalanceR Then
             angular_velocity = 0
         Else
-            If angular_velocity > 0 Then angular_velocity -= Engine_BalanceR Else angular_velocity += Engine_BalanceR
+            'If angular_velocity > 0 Then angular_velocity -= Engine_BalanceR Else angular_velocity += Engine_BalanceR
         End If
 
 
@@ -837,11 +854,11 @@ Public Class Ship
                     Case Is = Direction_Enum.Top
                         x = 0
                         y = 1
-                        Distance = (center_point.x - Device.Value.Active_Point.x)
+                        Distance = -(center_point.x - Device.Value.Active_Point.x)
                     Case Is = Direction_Enum.Bottom
                         x = 0
                         y = -1
-                        Distance = -(center_point.x - Device.Value.Active_Point.x)
+                        Distance = (center_point.x - Device.Value.Active_Point.x)
                     Case Is = Direction_Enum.Left
                         x = 1
                         y = 0
@@ -888,6 +905,52 @@ Public Class Ship
 
         Next
     End Sub
+
+
+    Sub Calculate_Engine_Ratios()
+
+        For Each Device In device_list
+            If Device.Value.type = device_type_enum.engine OrElse Device.Value.type = device_type_enum.thruster Then
+                'Dim accelerate As Decimal = Device_tech_list(Device.Value.tech_ID).Thrust_Power / Mass
+                'Dim accelerateR As Decimal = Device_tech_list(Device.Value.tech_ID).Thrust_Power / (Mass * Mass)
+
+                Dim Distance As Decimal
+                Dim ActivePoint As PointI = Device.Value.Active_Point                
+                Select Case Device.Value.Thrust_Direction
+                    Case Is = Direction_Enum.Top
+                        Distance = -(center_point.x - Device.Value.Active_Point.x)
+                    Case Is = Direction_Enum.Bottom
+                        Distance = (center_point.x - Device.Value.Active_Point.x)
+                    Case Is = Direction_Enum.Left
+                        Distance = (center_point.y - Device.Value.Active_Point.y)
+                    Case Is = Direction_Enum.Right
+                        Distance = -(center_point.y - Device.Value.Active_Point.y)
+                End Select
+
+                'Device.Value.Engine_Ratio.Rotation = accelerateR * Distance   '* 0.03125D
+                'Device.Value.Engine_Ratio.Thrust = accelerate                
+
+                Device.Value.Engine_Ratio.Rotation = Distance / (Mass * Mass)
+                Device.Value.Engine_Ratio.Thrust = 1 / Mass
+
+            End If
+        Next
+
+    End Sub
+
+
+
+    Sub Nav_Computer_Next()
+
+        If BurnTime > 0 Then
+            SetAllEngines(Direction_Enum.RotateR, 1, thrust_type_enum.Thruster)
+        Else
+            SetAllEngines(Direction_Enum.RotateR, 0, thrust_type_enum.Thruster)
+            NavControl = False
+        End If
+        BurnTime -= 1
+    End Sub
+
 
     Sub Nav_Computer()
 
@@ -992,45 +1055,83 @@ Public Class Ship
 
     End Sub
 
-    Function Check_Engine_Distance(ByVal Vel As Decimal, ByVal Accel As Decimal, ByVal Top As Decimal, ByVal Time As Decimal) As Decimal
-        Dim Distance As Decimal
-        Vel = 0D
-        Accel = 0.001D
-        Top = 0.1D
-        Time = 10D
-        Distance = Vel * Time + 0.5D * Accel * (Time * Time)
+    Function Check_Engine_Distance(ByVal Engine As Ship_device, ByVal TargetDistance As Decimal) As Integer
+        Dim CoastTime As Integer
+        Dim AccelDistance As Decimal
+        Dim DecelDistance As Decimal
+        Dim AccelTime As Integer
+        Dim DecelTime As Integer
 
-
-        Distance = 0D
-        Dim Speed As Decimal = 0D
-        For a = 1 To 10
-            Speed += 0.001D
-            Distance += Speed
+        For a = Engine.Engine_Power To Device_tech_list(Engine.tech_ID).Thrust_Power Step Device_tech_list(Engine.tech_ID).Acceleration
+            AccelDistance += Engine.Engine_Ratio.Rotation * a
+            AccelTime += 1
         Next
 
-        Return Distance
+        For a = Device_tech_list(Engine.tech_ID).Thrust_Power To 0 Step -Device_tech_list(Engine.tech_ID).Deceleration
+            DecelDistance += Engine.Engine_Ratio.Rotation * a
+            DecelTime += 1
+        Next
+
+        'Check if target is higher then Accel + Decel
+        If TargetDistance > AccelDistance + DecelDistance Then
+            Dim RemainingDistance As Decimal = TargetDistance - (AccelDistance + DecelDistance)
+
+            For a = 0 To RemainingDistance Step Device_tech_list(Engine.tech_ID).Thrust_Power * Engine.Engine_Ratio.Rotation
+                CoastTime += 1
+            Next
+        Else
+            'Turn shorter then Accel + Decel            
+            AccelTime = 0
+            DecelTime = 0
+            AccelDistance = 0
+            DecelDistance = 0
+
+            Dim TAD, TDD As Decimal
+            TAD = TargetDistance * (Device_tech_list(Engine.tech_ID).Acceleration / Device_tech_list(Engine.tech_ID).Deceleration) / 2
+            TDD = TargetDistance * (Device_tech_list(Engine.tech_ID).Deceleration / Device_tech_list(Engine.tech_ID).Acceleration) / 2
+
+            For a = Engine.Engine_Power To Device_tech_list(Engine.tech_ID).Thrust_Power Step Device_tech_list(Engine.tech_ID).Acceleration
+                AccelDistance += Engine.Engine_Ratio.Rotation * a
+                AccelTime += 1
+                If AccelDistance >= TAD Then Exit For
+            Next
+
+            For a = Device_tech_list(Engine.tech_ID).Thrust_Power To 0 Step -Device_tech_list(Engine.tech_ID).Deceleration
+                DecelDistance += Engine.Engine_Ratio.Rotation * a
+                DecelTime += 1
+                If DecelDistance >= TDD Then Exit For
+            Next
+
+        End If
+
+        Return AccelTime + CoastTime
     End Function
 
 
 
 
 
-    Sub SetFullTurn(ByVal theta As Double)
+    Sub SetFullTurn(ByVal theta As Decimal)
         target_rotation = theta
 
         Stop_Rotation = False
 
         Dim LeftR As Double
         Dim RightR As Double
+        Dim Time As Integer
 
         For Each engine In Engine_Coltrol_Group(Direction_Enum.RotateL)
             If device_list(engine.Key).type = device_type_enum.thruster Then LeftR += engine.Value.r
+            'Check_Engine_Distance(device_list(engine.Key))
         Next
 
         For Each engine In Engine_Coltrol_Group(Direction_Enum.RotateR)
             If device_list(engine.Key).type = device_type_enum.thruster Then RightR += engine.Value.r
+            'Check_Engine_Distance(device_list(engine.Key))
+            Time = Check_Engine_Distance(device_list(engine.Key), theta)
         Next
 
+        BurnTime = Time
 
         'Cycles to stop at max velocity
         'Cycles to get to max velocity
@@ -1058,12 +1159,12 @@ Public Class Ship
 
         'Turn Right
         If left > right OrElse left = right Then
-            Turn_Left = False            
+            Turn_Left = False
 
-            Dim ratio As Double = Math.Abs(LeftR) / Math.Abs(RightR)            
+            Dim ratio As Double = Math.Abs(LeftR) / Math.Abs(RightR)
             Nav_Angle = right * 0.5 '* ratio
 
-            Check_Engine_Distance(0, 0, 0, 0)
+
 
 
 
@@ -1231,12 +1332,26 @@ Public Class Ship
                     If Device.Value.Engine_Power < 0 Then Device.Value.Engine_Power = 0
                 End If
 
-
-                Me.Apply_Force(Device.Value.Engine_Power, Device.Value.Active_Point.ToPointD, Device.Value.Thrust_Direction)
+                Apply_Engine(Device.Value)
+                'Me.Apply_Force(Device.Value.Engine_Power, Device.Value.Active_Point.ToPointD, Device.Value.Thrust_Direction)
             End If
 
         Next
     End Sub
+
+    Function Get_Direction_Theta(ByVal Direction As Direction_Enum) As Decimal
+        Select Case Direction
+            Case Is = Direction_Enum.Top
+                Return PI
+            Case Is = Direction_Enum.Bottom
+                Return 0
+            Case Is = Direction_Enum.Left
+                Return -PI / 2
+            Case Is = Direction_Enum.Right
+                Return PI / 2
+        End Select
+        Return 0
+    End Function
 
 
     Sub Apply_Force(ByVal force As Decimal, ByVal point As PointD, ByVal direction As Direction_Enum)
@@ -1271,6 +1386,18 @@ Public Class Ship
         vector_velocity.x += y * accelerate
         vector_velocity.y -= x * accelerate
     End Sub
+
+
+    Sub Apply_Engine(ByVal Engine As Ship_device)        
+        Dim Ratio As Decimal = Engine.Engine_Power '/ Device_tech_list(Engine.tech_ID).Thrust_Power
+        angular_velocity += Engine.Engine_Ratio.Rotation * Ratio
+        Dim X As Double = Math.Sin(rotation + Get_Direction_Theta(Engine.Thrust_Direction))
+        Dim Y As Double = Math.Cos(rotation + Get_Direction_Theta(Engine.Thrust_Direction))
+
+        vector_velocity.x += Engine.Engine_Ratio.Thrust * Ratio * X
+        vector_velocity.y += Engine.Engine_Ratio.Thrust * Ratio * -Y
+    End Sub
+
 
     Sub Update_Officers()
         For Each item In Officer_List

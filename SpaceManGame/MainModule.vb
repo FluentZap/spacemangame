@@ -1681,8 +1681,8 @@
             'Ships(current_selected_ship_view).target_rotation = rot
             u.Ship_List(current_selected_ship_view).angular_velocity = 0
             u.Ship_List(current_selected_ship_view).rotation = 0
-            rot = PI * 0.5
-            u.Ship_List(current_selected_ship_view).SetFullTurn(rot)
+            'rot = PI * 0.11
+            u.Ship_List(current_selected_ship_view).SetFullTurn(CDec(rot))
             mouse_info.right_down = False
         End If
 
@@ -1706,60 +1706,53 @@
 
             If pressedkeys.Contains(Keys.ShiftKey) Then percent = -0.01D
 
-            If pressedkeys.Contains(Keys.Q) Then
-                For Each Device In u.Ship_List(current_selected_ship_view).Engine_Coltrol_Group(Direction_Enum.Right)
-                    'Device.Value.
-                    'If Ship_List(current_selected_ship_view).device_list(Device.Key).type = device_type_enum.thruster Then
-                    u.Ship_List(current_selected_ship_view).Set_Engine_Throttle(Device.Key, percent, True)
-                    'End If
-                Next
-            End If
 
-            If pressedkeys.Contains(Keys.E) Then
-                For Each Device In u.Ship_List(current_selected_ship_view).Engine_Coltrol_Group(Direction_Enum.Left)
-                    'If Ship_List(current_selected_ship_view).device_list(Device.Key).type = device_type_enum.thruster Then
-                    u.Ship_List(current_selected_ship_view).Set_Engine_Throttle(Device.Key, percent, True)
-                    'End If
-                Next
-            End If
+            If pressedkeys.Contains(Keys.E) Then percent = 1 Else percent = 0
+            For Each Device In u.Ship_List(current_selected_ship_view).Engine_Coltrol_Group(Direction_Enum.Right)
+                'u.Ship_List(current_selected_ship_view).Set_Engine_Throttle(Device.Key, percent)
+            Next
+
+            
+            If pressedkeys.Contains(Keys.Q) Then percent = 1 Else percent = 0
+            For Each Device In u.Ship_List(current_selected_ship_view).Engine_Coltrol_Group(Direction_Enum.Left)
+                'u.Ship_List(current_selected_ship_view).Set_Engine_Throttle(Device.Key, percent)
+            Next
 
 
             If pressedkeys.Contains(Keys.W) Then percent = 1 Else percent = 0
             For Each Device In u.Ship_List(current_selected_ship_view).Engine_Coltrol_Group(Direction_Enum.Bottom)
-                u.Ship_List(current_selected_ship_view).Set_Engine_Throttle(Device.Key, percent)
+                'u.Ship_List(current_selected_ship_view).Set_Engine_Throttle(Device.Key, percent)
             Next
 
 
             If pressedkeys.Contains(Keys.S) Then percent = 1 Else percent = 0
             For Each Device In u.Ship_List(current_selected_ship_view).Engine_Coltrol_Group(Direction_Enum.Top)
-                u.Ship_List(current_selected_ship_view).Set_Engine_Throttle(Device.Key, percent)
+                'u.Ship_List(current_selected_ship_view).Set_Engine_Throttle(Device.Key, percent)
             Next
 
 
             If pressedkeys.Contains(Keys.A) Then percent = 1 Else percent = 0
             For Each Device In u.Ship_List(current_selected_ship_view).Engine_Coltrol_Group(Direction_Enum.RotateL)
                 If u.Ship_List(current_selected_ship_view).device_list(Device.Key).type = device_type_enum.thruster Then
-                    u.Ship_List(current_selected_ship_view).Set_Engine_Throttle(Device.Key, percent)
+                    'u.Ship_List(current_selected_ship_view).Set_Engine_Throttle(Device.Key, percent)
                 End If
             Next
 
-
-            If pressedkeys.Contains(Keys.D) Then percent = 1 Else percent = 0
-            'percent = 1
+            If pressedkeys.Contains(Keys.D) Then percent = 1 Else percent = 0            
             For Each Device In u.Ship_List(current_selected_ship_view).Engine_Coltrol_Group(Direction_Enum.RotateR)
                 If u.Ship_List(current_selected_ship_view).device_list(Device.Key).type = device_type_enum.thruster Then
-                    u.Ship_List(current_selected_ship_view).Set_Engine_Throttle(Device.Key, percent)
+                    'u.Ship_List(current_selected_ship_view).Set_Engine_Throttle(Device.Key, percent)
                 End If
             Next
 
 
-        If pressedkeys.Contains(Keys.X) Then
-            For Each group In u.Ship_List(current_selected_ship_view).Engine_Coltrol_Group
-                For Each Device In group.Value
-                    u.Ship_List(current_selected_ship_view).Set_Engine_Throttle(Device.Key, 0)
+            If pressedkeys.Contains(Keys.X) Then
+                For Each group In u.Ship_List(current_selected_ship_view).Engine_Coltrol_Group
+                    For Each Device In group.Value
+                        u.Ship_List(current_selected_ship_view).Set_Engine_Throttle(Device.Key, 0, False)
+                    Next
                 Next
-            Next
-        End If
+            End If
 
         End If
 

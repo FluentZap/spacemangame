@@ -1848,7 +1848,7 @@
 
 
                     Throttle = CInt(SD.Throttle * 64)
-                    Power = CInt((SD.device_efficiency) * 64)
+                    Power = CInt((SD.Engine_Power / Device_tech_list(SD.tech_ID).Thrust_Power) * 64)
 
                     If PipeSupply > 64 Then PipeSupply = 64
                     If CrewSupply > 64 Then CrewSupply = 64
