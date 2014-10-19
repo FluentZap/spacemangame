@@ -11,9 +11,8 @@
 End Class
 
 <Serializable()> Public Class Engine_Ratio_Type
-    Public X As Decimal
-    Public Y As Decimal
-    Public R As Decimal
+    Public Thrust As Decimal
+    Public Rotation As Decimal
 End Class
 
 
@@ -34,7 +33,7 @@ End Class
     Public device_efficiency As Decimal
 
     'Engine/Thruster Power
-    Public Engine_Ratio As Engine_Ratio_Type
+    Public Engine_Ratio As New Engine_Ratio_Type
     Public Engine_Power As Decimal
     Public Throttle As Decimal
 

@@ -403,9 +403,9 @@ Public Module Tech
         Pipe.Add(New Device_Pipeline(Pipeline_type_enum.Energy, -25))
         Pipe.Add(New Device_Pipeline(Pipeline_type_enum.Data, -10))
         Device_tech_list.Add(tech_list_enum.Combustion_Engine_MK1, New device_data(device_type_enum.engine, 100, New crew_resource_type(10, 0), New PointI(2, 2), c_map, Pipe, device_tile_type_enum.Combustion_engine_MK1, True, flip_enum.Both))
-        Device_tech_list(tech_list_enum.Combustion_Engine_MK1).Thrust_Power = 40000
-        Device_tech_list(tech_list_enum.Combustion_Engine_MK1).Acceleration = 1000
-        Device_tech_list(tech_list_enum.Combustion_Engine_MK1).Deceleration = 300
+        Device_tech_list(tech_list_enum.Combustion_Engine_MK1).Thrust_Power = 5000
+        Device_tech_list(tech_list_enum.Combustion_Engine_MK1).Acceleration = 10
+        Device_tech_list(tech_list_enum.Combustion_Engine_MK1).Deceleration = 25
         Device_tech_list(tech_list_enum.Combustion_Engine_MK1).Active_Point = New PointI(2, 4)
 
 
@@ -459,9 +459,9 @@ Public Module Tech
         Pipe.Add(New Device_Pipeline(Pipeline_type_enum.Energy, -5))
         Pipe.Add(New Device_Pipeline(Pipeline_type_enum.Data, -10))
         Device_tech_list.Add(tech_list_enum.Thruster_MK1, New device_data(device_type_enum.thruster, 100, New crew_resource_type(0, 0), New PointI(4, 0), c_map, Pipe, device_tile_type_enum.Thruster_MK1, True, flip_enum.Flip_X))
-        Device_tech_list(tech_list_enum.Thruster_MK1).Thrust_Power = 25D
-        Device_tech_list(tech_list_enum.Thruster_MK1).Acceleration = 1D
-        Device_tech_list(tech_list_enum.Thruster_MK1).Deceleration = 1D
+        Device_tech_list(tech_list_enum.Thruster_MK1).Thrust_Power = 500D
+        Device_tech_list(tech_list_enum.Thruster_MK1).Acceleration = 10D
+        Device_tech_list(tech_list_enum.Thruster_MK1).Deceleration = 10D
         Device_tech_list(tech_list_enum.Thruster_MK1).Active_Point = New PointI(3, 0)
 
 
